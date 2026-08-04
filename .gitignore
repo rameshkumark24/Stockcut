@@ -1,0 +1,61 @@
+# ─────────────────────────────────────────────────────────────
+# SECRETS — never commit. See docs/02-trd.md §7.
+# Losing the upload keystore means the app can NEVER be updated.
+# Back it up in two places OFF this machine.
+# ─────────────────────────────────────────────────────────────
+keystore.properties
+*.jks
+*.keystore
+local.properties
+google-services.json
+!keystore.properties.example
+
+# ── Gradle / Android build ──
+*.iml
+.gradle/
+build/
+captures/
+.externalNativeBuild/
+.cxx/
+release/
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+bin/
+gen/
+out/
+lint/
+local.properties
+
+# ── Android Studio / IntelliJ ──
+.idea/*
+!.idea/codeStyles/
+!.idea/inspectionProfiles/
+.navigation/
+*.ipr
+*.iws
+
+# ── VS Code ──
+.vscode/*
+!.vscode/extensions.json
+
+# ── OS ──
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Kotlin / JVM ──
+.kotlin/
+hs_err_pid*
+*.hprof
+
+# ── Test / coverage output ──
+/reports/
+/coverage/
+*.exec
+
+# ── Keep these tracked (do NOT ignore) ──
+# !app/schemas/          Room exported schemas — the only record of what shipped
+# !gradle/wrapper/       Gradle wrapper must be committed
