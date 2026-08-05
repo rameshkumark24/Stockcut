@@ -5,8 +5,16 @@ on:
     branches: [main]
   pull_request:
 
+# Two jobs on purpose.
+#
+# The correctness suite (:units, :optimizer) is pure JVM — no Android SDK, no
+# emulator. It is the part that actually guarantees a cut plan is right, so it
+# must never be blocked by Android SDK provisioning on the runner. It runs in
+# its own job and gates nothing else.
 jobs:
-  test:
+
+  jvm:
+    name: Correctness (pure JVM)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,14 +26,8 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
-      # :optimizer and :units are pure JVM — no Android SDK, no emulator.
-      # This is why the suite runs in seconds and why it runs on every push.
-      - name: Test
-        run: ./gradlew :units:test :optimizer:test :data:testDebugUnitTest
-
-      # Instrumented tests need a device, so at minimum prove they still compile.
-      - name: Compile instrumented tests
-        run: ./gradlew :data:assembleDebugAndroidTest
+      - name: Test :units and :optimizer
+        run: ./gradlew :units:test :optimizer:test
 
       # CLAUDE.md hard rule 1. Enforced mechanically, not by memory.
       - name: No Android imports in pure modules
@@ -39,28 +41,15 @@ jobs:
       - name: No floating point in domain code
         run: |
           hits=$(grep -rn --include=*.kt -E "\b(Float|Double)\b" optimizer/src/main units/src/main \
-                 | grep -v "wastePercent" | grep -v "^\s*\*" | grep -v "//" || true)
+                 | grep -v "wastePercent" | grep -vE ":\s*(//|\*)" || true)
           if [ -n "$hits" ]; then
             echo "$hits"
             echo "::error::Float/Double outside wastePercent (CLAUDE.md rule 2)"
             exit 1
           fi
 
-      # CLAUDE.md hard rule 6. This one call silently deletes every saved job on
-      # upgrade, and it is exactly what someone reaches for under time pressure.
-      # Matches real calls only, not the comments that say it is banned.
-      - name: No destructive Room migration
-        run: |
-          hits=$(grep -rn --include=*.kt "fallbackToDestructiveMigration" data/src \
-                 | grep -v "^\s*[0-9]*:\s*\*" | grep -vE ":\s*(//|\*)" || true)
-          if [ -n "$hits" ]; then
-            echo "$hits"
-            echo "::error::fallbackToDestructiveMigration is banned (CLAUDE.md rule 6)"
-            exit 1
-          fi
-
-      # CLAUDE.md hard rule 2, at the persistence layer. Every length column is
-      # INTEGER in units of 1/320 mm; a REAL column would reintroduce drift.
+      # CLAUDE.md hard rule 2, at the persistence layer. Reads the committed
+      # schema JSON, so it needs no Android SDK and belongs in this job.
       - name: No REAL columns in the Room schema
         run: |
           if grep -o '"affinity": "REAL"' data/schemas/*/*.json; then
@@ -68,9 +57,58 @@ jobs:
             exit 1
           fi
 
+      # CLAUDE.md hard rule 6. This one call silently deletes every saved job on
+      # upgrade, and it is exactly what gets reached for under time pressure.
+      # Matches real calls only, not the comments saying it is banned.
+      - name: No destructive Room migration
+        run: |
+          hits=$(grep -rn --include=*.kt "fallbackToDestructiveMigration" data/src \
+                 | grep -vE ":\s*(//|\*)" || true)
+          if [ -n "$hits" ]; then
+            echo "$hits"
+            echo "::error::fallbackToDestructiveMigration is banned (CLAUDE.md rule 6)"
+            exit 1
+          fi
+
       - name: Upload test reports
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: test-reports
+          name: jvm-test-reports
           path: '**/build/reports/tests/test'
+
+  android:
+    name: Android modules
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # Installs the SDK and accepts licences. Without this, AGP cannot download
+      # platforms;android-36 and the build fails on a licence prompt it can
+      # never answer. compileSdk is 36 because new Play submissions must target
+      # API 36 from 31 Aug 2026.
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platforms;android-36 build-tools;36.0.0'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Unit tests (JVM — entitlement rules, seed job)
+        run: ./gradlew :data:testDebugUnitTest
+
+      # Instrumented tests need a device, so at minimum prove they still compile.
+      # Run them yourself with: ./gradlew :data:connectedDebugAndroidTest
+      - name: Compile instrumented tests
+        run: ./gradlew :data:assembleDebugAndroidTest
+
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-test-reports
+          path: '**/build/reports/tests/**'
