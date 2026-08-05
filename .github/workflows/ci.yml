@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # :optimizer and :units are pure JVM — no Android SDK, no emulator.
+      # This is why the suite runs in seconds and why it runs on every push.
+      - name: Test
+        run: ./gradlew :units:test :optimizer:test
+
+      # CLAUDE.md hard rule 1. Enforced mechanically, not by memory.
+      - name: No Android imports in pure modules
+        run: |
+          if grep -rn "import android" optimizer/src units/src; then
+            echo "::error::android.* imported in a pure JVM module (CLAUDE.md rule 1)"
+            exit 1
+          fi
+
+      # CLAUDE.md hard rule 2. Float/Double are permitted only for wastePercent.
+      - name: No floating point in domain code
+        run: |
+          hits=$(grep -rn --include=*.kt -E "\b(Float|Double)\b" optimizer/src/main units/src/main \
+                 | grep -v "wastePercent" | grep -v "^\s*\*" | grep -v "//" || true)
+          if [ -n "$hits" ]; then
+            echo "$hits"
+            echo "::error::Float/Double outside wastePercent (CLAUDE.md rule 2)"
+            exit 1
+          fi
+
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: '**/build/reports/tests/test'
