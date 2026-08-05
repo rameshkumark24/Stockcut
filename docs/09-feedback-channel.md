@@ -209,7 +209,84 @@ A feedback channel nobody reads is worse than none — it makes users feel ignor
 
 ---
 
-## 9. When to replace this
+## 9. Abuse handling
+
+### 9.1 Assume the form URL is public
+
+The URL ships inside the APK. Any APK can be decompiled in minutes. **Treat the form link as public information** — never put anything secret in it, and design assuming a stranger can submit to it directly without the app.
+
+### 9.2 What a flood actually costs you
+
+| Server-backed app | StockCut |
+|---|---|
+| Flood → CPU, bandwidth, DB writes → **a bill** | **₹0.** Nothing is metered. |
+| Flood → other users get a slow or down service | **Nobody else is affected.** No shared resource. |
+| Flood → possible data corruption | Nothing to corrupt |
+| Needs rate limiting, WAF, captcha | Not applicable |
+
+**The only thing a flood can damage is your inbox** — and through it, your willingness to read real feedback. That is the entire threat. Size the response to match; do not build defences for damage that cannot occur.
+
+### 9.3 Legitimate repeat reports — do not block these
+
+A real user sending three reports in one session is a **good** outcome, not abuse. Never block it.
+
+**Soft client-side cooldown only:**
+- Max **3 form opens per 24 h**, counted in DataStore
+- On the 4th: *"You've sent a few already — I'll read them. Something urgent? Email me."* → offer `mailto:`
+- **Never a hard block.** Never a lockout.
+
+This is trivially bypassable and that's fine — its job is preventing accidental double-submits and casual mashing, which is what ~99% of real duplicates are. It is not a security control and should not be described as one.
+
+### 9.4 Field-level hygiene
+
+- **Minimum length on field 2** (Forms → response validation) — kills empty and single-character junk
+- Keep field 1 a multiple choice, not free text — makes triage sortable even under noise
+
+### 9.5 🔴 The kill switch you'd otherwise not have
+
+With no server, there is normally **no way to change anything without shipping an app update** — and store review takes days. If the form URL is flooded or abused, you'd be stuck.
+
+**Fix it for free with one layer of indirection:**
+
+```
+App links to:   https://rameshkumark24.github.io/stockcut/feedback
+                          ↓ (HTML meta-refresh or JS redirect)
+Which points to: https://docs.google.com/forms/d/e/{FORM_ID}/viewform?...
+```
+
+GitHub Pages is already hosting the privacy policy, so this costs nothing. Now:
+
+- Form flooded? Create a **new form**, edit one line on the redirect page. Live in a minute. No app update, no store review.
+- Need to change the form structure? Same.
+- Want to retire the form entirely at 500 users (§10)? Point the redirect at whatever replaces it.
+
+> **Set the redirect up in W0, before the URL ships.** Retrofitting it requires the app update you were trying to avoid.
+
+The redirect page must preserve query parameters so the pre-filled diagnostics still arrive.
+
+### 9.6 ⚠️ Do not open form exports in Excel carelessly
+
+Classic **CSV injection**: a response beginning with `=`, `+`, `-` or `@` can be interpreted as a formula when the export is opened in a spreadsheet — including formulas that fetch remote URLs.
+
+- Read responses **in the Google Sheet**, not in a downloaded CSV opened in Excel
+- If you must export, open with the columns set to plain text
+- **Never click a link inside a response.** You have no reply channel, so there is never a reason to.
+
+### 9.7 What the form cannot be used to do
+
+Worth stating so effort goes to real risks:
+
+- ❌ Cannot reach your app, your users, or their data — there is no connection between a form response and any device
+- ❌ Cannot cost you money — nothing is metered
+- ❌ Cannot leak personal data — **none is collected** (§6)
+- ❌ Cannot cause downtime — there is nothing to take down
+- ❌ Cannot be used for account takeover — there are no accounts
+
+**The strongest security control in this app is the data you decided not to collect.**
+
+---
+
+## 10. When to replace this
 
 Google Forms is the right tool for **0 to ~500 users**. Move on when either is true:
 

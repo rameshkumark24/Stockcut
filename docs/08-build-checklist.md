@@ -46,6 +46,7 @@ See [`00-phase-0-scope-feasibility.md`](00-phase-0-scope-feasibility.md) and [`0
 - [ ] **Tester recruitment started** — spreadsheet of Gmail addresses, target 15, ≥ 3 real tradesmen
 - [ ] Privacy policy written and live on a public URL (GitHub Pages)
 - [ ] **Google Form for feedback created** — see [`09-feedback-channel.md`](09-feedback-channel.md)
+- [ ] 🔴 **Redirect page live on GitHub Pages**, pointing at the form — the app links to the *redirect*, never the form directly. This is your only kill switch without a server; retrofitting it needs an app update.
 
 ---
 
@@ -142,6 +143,10 @@ See [`00-phase-0-scope-feasibility.md`](00-phase-0-scope-feasibility.md) and [`0
 - [ ] `mailto:` fallback when offline or no browser; copy-to-clipboard if neither
 - [ ] Entry points: About + "This plan looks wrong" on the cut plan screen
 - [ ] Never gated behind the paywall, never nagged, never after a crash
+- [ ] App links to the **GitHub Pages redirect**, not the Google Form URL directly
+- [ ] Redirect preserves query params so pre-filled diagnostics still arrive
+- [ ] Soft cooldown: 3 form opens per 24 h, `mailto:` offered on the 4th — **never a hard block**
+- [ ] Minimum-length validation on field 2
 - [ ] Data safety form covers it *(no new category — Crashlytics already declares Diagnostics)*
 - [ ] Privacy policy paragraph added, with a retention period
 - [ ] Triage routine agreed (weekly, 15 min)

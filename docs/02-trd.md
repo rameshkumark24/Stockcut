@@ -196,3 +196,45 @@ Each absence is a cost, a compliance burden, or a failure mode that does not exi
 You still receive the responses, so the form is declared on the Play data safety form — but with no contact field it adds no category that Crashlytics doesn't already require. See [`09-feedback-channel.md`](09-feedback-channel.md) §6.
 
 **Never added to the diagnostics string:** advertising ID · install ID · location · project contents · anything the user cannot see before sending.
+
+## 13. Threat model
+
+Small on purpose. Listed so effort goes where the risk actually is.
+
+| Threat | Real? | Response |
+|---|---|---|
+| Feedback-form spam | Yes, mild | Soft cooldown + redirect kill switch — [`09`](09-feedback-channel.md) §9 |
+| APK decompiled, form URL and AdMob unit IDs extracted | Yes | Neither is secret. Assume both are public. |
+| **Paid unlock cracked** | **Yes — unavoidable** | See §13.1 |
+| Modified APK republished elsewhere | Yes | Out of your control. Play protects the listing, not the binary. |
+| User data breach | **No** | No server, no accounts, no personal data. Nothing to breach. |
+| Someone else's data exposed to a user | **No** | No shared storage. Each device is an island. |
+| DoS / traffic overload | **No** | No shared resource. See §13.2 |
+| SQL injection, XSS, CSRF, IDOR | **No** | No API, no WebView, no multi-user data, parameterised Room queries only |
+
+### 13.1 The paid unlock will be cracked, and that is fine
+
+Entitlement is cached locally so paid users work offline (§6). A rooted device or a patched APK can flip that flag. **This cannot be prevented without a server, and there is no server.**
+
+**Posture: accept it.**
+
+- Someone who patches an APK to avoid a $4.99 one-time purchase was never going to buy it. Cracking does not convert to lost revenue.
+- Reasonable and cheap: **R8 obfuscation on release builds**, and re-verify entitlement with Play Billing on launch when a network is available.
+- 🔴 **Never punish a suspected pirate at the risk of a false positive.** A genuine paying customer wrongly locked out writes a 1-star review that costs you far more than the pirate ever would. Rule 10 in `CLAUDE.md` — never downgrade on a failed check — exists for exactly this reason.
+- Do not add tamper detection, root detection, or licence-check dialogs. They generate false positives, break on custom ROMs, and annoy the people who paid you.
+
+### 13.2 There is no "peak traffic"
+
+Every user runs an independent copy on their own device. There is no shared server, database, connection pool, or queue. Ten users and ten million users are the identical situation — nobody waits for anybody, nothing slows down, nothing can go down.
+
+**Performance in this app is a single-device question**, not a concurrency question: can the optimizer handle 1000 parts on a low-end phone within budget (NFR-1)? That is the whole of it. There is nothing to load test.
+
+### 13.3 What *does* scale badly: a bad release
+
+The one thing that reaches every user at once is **a broken build** — and with no server there is no remote kill switch or feature flag to disable it. Store review means a fix takes days, not minutes.
+
+**This is the real cost of the ₹0 architecture, and the mitigations are already in the plan:**
+- **Staged rollout at 20%**, never straight to 100%
+- Android Vitals watched hourly for the first 48 h
+- Halt the rollout in Play Console if crash rate moves — 80% of users never receive the bad build
+- The `:optimizer` property tests, which exist precisely because a silently wrong cut plan is the failure that a staged rollout would *not* catch
