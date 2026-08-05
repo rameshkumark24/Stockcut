@@ -123,7 +123,8 @@ Full spec: [`09-feedback-channel.md`](09-feedback-channel.md)
 - **"Report a problem or suggest a feature"** in About → opens a Google Form in the browser
 - **"This plan looks wrong"** in the cut-plan overflow → same form, pre-tagged as a correctness bug
 - Diagnostics (app/OS/device version, unit mode, tier) pre-filled and **visible to the user before sending**
-- Optional email field, for a reply only
+- **No email, name, or contact field** — the form is anonymous and collects no personal data
+- Separate **"Email support"** `mailto:` link in About for anyone who wants a reply
 - `mailto:` fallback when offline
 - Developer gets an **email notification** on every response
 - Never behind the paywall, never nagged, never triggered after a crash

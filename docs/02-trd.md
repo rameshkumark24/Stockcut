@@ -178,18 +178,21 @@ No server · no accounts · no user-generated content · no moderation · no bac
 
 Each absence is a cost, a compliance burden, or a failure mode that does not exist.
 
-## 12. Data collection — the one exception
+## 12. Data collection
 
-> ⚠️ **Correction.** An earlier revision of this document claimed "no personal data collected by us." That is no longer accurate. The in-app feedback channel ([`09-feedback-channel.md`](09-feedback-channel.md)) collects an **optional** email address and a **visible, editable** diagnostics string via a Google Form.
+**No personal data is collected by this app.** That statement is load-bearing — it is why §11 is as short as it is, and it is a deliberate constraint, not a happy accident.
 
-| Source | Data | Optional? |
+| Source | Data | Personal? |
 |---|---|---|
-| Feedback form | Email (optional field), app/OS/device version, unit mode, tier, optimize count, free text | ✅ user-initiated and editable before sending |
+| Feedback form ([`09`](09-feedback-channel.md)) | App/OS/device version, unit mode, tier, optimize count, free text | ❌ — no contact field of any kind |
 | AdMob | Advertising ID | Per UMP consent |
-| Crashlytics | Crash logs, device state | Automatic |
+| Crashlytics | Crash logs, device state | ❌ |
+| `mailto:` support link | Whatever the user chooses to write, from their own mail app | User-supplied, outside the app |
 
-**Architectural note:** the form opens via `Intent.ACTION_VIEW` in the user's browser, so *the app process never transmits the data* — the browser does, after the user has reviewed it on screen. That is a genuinely stronger privacy position than an in-app POST, and it is why WebView is banned here rather than merely discouraged.
+**The feedback form has no email or name field.** Anyone wanting a reply uses the `mailto:` link instead, which means they hand over their address themselves, through their own mail client, entirely outside this app.
 
-It does **not** exempt you from declaring it. You receive the data, so it goes on the Play data safety form and in the privacy policy. See [`09-feedback-channel.md`](09-feedback-channel.md) §6.
+**Architectural note:** the form opens via `Intent.ACTION_VIEW` in the user's browser, so *the app process never transmits anything* — the browser does, after the user has read the diagnostics string on screen and had the chance to delete it. That is a stronger position than an in-app POST, and it is why WebView is banned here rather than merely discouraged.
 
-**Never added:** advertising ID or install ID in the diagnostics string · location · project contents · anything the user cannot see before sending.
+You still receive the responses, so the form is declared on the Play data safety form — but with no contact field it adds no category that Crashlytics doesn't already require. See [`09-feedback-channel.md`](09-feedback-channel.md) §6.
+
+**Never added to the diagnostics string:** advertising ID · install ID · location · project contents · anything the user cannot see before sending.

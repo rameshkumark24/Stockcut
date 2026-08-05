@@ -24,9 +24,16 @@
 |---|---|---|---|---|
 | 1 | What's this about? | Multiple choice | ✅ | `Something's broken` · `Idea for a feature` · `The cut plan was wrong` · `Something else` |
 | 2 | Tell me what happened | Paragraph | ✅ | |
-| 3 | What were you cutting? | Short answer | ❌ | **The most valuable field in the form** — see §3 |
-| 4 | Your email | Short answer | ❌ | Label it: *"Only if you want a reply. Leave blank otherwise."* |
-| 5 | Diagnostics | Short answer | ❌ | **Pre-filled by the app.** Tell the user: *"Auto-filled — helps me reproduce it. Clear it if you'd rather not send it."* |
+| 3 | What were you cutting? | Short answer | ❌ | **The most valuable field in the form** — see §2.1 |
+| 4 | Diagnostics | Short answer | ❌ | **Pre-filled by the app.** Tell the user: *"Auto-filled — helps me reproduce it. Clear it if you'd rather not send it."* |
+
+> 🔴 **No email field. No name field. No contact field of any kind.** This is a deliberate decision, not an omission — see §6. Do not add one without redoing the data-safety declaration.
+
+**Where replies happen instead:** the About screen keeps a separate **"Email support"** `mailto:` link. That gives a clean split:
+- **Form** → structured report, anonymous, no reply expected
+- **`mailto:`** → "I want an answer", and the user hands you their address themselves, through their own mail app
+
+This is a better design than one channel doing both, and it is why removing the email field costs nothing.
 
 **"The cut plan was wrong" gets its own option** on purpose. That is a correctness bug in the one thing this app must get right, and you want it flagged, not buried in "something else."
 
@@ -145,29 +152,36 @@ The "This plan looks wrong" entry is worth its weight: it catches the one bug cl
 
 ---
 
-## 6. 🔴 Compliance impact — this changes your Play declarations
+## 6. Compliance impact — deliberately kept near zero
 
-Adding this feature means **the app now collects data**. Two documents must change or the store listing becomes inaccurate.
+**Design decision: the form collects no personal data.** No email, no name, no contact field, no advertising ID, no install ID, no location, no project contents.
+
+What it does collect is app version, OS version, device model, unit mode, tier, and optimize count — none of which identifies a person, and all of which the user sees on screen and can delete before sending.
 
 ### 6.1 Data safety form
 
-| Data type | Collected | Required? | Purpose |
+| Data type | Source | Category | Notes |
 |---|---|---|---|
-| Email address | ✅ (field 4) | **Optional** | App functionality — support |
-| App version, OS version, device model | ✅ (diagnostics) | **Optional** | App functionality — diagnostics |
-| Free-text feedback | ✅ | Optional | App functionality |
-| Advertising ID | ✅ *(AdMob, separate)* | — | Advertising |
-| Crash logs | ✅ *(Crashlytics, separate)* | — | Diagnostics |
+| Crash logs, device state | **Crashlytics** | Diagnostics | Already declared — automatic |
+| Advertising ID | **AdMob** | Advertising | Already declared — per UMP consent |
+| App/OS/device version, unit mode, tier | Feedback form | Diagnostics | **Same category Crashlytics already forces** |
+| Free-text feedback | Feedback form | User-initiated support content | Optional |
 
-Declare all of it as **optional** and **user-initiated** — which it genuinely is. Mark "data is not shared with third parties" only if that's true; note that Google is the form processor.
+> **The practical effect: with no email field, the form adds no new data-safety category.** Crashlytics already puts *Diagnostics* on your declaration. The form rides on a box you were ticking anyway.
+
+Declare everything from the form as **optional** and **user-initiated** — which it genuinely is. Google is the processor for form responses.
+
+**Confirm the exact categories against the guidance shown inside the Data safety form when you fill it in.** The taxonomy is Google's and it changes; the above is how it maps today, not a quotation.
 
 ### 6.2 Privacy policy
 
-Add a section covering: what the form collects, that it's optional and user-initiated, that Google processes it, that email is only used to reply, and how long you keep responses (**pick a number — 24 months is reasonable**).
+One short paragraph: what the form collects, that it is optional and user-initiated, that Google processes responses, and how long you keep them (**pick a number — 24 months is reasonable**).
 
-### 6.3 The TRD line that is now wrong
+### 6.3 The rule that outlives this document
 
-[`02-trd.md`](02-trd.md) §11 said *"no personal data collected by us."* That is no longer true if a user types their email. **Corrected in that document.** Flagging it here because an inaccurate data-safety declaration is a real cause of app suspension, and this is exactly how it happens — a small feature added late, declarations never revisited.
+An inaccurate data-safety declaration is a real cause of app suspension, and it nearly always arrives the same way: **a small feature added after the declarations were written, and nobody goes back.**
+
+So: **if you ever add a contact field to this form, the data-safety form and the privacy policy change in the same PR.** That is `CLAUDE.md` rule 11, and it exists specifically to catch future-you.
 
 ---
 
@@ -179,7 +193,8 @@ A feedback channel nobody reads is worse than none — it makes users feel ignor
 - Tag each: `bug` · `feature` · `wrong-plan` · `confusion` · `noise`
 - 🔴 **Any `wrong-plan` response is P0.** Reproduce it that day, and add it to the oracle set in [`06-test-plan.md`](06-test-plan.md) §2.5 as a permanent regression test. **A real user's broken job is the most valuable test case you will ever get** — better than anything you'd invent.
 - `confusion` responses are UX bugs, not user error. If two people are confused by the same thing, it's your fault.
-- Reply to anyone who left an email. At this volume you can reply to all of them, and early users who get a personal reply become your reviewers.
+- **Responses are anonymous — you cannot reply.** That is the trade for collecting nothing. Anyone who wants an answer uses the `mailto:` support link instead, and those you reply to individually.
+- Because you can't ask a follow-up, **field 2's prompt has to do that work up front**. Word it to invite specifics: *"What did you expect, and what happened instead? If it's a wrong cut plan, include the stock length and the pieces."*
 
 ## 8. Success criteria
 
@@ -188,7 +203,7 @@ A feedback channel nobody reads is worse than none — it makes users feel ignor
 | Responses per 100 installs | ≥ 2 | The channel is discoverable |
 | `wrong-plan` reports | **0** | The optimizer is correct |
 | Distinct trades in field 3 | ≥ 5 | Who your users actually are |
-| Median reply time | < 7 days | You're actually reading it |
+| Reports with enough detail to reproduce | ≥ 60% | Field 2's prompt is working — no follow-up is possible, so this is the quality gate |
 
 **If `wrong-plan` reports are non-zero, stop all feature work and fix the optimizer.** Correctness is the entire product.
 

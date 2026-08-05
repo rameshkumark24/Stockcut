@@ -130,16 +130,20 @@ See [`00-phase-0-scope-feasibility.md`](00-phase-0-scope-feasibility.md) and [`0
 
 ## Phase 7 — Feedback channel *(new — see [`09-feedback-channel.md`](09-feedback-channel.md))*
 
-- [ ] Google Form created with the field set in the spec
+- [ ] Google Form created — 4 fields only
+- [ ] 🔴 **No email, name, or contact field** — the form is anonymous by design
+- [ ] Field 2 prompt worded to get reproducible detail (you cannot ask a follow-up)
 - [ ] Email notification on new response enabled
-- [ ] Pre-filled link generated, `entry.*` IDs extracted
-- [ ] Diagnostics string built at runtime and prefilled — **visible to the user**
+- [ ] Pre-filled link generated, `entry.*` IDs extracted into `local.properties`
+- [ ] Diagnostics string built at runtime and prefilled — **visible and editable by the user**
+- [ ] Diagnostics contains no advertising ID, install ID, location, or project contents
 - [ ] Opens via `Intent.ACTION_VIEW` — **no WebView**
-- [ ] `mailto:` fallback when offline or no browser
-- [ ] Entry points: About screen + result screen overflow
-- [ ] Never gated behind the paywall, never nagged
-- [ ] 🔴 **Data safety form updated** to declare what the form collects
-- [ ] 🔴 **Privacy policy updated** to cover the feedback form
+- [ ] Separate `mailto:` support link in About, for users who want a reply
+- [ ] `mailto:` fallback when offline or no browser; copy-to-clipboard if neither
+- [ ] Entry points: About + "This plan looks wrong" on the cut plan screen
+- [ ] Never gated behind the paywall, never nagged, never after a crash
+- [ ] Data safety form covers it *(no new category — Crashlytics already declares Diagnostics)*
+- [ ] Privacy policy paragraph added, with a retention period
 - [ ] Triage routine agreed (weekly, 15 min)
 
 ## Phase 8 — Testing & QA
