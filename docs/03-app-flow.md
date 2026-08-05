@@ -153,11 +153,27 @@ Global defaults applied to *new* projects only — changing them never mutates e
 ## S7 — About / support
 
 - Version + build number *(support asks for this first)*
-- **Email support** — pre-fills device model, Android version, app version in the body
+- **Report a problem or suggest a feature** → opens the Google Form in the browser, diagnostics pre-filled
+- **Email support** — `mailto:` with device model, Android version, app version pre-filled in the body
 - Privacy policy (opens browser)
 - Rate on Play
 - Unlock / restore
 - Open-source licences
+
+| State | Behaviour |
+|---|---|
+| **Online** | Form link opens the browser |
+| **Offline** | Sheet: *"You're offline. Send it as an email instead?"* → `mailto:`, queued by the mail app until signal returns |
+| **No browser installed** | Falls back to `mailto:` silently |
+| **No mail app either** | Diagnostics string shown with a **Copy** button — always leave one working path |
+
+## S4 addition — "This plan looks wrong"
+
+In the cut-plan overflow menu. Opens the same form with field 1 pre-selected as *The cut plan was wrong*.
+
+**Why this earns its place on the payoff screen:** it is the moment a user discovers a correctness bug, and it converts the worst possible outcome — a 1-star review saying *"wasted my steel"* — into a private report you can fix and add to the regression suite.
+
+**Rules for both entry points:** never behind the paywall · never a popup or nag · never shown after a crash (Crashlytics already has it, and asking then is insulting).
 
 ---
 

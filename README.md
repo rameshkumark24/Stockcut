@@ -60,6 +60,8 @@ The tools that solve this are on iOS, in a browser (needs signal and a keyboard)
 | [`docs/05-data-model-and-optimizer-contract.md`](docs/05-data-model-and-optimizer-contract.md) | Schema + the optimizer/units module contracts |
 | [`docs/06-test-plan.md`](docs/06-test-plan.md) | Property tests, oracle set, device matrix, release gate |
 | [`docs/07-implementation-plan.md`](docs/07-implementation-plan.md) | 9-week plan, milestones, gates |
+| [`docs/08-build-checklist.md`](docs/08-build-checklist.md) | **The executable checklist. Work from this one.** |
+| [`docs/09-feedback-channel.md`](docs/09-feedback-channel.md) | In-app feedback via Google Form, and its compliance impact |
 | [`CLAUDE.md`](CLAUDE.md) | Agent rules — hard constraints, conventions, do-nots |
 
 ## Build

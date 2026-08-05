@@ -174,6 +174,22 @@ One shape for all user-facing failures. The optimizer never throws for expected 
 
 ## 11. What this app deliberately does not have
 
-No server · no accounts · no personal data collected by us · no user-generated content · no moderation · no background work · no push notifications · no deep links · no WebView · no dynamic feature modules · no A/B testing framework.
+No server · no accounts · no user-generated content · no moderation · no background work · no push notifications · no deep links · **no WebView** · no dynamic feature modules · no A/B testing framework.
 
 Each absence is a cost, a compliance burden, or a failure mode that does not exist.
+
+## 12. Data collection — the one exception
+
+> ⚠️ **Correction.** An earlier revision of this document claimed "no personal data collected by us." That is no longer accurate. The in-app feedback channel ([`09-feedback-channel.md`](09-feedback-channel.md)) collects an **optional** email address and a **visible, editable** diagnostics string via a Google Form.
+
+| Source | Data | Optional? |
+|---|---|---|
+| Feedback form | Email (optional field), app/OS/device version, unit mode, tier, optimize count, free text | ✅ user-initiated and editable before sending |
+| AdMob | Advertising ID | Per UMP consent |
+| Crashlytics | Crash logs, device state | Automatic |
+
+**Architectural note:** the form opens via `Intent.ACTION_VIEW` in the user's browser, so *the app process never transmits the data* — the browser does, after the user has reviewed it on screen. That is a genuinely stronger privacy position than an in-app POST, and it is why WebView is banned here rather than merely discouraged.
+
+It does **not** exempt you from declaring it. You receive the data, so it goes on the Play data safety form and in the privacy policy. See [`09-feedback-channel.md`](09-feedback-channel.md) §6.
+
+**Never added:** advertising ID or install ID in the diagnostics string · location · project contents · anything the user cannot see before sending.

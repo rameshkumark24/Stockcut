@@ -61,6 +61,8 @@ Kotlin · Jetpack Compose (Material 3) · Room · DataStore · Navigation-Compos
 
 10. **Never downgrade a paid user because an entitlement check failed offline.** The DataStore cache is authoritative when there is no network.
 
+11. **The feedback form opens via `Intent.ACTION_VIEW` in the external browser — never a WebView.** The diagnostics string is visible and editable by the user before sending. Never add an advertising ID, install ID, location, or project contents to it. If you change what the form collects, the Play data safety form and the privacy policy must change in the same PR — an inaccurate declaration gets apps suspended.
+
 ---
 
 ## Conventions
