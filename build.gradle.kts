@@ -1,5 +1,8 @@
 plugins {
     alias(libs.plugins.kotlin.jvm) apply false
+    alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.android.library) apply false
+    alias(libs.plugins.ksp) apply false
 }
 
 // Modules configure themselves. :optimizer and :units apply ONLY the Kotlin JVM

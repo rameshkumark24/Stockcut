@@ -21,7 +21,11 @@ jobs:
       # :optimizer and :units are pure JVM — no Android SDK, no emulator.
       # This is why the suite runs in seconds and why it runs on every push.
       - name: Test
-        run: ./gradlew :units:test :optimizer:test
+        run: ./gradlew :units:test :optimizer:test :data:testDebugUnitTest
+
+      # Instrumented tests need a device, so at minimum prove they still compile.
+      - name: Compile instrumented tests
+        run: ./gradlew :data:assembleDebugAndroidTest
 
       # CLAUDE.md hard rule 1. Enforced mechanically, not by memory.
       - name: No Android imports in pure modules
@@ -39,6 +43,28 @@ jobs:
           if [ -n "$hits" ]; then
             echo "$hits"
             echo "::error::Float/Double outside wastePercent (CLAUDE.md rule 2)"
+            exit 1
+          fi
+
+      # CLAUDE.md hard rule 6. This one call silently deletes every saved job on
+      # upgrade, and it is exactly what someone reaches for under time pressure.
+      # Matches real calls only, not the comments that say it is banned.
+      - name: No destructive Room migration
+        run: |
+          hits=$(grep -rn --include=*.kt "fallbackToDestructiveMigration" data/src \
+                 | grep -v "^\s*[0-9]*:\s*\*" | grep -vE ":\s*(//|\*)" || true)
+          if [ -n "$hits" ]; then
+            echo "$hits"
+            echo "::error::fallbackToDestructiveMigration is banned (CLAUDE.md rule 6)"
+            exit 1
+          fi
+
+      # CLAUDE.md hard rule 2, at the persistence layer. Every length column is
+      # INTEGER in units of 1/320 mm; a REAL column would reintroduce drift.
+      - name: No REAL columns in the Room schema
+        run: |
+          if grep -o '"affinity": "REAL"' data/schemas/*/*.json; then
+            echo "::error::REAL column in schema — lengths must be INTEGER (CLAUDE.md rule 2)"
             exit 1
           fi
 
