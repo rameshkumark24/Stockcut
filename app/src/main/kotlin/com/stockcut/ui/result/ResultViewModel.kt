@@ -27,6 +27,7 @@ data class ResultUiState(
     val unitSystem: UnitSystem = UnitSystem.MM,
     val denominator: Int = 16,
     val kerfU: Long = 0,
+    val jobName: String = "",
 )
 
 /**
@@ -67,6 +68,7 @@ class ResultViewModel(
                     unitSystem = unit,
                     denominator = denominator,
                     kerfU = cutList.project.kerfU,
+                    jobName = cutList.project.name,
                 )
                 is OptimizeResult.Shortfall -> ResultUiState(
                     plan = result.plan,
@@ -75,6 +77,7 @@ class ResultViewModel(
                     unitSystem = unit,
                     denominator = denominator,
                     kerfU = cutList.project.kerfU,
+                    jobName = cutList.project.name,
                 )
                 // Unreachable: S3 refuses to navigate for either of these.
                 is OptimizeResult.Infeasible,
