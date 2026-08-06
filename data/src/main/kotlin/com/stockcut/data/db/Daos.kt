@@ -4,7 +4,6 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
-import androidx.room.Transaction
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
@@ -101,23 +100,5 @@ interface StockProfileDao {
     suspend fun delete(profile: StockProfileEntity)
 }
 
-@Dao
-interface ProjectWriteDao {
-
-    @Transaction
-    suspend fun duplicate(
-        projectDao: ProjectDao,
-        stockDao: StockDao,
-        partDao: PartDao,
-        source: ProjectEntity,
-        newName: String,
-        now: Long,
-    ): Long {
-        val copyId = projectDao.insert(
-            source.copy(id = 0, name = newName, isExample = false, createdAt = now, updatedAt = now),
-        )
-        stockDao.forProject(source.id).forEach { stockDao.insert(it.copy(id = 0, projectId = copyId)) }
-        partDao.forProject(source.id).forEach { partDao.insert(it.copy(id = 0, projectId = copyId)) }
-        return copyId
-    }
-}
+// Duplicating a project spans three DAOs, so it cannot live in any one of them.
+// See duplicateProject() in ProjectDuplication.kt.

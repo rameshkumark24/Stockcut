@@ -1,16 +1,20 @@
 package com.stockcut.data
 
+import android.database.sqlite.SQLiteConstraintException
 import androidx.room.Room
 import androidx.room.testing.MigrationTestHelper
-import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.stockcut.data.db.PartEntryEntity
 import com.stockcut.data.db.ProjectEntity
+import com.stockcut.data.db.SchemaConstraints
 import com.stockcut.data.db.StockCutDatabase
 import com.stockcut.data.db.StockEntryEntity
+import com.stockcut.data.db.StockProfileEntity
+import com.stockcut.data.db.duplicateProject
 import kotlinx.coroutines.runBlocking
+import kotlin.test.assertFailsWith
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -38,14 +42,9 @@ class DaoTest {
             ApplicationProvider.getApplicationContext(),
             StockCutDatabase::class.java,
         )
-            .addCallback(
-                object : androidx.room.RoomDatabase.Callback() {
-                    override fun onOpen(connection: SupportSQLiteDatabase) {
-                        // Without this, ON DELETE CASCADE is inert.
-                        connection.execSQL("PRAGMA foreign_keys = ON")
-                    }
-                },
-            )
+            // The same callback the shipped database uses: CHECK triggers plus
+            // foreign keys, without which ON DELETE CASCADE is inert.
+            .addCallback(SchemaConstraints.callback)
             .allowMainThreadQueries()
             .build()
     }
@@ -126,6 +125,165 @@ class DaoTest {
             PartEntryEntity(projectId = id, lengthU = 100, quantity = 1, label = nasty, sortOrder = 0),
         )
         assertEquals(nasty, db.partDao().forProject(id).single().label)
+    }
+
+    @Test
+    fun duplicatingAProjectCopiesItsStockAndParts() = runBlocking {
+        val id = newProject("June gate")
+        db.stockDao().insert(StockEntryEntity(projectId = id, lengthU = 1_920_000, quantity = -1, sortOrder = 0))
+        db.partDao().insert(PartEntryEntity(projectId = id, lengthU = 576_000, quantity = 2, sortOrder = 0))
+        db.partDao().insert(PartEntryEntity(projectId = id, lengthU = 288_000, quantity = 3, sortOrder = 1))
+
+        val copyId = db.duplicateProject(id, "July gate", now = 2_000L)!!
+
+        assertEquals("July gate", db.projectDao().byId(copyId)!!.name)
+        assertEquals(1, db.stockDao().countForProject(copyId))
+        assertEquals(5, db.partDao().totalQuantityForProject(copyId))
+        // The original is untouched — this is a copy, not a move.
+        assertEquals(5, db.partDao().totalQuantityForProject(id))
+    }
+
+    @Test
+    fun duplicatingDetachesTheCopyFromTheOriginal() = runBlocking {
+        val id = newProject()
+        db.partDao().insert(PartEntryEntity(projectId = id, lengthU = 576_000, quantity = 2, sortOrder = 0))
+        val copyId = db.duplicateProject(id, "Copy", now = 2_000L)!!
+
+        db.projectDao().delete(db.projectDao().byId(id)!!)
+
+        // Deleting the source must not cascade into the copy's rows.
+        assertNotNull(db.projectDao().byId(copyId))
+        assertEquals(2, db.partDao().totalQuantityForProject(copyId))
+    }
+
+    @Test
+    fun duplicatingTheExampleProducesAnOrdinaryJob() = runBlocking {
+        // Otherwise the copy would keep is_example = 1 and stay outside the
+        // free tier's project count, which is not what the user asked for.
+        val exampleId = db.projectDao().insert(
+            ProjectEntity(
+                name = "Example: gate frame",
+                unitSystem = "MM",
+                isExample = true,
+                createdAt = 1L,
+                updatedAt = 1L,
+            ),
+        )
+        val copyId = db.duplicateProject(exampleId, "My gate", now = 2_000L)!!
+
+        assertEquals(false, db.projectDao().byId(copyId)!!.isExample)
+        assertEquals(1, db.projectDao().countReal())
+    }
+
+    @Test
+    fun duplicatingAMissingProjectReturnsNullRatherThanCrashing() = runBlocking {
+        assertNull(db.duplicateProject(sourceId = 9_999L, newName = "Ghost", now = 2_000L))
+    }
+}
+
+/**
+ * The CHECK constraints from docs/05 §1.2, verified at the DAO level as
+ * docs/06 §4 requires — a Kotlin-side check would pass whether or not the
+ * database enforces anything.
+ *
+ * A zero or negative length reaching storage is not a cosmetic problem: the
+ * optimizer rejects it as InvalidInput, so the row becomes a saved job that can
+ * never be optimized, and the user cannot see why.
+ */
+@RunWith(AndroidJUnit4::class)
+class ConstraintTest {
+
+    private lateinit var db: StockCutDatabase
+
+    @Before
+    fun setUp() {
+        db = Room.inMemoryDatabaseBuilder(
+            ApplicationProvider.getApplicationContext(),
+            StockCutDatabase::class.java,
+        )
+            .addCallback(SchemaConstraints.callback)
+            .allowMainThreadQueries()
+            .build()
+    }
+
+    @After
+    fun tearDown() = db.close()
+
+    private suspend fun newProject(): Long = db.projectDao().insert(
+        ProjectEntity(name = "Gate", unitSystem = "MM", createdAt = 1L, updatedAt = 1L),
+    )
+
+    @Test
+    fun stockLengthMustBePositive() = runBlocking {
+        val id = newProject()
+        assertFailsWith<SQLiteConstraintException> {
+            db.stockDao().insert(StockEntryEntity(projectId = id, lengthU = 0, quantity = -1, sortOrder = 0))
+        }
+        assertFailsWith<SQLiteConstraintException> {
+            db.stockDao().insert(StockEntryEntity(projectId = id, lengthU = -5, quantity = -1, sortOrder = 0))
+        }
+        assertEquals(0, db.stockDao().countForProject(id))
+    }
+
+    @Test
+    fun stockQuantityIsPositiveOrExactlyMinusOne() = runBlocking {
+        val id = newProject()
+        // -1 is "unlimited" and must be accepted.
+        db.stockDao().insert(StockEntryEntity(projectId = id, lengthU = 1_920_000, quantity = -1, sortOrder = 0))
+        db.stockDao().insert(StockEntryEntity(projectId = id, lengthU = 1_920_000, quantity = 3, sortOrder = 1))
+        assertEquals(2, db.stockDao().countForProject(id))
+
+        assertFailsWith<SQLiteConstraintException> {
+            db.stockDao().insert(StockEntryEntity(projectId = id, lengthU = 1_920_000, quantity = 0, sortOrder = 2))
+        }
+        assertFailsWith<SQLiteConstraintException> {
+            db.stockDao().insert(StockEntryEntity(projectId = id, lengthU = 1_920_000, quantity = -2, sortOrder = 3))
+        }
+        assertEquals(2, db.stockDao().countForProject(id))
+    }
+
+    @Test
+    fun partLengthAndQuantityMustBePositive() = runBlocking {
+        val id = newProject()
+        assertFailsWith<SQLiteConstraintException> {
+            db.partDao().insert(PartEntryEntity(projectId = id, lengthU = 0, quantity = 1, sortOrder = 0))
+        }
+        assertFailsWith<SQLiteConstraintException> {
+            db.partDao().insert(PartEntryEntity(projectId = id, lengthU = 576_000, quantity = 0, sortOrder = 0))
+        }
+        // There is no "unlimited" number of pieces to cut, so -1 is invalid here.
+        assertFailsWith<SQLiteConstraintException> {
+            db.partDao().insert(PartEntryEntity(projectId = id, lengthU = 576_000, quantity = -1, sortOrder = 0))
+        }
+        assertEquals(0, db.partDao().totalQuantityForProject(id))
+    }
+
+    @Test
+    fun stockProfileLengthMustBePositive() = runBlocking {
+        assertFailsWith<SQLiteConstraintException> {
+            db.stockProfileDao().insert(
+                StockProfileEntity(name = "50x50 SHS", lengthU = 0, lastUsedAt = 1L),
+            )
+        }
+        // assertFailsWith returns the exception; JUnit4 requires a void method.
+        Unit
+    }
+
+    @Test
+    fun anUpdateCannotSneakPastTheConstraint() = runBlocking {
+        // The trigger fires BEFORE UPDATE as well as BEFORE INSERT. Without that,
+        // a valid row could be edited into an invalid one and stored.
+        val id = newProject()
+        db.partDao().insert(PartEntryEntity(projectId = id, lengthU = 576_000, quantity = 2, sortOrder = 0))
+        val row = db.partDao().forProject(id).single()
+
+        assertFailsWith<SQLiteConstraintException> {
+            db.partDao().update(row.copy(lengthU = 0))
+        }
+        assertFailsWith<SQLiteConstraintException> {
+            db.partDao().update(row.copy(quantity = 0))
+        }
+        assertEquals(576_000L, db.partDao().forProject(id).single().lengthU)
     }
 }
 

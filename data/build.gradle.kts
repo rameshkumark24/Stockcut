@@ -53,6 +53,7 @@ dependencies {
     testRuntimeOnly(libs.junit.platform.launcher)
 
     // Instrumented tests — DAO behaviour and migrations. Need a device/emulator.
+    androidTestImplementation(kotlin("test"))
     androidTestImplementation(libs.androidx.test.junit)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.room.testing)
