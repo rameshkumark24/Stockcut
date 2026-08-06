@@ -16,6 +16,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.stockcut.AppContainer
+import com.stockcut.ui.editor.ProjectEditorScreen
+import com.stockcut.ui.editor.ProjectEditorViewModel
 import com.stockcut.ui.projects.ProjectsScreen
 import com.stockcut.ui.projects.ProjectsViewModel
 import com.stockcut.ui.theme.Space
@@ -55,7 +57,17 @@ fun StockCutNavHost(
             arguments = listOf(navArgument(Routes.PROJECT_ARG) { type = NavType.LongType }),
         ) { entry ->
             val projectId = entry.arguments?.getLong(Routes.PROJECT_ARG) ?: 0L
-            Stub("Project editor", "S2 — Parts · Stock · Setup for job $projectId")
+            val viewModel: ProjectEditorViewModel = viewModel(
+                // Keyed by project id, so opening a second job does not reuse the
+                // first one's ViewModel and show its parts.
+                key = "editor-$projectId",
+                factory = ProjectEditorViewModel.factory(container, projectId),
+            )
+            ProjectEditorScreen(
+                viewModel = viewModel,
+                onOptimize = { navController.navigate(Routes.result(projectId)) },
+                onBack = { navController.popBackStack() },
+            )
         }
 
         composable(
