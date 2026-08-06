@@ -26,6 +26,13 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
+      # This repo is developed on Windows, where git's core.fileMode is false and
+      # the executable bit is never recorded. If gradlew is ever re-added without
+      # it, every job here fails in 0s with "Permission denied" and the error
+      # looks nothing like its cause. One line, permanently.
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
       - name: Test :units and :optimizer
         run: ./gradlew :units:test :optimizer:test
 
@@ -98,13 +105,26 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
-      - name: Unit tests (JVM — entitlement rules, seed job)
-        run: ./gradlew :data:testDebugUnitTest
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      # :app's MeasurementFieldState is deliberately free of Android imports, so
+      # the rules that decide what the field accepts are pinned here, on the JVM,
+      # rather than only on a device.
+      - name: Unit tests (JVM — entitlement rules, seed job, measurement field)
+        run: ./gradlew :data:testDebugUnitTest :app:testDebugUnitTest
+
+      - name: Assemble the app
+        run: ./gradlew :app:assembleDebug
 
       # Instrumented tests need a device, so at minimum prove they still compile.
-      # Run them yourself with: ./gradlew :data:connectedDebugAndroidTest
+      # 🔴 THEY ARE NEVER RUN HERE. Cascade deletes, the CHECK-constraint
+      # triggers, migrations, and the MeasurementField blur behaviour are only
+      # verified when a human runs, against a device or emulator:
+      #   ./gradlew :data:connectedDebugAndroidTest :app:connectedDebugAndroidTest
+      # Do that before any schema change and before any release.
       - name: Compile instrumented tests
-        run: ./gradlew :data:assembleDebugAndroidTest
+        run: ./gradlew :data:assembleDebugAndroidTest :app:assembleDebugAndroidTest
 
       - name: Upload test reports
         if: failure()

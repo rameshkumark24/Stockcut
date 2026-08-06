@@ -10,12 +10,23 @@ Built for fabricators, welders, timber framers, and anyone cutting from linear s
 
 ## Status
 
-🟡 **Phase 1 — planning complete, no code yet.**
+🟡 **Phases 3–4 complete — the engine and the data layer are built and tested. No UI yet.**
 
-Two gates must clear before building starts (see [`docs/07-implementation-plan.md`](docs/07-implementation-plan.md) W0):
+| Module | State |
+|---|---|
+| `:units` | Done — 5 unit systems, fractional inch, exact integer arithmetic |
+| `:optimizer` | Done — Best-Fit-Decreasing + improvement pass, self-verifying invariant |
+| `:data` | Done — Room schema, DB-level constraints, DataStore, entitlement rules |
+| `:app` | **Not started** (Phase 5) |
 
-- [ ] A real tradesman validates a hand-made cut plan on paper
-- [ ] App name cleared against the Play Store, package name fixed
+89 tests green: 74 on the JVM, 15 instrumented.
+
+🔴 **Two W0 gates are still open and both are non-code** (see [`docs/07-implementation-plan.md`](docs/07-implementation-plan.md) W0). Phases 3–4 were built ahead of them:
+
+- [ ] A real tradesman validates a hand-made cut plan on paper — *if this fails, the project stops*
+- [ ] App name cleared against the Play Store, package name fixed — **permanent once published**
+
+Also open, and the longest lead-time item: **tester recruitment**. A closed test needs 12 testers opted in for 14 continuous days before production access can even be applied for.
 
 ---
 
@@ -66,11 +77,13 @@ The tools that solve this are on iOS, in a browser (needs signal and a keyboard)
 
 ## Build
 
-Nothing to build yet. When there is:
-
 ```bash
-./gradlew :optimizer:test :units:test   # pure JVM, no emulator, < 5s
-./gradlew :app:assembleDebug
+# Correctness suite — pure JVM, no emulator, seconds
+./gradlew :units:test :optimizer:test :data:testDebugUnitTest
+
+# Cascade deletes, CHECK constraints, migrations — needs a device or emulator.
+# CI only COMPILES these, so run them yourself before any schema change.
+./gradlew :data:connectedDebugAndroidTest
 ```
 
 ## Setup

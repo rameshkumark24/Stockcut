@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Store title carries the primary keyword (docs/00-gap-audit §B8); the
+         launcher label stays short so it is not ellipsised on the home screen. -->
+    <string name="app_name">StockCut</string>
+</resources>

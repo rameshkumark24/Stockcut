@@ -42,6 +42,12 @@ dependencies {
     implementation(project(":optimizer"))
 
     implementation(libs.androidx.core.ktx)
+
+    // `implementation`, not `api`: Room is an implementation detail of this
+    // module. Consumers talk to ProjectRepository / CutListRepository and get
+    // domain types back, so nothing outside :data needs Room on its classpath.
+    // If this ever has to become `api` again, something has started leaking
+    // entities and the repository layer is being bypassed.
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
@@ -53,6 +59,7 @@ dependencies {
     testRuntimeOnly(libs.junit.platform.launcher)
 
     // Instrumented tests — DAO behaviour and migrations. Need a device/emulator.
+    androidTestImplementation(kotlin("test"))
     androidTestImplementation(libs.androidx.test.junit)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.room.testing)

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    A stock bar cut into pieces, with the offcut in grey at the right end —
+    the CutPlanBar visual from docs/04 §6, which is also the feature graphic
+    and the first store screenshot. The icon should read as the product.
+
+    Drawn inside the 72x72 adaptive-icon safe zone, centred in the 108x108
+    viewport, so nothing is clipped by a round or squircle mask.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Cut pieces -->
+    <path android:fillColor="#FFFFFF" android:pathData="M20,42h20v24h-20z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M43,42h15v24h-15z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M61,42h11v24h-11z" />
+
+    <!-- Offcut: the waste this app exists to shrink -->
+    <path android:fillColor="#B3FFFFFF" android:pathData="M75,42h13v24h-13z" />
+</vector>

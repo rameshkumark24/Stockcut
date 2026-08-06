@@ -4,7 +4,6 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
-import androidx.room.Transaction
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
@@ -62,6 +61,12 @@ interface StockDao {
     suspend fun clearProject(projectId: Long)
 }
 
+/** Projection for [PartDao.observePieceTotals]. Not a table. */
+data class ProjectPieceTotal(
+    val projectId: Long,
+    val totalQuantity: Int,
+)
+
 @Dao
 interface PartDao {
 
@@ -74,6 +79,22 @@ interface PartDao {
     /** Sum of quantities, not row count — the free-tier limit counts pieces. */
     @Query("SELECT COALESCE(SUM(quantity), 0) FROM part_entry WHERE project_id = :projectId")
     suspend fun totalQuantityForProject(projectId: Long): Int
+
+    /**
+     * Piece totals for every project at once, for the projects list.
+     *
+     * One grouped query rather than one query per card. With a handful of
+     * projects the difference is immaterial today, but a per-row query inside a
+     * list is the shape that quietly becomes N+1 later.
+     *
+     * Projects with no parts yet are absent from the result, not zero — the
+     * caller supplies the zero.
+     */
+    @Query(
+        "SELECT project_id AS projectId, COALESCE(SUM(quantity), 0) AS totalQuantity " +
+            "FROM part_entry GROUP BY project_id",
+    )
+    fun observePieceTotals(): Flow<List<ProjectPieceTotal>>
 
     @Insert
     suspend fun insert(entry: PartEntryEntity): Long
@@ -101,23 +122,5 @@ interface StockProfileDao {
     suspend fun delete(profile: StockProfileEntity)
 }
 
-@Dao
-interface ProjectWriteDao {
-
-    @Transaction
-    suspend fun duplicate(
-        projectDao: ProjectDao,
-        stockDao: StockDao,
-        partDao: PartDao,
-        source: ProjectEntity,
-        newName: String,
-        now: Long,
-    ): Long {
-        val copyId = projectDao.insert(
-            source.copy(id = 0, name = newName, isExample = false, createdAt = now, updatedAt = now),
-        )
-        stockDao.forProject(source.id).forEach { stockDao.insert(it.copy(id = 0, projectId = copyId)) }
-        partDao.forProject(source.id).forEach { partDao.insert(it.copy(id = 0, projectId = copyId)) }
-        return copyId
-    }
-}
+// Duplicating a project spans three DAOs, so it cannot live in any one of them.
+// See duplicateProject() in ProjectDuplication.kt.

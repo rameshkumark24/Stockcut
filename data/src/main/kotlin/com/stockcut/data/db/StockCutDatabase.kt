@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [
@@ -33,15 +32,10 @@ abstract class StockCutDatabase : RoomDatabase() {
          */
         fun build(context: Context): StockCutDatabase =
             Room.databaseBuilder(context.applicationContext, StockCutDatabase::class.java, NAME)
-                .addCallback(
-                    object : Callback() {
-                        override fun onOpen(db: SupportSQLiteDatabase) {
-                            // Room enables this per-connection; without it the
-                            // ON DELETE CASCADE declarations are inert on older APIs.
-                            db.execSQL("PRAGMA foreign_keys = ON")
-                        }
-                    },
-                )
+                // Installs the CHECK-equivalent triggers and turns on foreign
+                // keys. Tests must use the same callback or they would validate
+                // a database that behaves differently from the shipped one.
+                .addCallback(SchemaConstraints.callback)
                 .build()
     }
 }

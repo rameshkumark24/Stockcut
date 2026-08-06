@@ -26,5 +26,6 @@ dependencyResolutionManagement {
 include(":units")
 include(":optimizer")
 
-// Android library. :app follows in Phase 5.
+// Android.
 include(":data")
+include(":app")
