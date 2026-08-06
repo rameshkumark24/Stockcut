@@ -64,38 +64,43 @@ See [`00-phase-0-scope-feasibility.md`](00-phase-0-scope-feasibility.md) and [`0
 - [ ] Microcopy written (UI/UX brief §8) — before build, not during
 - [ ] Destructive actions: undo snackbar for rows, dialog for projects
 
-## Phase 3 — Core modules *(replaces "Architecture & Data Model")*
+## ✅ Phase 3 — Core modules *(complete)* *(replaces "Architecture & Data Model")*
 
 **Build these before a single screen exists.**
 
-- [ ] Gradle multi-module skeleton: `:app :data :optimizer :units`
-- [ ] Version catalog, `targetSdk = 36`, `minSdk = 26`
-- [ ] `:units` — parse + format, all 5 unit systems
-- [ ] `:units` — fractional inch, feet notation (`8' 3 1/2"`)
-- [ ] `:units` — round-trip property test passing
-- [ ] `:units` — exactness table verified (1/64" == 127 U)
-- [ ] `:optimizer` — data classes exactly per the contract
-- [ ] `:optimizer` — Best-Fit-Decreasing + bounded improvement pass
-- [ ] `:optimizer` — self-verifies the invariant before returning
-- [ ] `:optimizer` — property tests: invariant, conservation, non-negativity, determinism (≥ 1000 cases each)
-- [ ] `:optimizer` — oracle set `O-01`…`O-10` green
-- [ ] `:optimizer` — benchmarks within budget (20 / 200 / 1000 parts)
-- [ ] **Zero `android.*` imports in `:optimizer` and `:units`** — verified
-- [ ] **No `Float`/`Double`** outside `wastePercent`
-- [ ] GitHub Actions runs both suites on every push
+- [x] Gradle multi-module skeleton: `:data :optimizer :units` — *`:app` deferred to Phase 5*
+- [x] Version catalog, `targetSdk = 36`, `minSdk = 26`
+- [x] `:units` — parse + format, all 5 unit systems
+- [x] `:units` — fractional inch, feet notation (`8' 3 1/2"`)
+- [x] `:units` — round-trip property test passing
+- [x] `:units` — exactness table verified (1/64" == 127 U)
+- [x] `:optimizer` — data classes exactly per the contract
+- [x] `:optimizer` — Best-Fit-Decreasing + bounded improvement pass
+- [x] `:optimizer` — self-verifies the invariant before returning
+- [x] `:optimizer` — property tests: invariant, conservation, non-negativity, determinism (≥ 1000 cases each) — *1,500–20,000 seeded cases each*
+- [x] `:optimizer` — oracle set `O-01`…`O-09` green — [ ] `O-10` **blocked on the W0 tradesman gate**
+- [x] `:optimizer` — benchmarks within budget (20 / 200 / 1000 parts)
+- [x] **Zero `android.*` imports in `:optimizer` and `:units`** — verified in CI
+- [x] **No `Float`/`Double`** outside `wastePercent` — verified in CI
+- [x] GitHub Actions runs both suites on every push
+- [ ] Waste-% baseline committed for the **whole** oracle set *(only the example job is pinned today, at 13.75%)*
 
-## Phase 4 — Data layer
+## ✅ Phase 4 — Data layer *(complete)*
 
-- [ ] Room entities, DAOs, database (3 tables)
-- [ ] Constraints at the **DB level**: NOT NULL, CHECK > 0, ON DELETE CASCADE
-- [ ] Indexes on both `project_id` foreign keys
-- [ ] `created_at` / `updated_at` on `project`, stored **UTC**
-- [ ] `exportSchema = true`, v1 JSON **committed to git**
-- [ ] Migration test infrastructure set up
-- [ ] **`fallbackToDestructiveMigration()` absent** — verified by grep
-- [ ] DataStore settings + entitlement cache
-- [ ] Android auto-backup enabled
-- [ ] Example project seeded on first run
+- [x] Room entities, DAOs, database (4 tables — 3 per job, plus `stock_profile`)
+- [x] Constraints at the **DB level**: NOT NULL, CHECK > 0, ON DELETE CASCADE — *CHECK via `RAISE(ABORT)` triggers, see `docs/05` §1.3*
+- [x] Indexes on both `project_id` foreign keys
+- [x] `created_at` / `updated_at` on `project`, stored **UTC**
+- [x] `exportSchema = true`, v1 JSON **committed to git**
+- [x] Migration test infrastructure set up
+- [x] **`fallbackToDestructiveMigration()` absent** — verified by grep in CI
+- [x] DataStore settings + entitlement cache
+- [ ] Android auto-backup enabled — **blocked: needs the `:app` manifest (Phase 5)**
+- [x] Example project seeded on first run *(seed data + tests; the write happens in Phase 5)*
+
+> ⚠️ **CI compiles the instrumented tests but never runs them** — cascade deletes, CHECK
+> constraints and migrations are only verified when someone runs
+> `./gradlew :data:connectedDebugAndroidTest` against a device. Do it before any schema change.
 
 ## Phase 5 — UI build
 

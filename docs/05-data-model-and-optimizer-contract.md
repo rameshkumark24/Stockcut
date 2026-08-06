@@ -18,7 +18,8 @@ Project ─1──────n─ StockEntry
 StockProfile   (standalone — saved reusable stock sizes)
 ```
 
-Three tables. That is the entire schema.
+Four tables. That is the entire schema — three for a job, plus the standalone
+`stock_profile` list of reusable stock sizes (US-14).
 
 ## 1.2 Tables
 
@@ -71,6 +72,7 @@ Three tables. That is the entire schema.
 
 - **Every length is `INTEGER`, in internal units of 1/320 mm.** No REAL columns anywhere in this schema. Floating point does not appear in the persistence layer.
 - **Constraints live in the database**, not only in Kotlin — `NOT NULL`, `CHECK`, `ON DELETE CASCADE`, per checklist Phase 3.
+- **How `CHECK` is implemented:** Room's annotations cannot emit a `CHECK` clause and SQLite has no `ALTER TABLE ... ADD CONSTRAINT`, so each `CHECK` above is a `BEFORE INSERT` / `BEFORE UPDATE` trigger calling `RAISE(ABORT)`, in `SchemaConstraints.kt`. A rejected row raises `SQLiteConstraintException`, exactly as a `CHECK` would. Triggers are invisible to Room's schema validation (which reads `PRAGMA table_info`, `foreign_key_list` and `index_list`), so they do not appear in the exported schema JSON and cannot cause an identity-hash mismatch. 🔴 **A migration that adds a table must create that table's triggers in the same `Migration`** — `onCreate` does not run again for an existing install.
 - Timestamps stored as epoch millis **UTC**; converted at display time only.
 - **Hard delete** for parts and stock (an undo snackbar holds the row in memory, not in the DB). **Hard delete** for projects too — there is no recovery expectation and no server.
 - Indexes on both `project_id` foreign keys. That is all the indexing this app will ever need.
