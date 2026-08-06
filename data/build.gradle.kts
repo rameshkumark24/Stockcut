@@ -42,8 +42,18 @@ dependencies {
     implementation(project(":optimizer"))
 
     implementation(libs.androidx.core.ktx)
-    implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
+
+    // `api`, not `implementation`: this module's public surface returns Room
+    // types — StockCutDatabase extends RoomDatabase — so a consumer cannot call
+    // database.projectDao() without Room on its compile classpath.
+    //
+    // This is a symptom worth naming rather than hiding. docs/07 W2 lists
+    // "Repositories — Room ↔ domain mapping" as a deliverable and they were
+    // never built, so :app currently reaches for DAOs directly. When the
+    // repositories land, :data should expose only domain types and this can go
+    // back to `implementation`.
+    api(libs.room.runtime)
+    api(libs.room.ktx)
     ksp(libs.room.compiler)
     implementation(libs.datastore.preferences)
 

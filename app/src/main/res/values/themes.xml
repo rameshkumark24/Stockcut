@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Only the pre-Compose window theme. All real styling is in Theme.kt.
+         NoActionBar because the app draws its own top bars in Compose. -->
+    <style name="Theme.StockCut" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>
