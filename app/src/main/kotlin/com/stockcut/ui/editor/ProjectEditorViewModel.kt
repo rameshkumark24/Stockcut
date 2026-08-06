@@ -15,7 +15,11 @@ import com.stockcut.data.model.Project
 import com.stockcut.data.model.StockEntry
 import com.stockcut.data.repository.CutListRepository
 import com.stockcut.data.repository.ProjectRepository
+import com.stockcut.data.repository.toOptimizeRequest
 import com.stockcut.data.settings.SettingsStore
+import com.stockcut.optimizer.OptimizeResult
+import com.stockcut.optimizer.optimize
+import com.stockcut.ui.result.PlanCache
 import com.stockcut.units.UnitSystem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,7 +27,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 enum class EditorTab { PARTS, STOCK, SETUP }
 
@@ -38,6 +45,20 @@ sealed interface PendingUndo {
     data class Stock(val entry: StockEntry) : PendingUndo
 }
 
+/**
+ * S3-ERR-1. Parts that fit no stock length, and the longest bar they were
+ * measured against.
+ *
+ * 🔴 While this is non-null the editor MUST NOT navigate to a plan. docs/03:
+ * "Never navigate to a plan that silently omitted parts. This is the single most
+ * damaging possible bug — the user cuts to a plan and discovers at the end that
+ * two pieces were never included."
+ */
+data class InfeasibleParts(
+    val parts: List<com.stockcut.optimizer.PartSpec>,
+    val longestUsableU: Long,
+)
+
 data class EditorUiState(
     val project: Project? = null,
     val parts: List<PartEntry> = emptyList(),
@@ -47,6 +68,12 @@ data class EditorUiState(
     val pendingUndo: PendingUndo? = null,
     val paywallTrigger: com.stockcut.data.entitlement.PaywallTrigger? = null,
     val hardLimitMessage: String? = null,
+    val infeasible: InfeasibleParts? = null,
+    /** Shown on the Optimize button only past 300 ms — see onOptimize. */
+    val optimizing: Boolean = false,
+    val invalidInputMessage: String? = null,
+    /** Set once a plan is ready and cached. Cleared when consumed. */
+    val navigateToResult: Boolean = false,
 ) {
     val totalPieces: Int get() = parts.sumOf { it.quantity }
 
@@ -94,6 +121,10 @@ class ProjectEditorViewModel(
         val pendingUndo: PendingUndo? = null,
         val paywallTrigger: com.stockcut.data.entitlement.PaywallTrigger? = null,
         val hardLimitMessage: String? = null,
+        val infeasible: InfeasibleParts? = null,
+        val optimizing: Boolean = false,
+        val invalidInputMessage: String? = null,
+        val navigateToResult: Boolean = false,
     )
 
     val uiState: StateFlow<EditorUiState> = combine(
@@ -111,6 +142,10 @@ class ProjectEditorViewModel(
             pendingUndo = state.pendingUndo,
             paywallTrigger = state.paywallTrigger,
             hardLimitMessage = state.hardLimitMessage,
+            infeasible = state.infeasible,
+            optimizing = state.optimizing,
+            invalidInputMessage = state.invalidInputMessage,
+            navigateToResult = state.navigateToResult,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), EditorUiState())
 
@@ -121,6 +156,17 @@ class ProjectEditorViewModel(
     private fun refreshProject() {
         viewModelScope.launch {
             local.value = local.value.copy(project = projects.getProject(projectId))
+        }
+    }
+
+    /**
+     * Clears a shown infeasible banner. Called after any edit, because the edit
+     * may well be the user fixing exactly what the banner complained about, and
+     * a stale red banner would say they had not.
+     */
+    private fun clearValidation() {
+        if (local.value.infeasible != null || local.value.invalidInputMessage != null) {
+            local.value = local.value.copy(infeasible = null, invalidInputMessage = null)
         }
     }
 
@@ -152,6 +198,7 @@ class ProjectEditorViewModel(
         viewModelScope.launch {
             cutLists.addPart(projectId, lengthU, quantity, label?.takeIf { it.isNotBlank() })
             refreshProject()
+            clearValidation()
         }
         return true
     }
@@ -161,6 +208,7 @@ class ProjectEditorViewModel(
         viewModelScope.launch {
             cutLists.updatePart(projectId, entry)
             refreshProject()
+            clearValidation()
         }
     }
 
@@ -169,6 +217,7 @@ class ProjectEditorViewModel(
             cutLists.deletePart(projectId, entry)
             local.value = local.value.copy(pendingUndo = PendingUndo.Part(entry))
             refreshProject()
+            clearValidation()
         }
     }
 
@@ -184,6 +233,7 @@ class ProjectEditorViewModel(
         viewModelScope.launch {
             cutLists.addStock(projectId, lengthU, quantity, label?.takeIf { it.isNotBlank() })
             refreshProject()
+            clearValidation()
         }
         return true
     }
@@ -192,6 +242,7 @@ class ProjectEditorViewModel(
         viewModelScope.launch {
             cutLists.updateStock(projectId, entry)
             refreshProject()
+            clearValidation()
         }
     }
 
@@ -200,6 +251,7 @@ class ProjectEditorViewModel(
             cutLists.deleteStock(projectId, entry)
             local.value = local.value.copy(pendingUndo = PendingUndo.Stock(entry))
             refreshProject()
+            clearValidation()
         }
     }
 
@@ -214,6 +266,7 @@ class ProjectEditorViewModel(
             }
             local.value = local.value.copy(pendingUndo = null)
             refreshProject()
+            clearValidation()
         }
     }
 
@@ -257,6 +310,94 @@ class ProjectEditorViewModel(
         // waiting for a round trip, which at Room's speed would just be a flicker.
         local.value = local.value.copy(project = updated)
         viewModelScope.launch { projects.updateProject(updated) }
+    }
+
+    // ── S3 — Optimize ────────────────────────────────────────────────────────
+
+    /**
+     * Runs the optimizer and decides whether the user may see a plan.
+     *
+     * 🔴 THE RULE THIS FUNCTION EXISTS FOR: if any part fits no stock length, it
+     * sets [InfeasibleParts] and does NOT navigate. docs/03 S3-ERR-1 calls a plan
+     * that silently omitted parts "the single most damaging possible bug" —
+     * someone cuts the whole job and finds out at the end that two pieces were
+     * never in it.
+     *
+     * Shortfall is different and DOES navigate: limited stock ran out, but every
+     * part is accounted for, the partial plan is real, and S4 shows a banner
+     * saying how much more to buy. Infeasible means impossible; Shortfall means
+     * "buy more" — conflating them would either hide a real plan or show a false
+     * one.
+     *
+     * Optimizing itself is never gated by tier (CLAUDE.md rule 9). Free and paid
+     * run the identical optimizer.
+     */
+    fun onOptimize() {
+        viewModelScope.launch {
+            val cutList = cutLists.loadCutList(projectId) ?: return@launch
+
+            if (cutList.parts.isEmpty() || cutList.stock.isEmpty()) {
+                local.value = local.value.copy(
+                    invalidInputMessage = "Add at least one part and one stock length.",
+                )
+                return@launch
+            }
+
+            // Only show progress if it is actually slow. docs/03 S3: under 300 ms
+            // navigate straight through — "a flash of spinner is worse than none".
+            val progress = launch {
+                delay(300)
+                local.value = local.value.copy(optimizing = true)
+            }
+
+            // Off the main thread: 1000 parts has a 10 s budget (docs/05 §2.4),
+            // and blocking the main thread for that is an ANR.
+            val result = withContext(Dispatchers.Default) {
+                optimize(cutList.toOptimizeRequest())
+            }
+            progress.cancel()
+
+            when (result) {
+                is OptimizeResult.Infeasible -> {
+                    local.value = local.value.copy(
+                        optimizing = false,
+                        infeasible = InfeasibleParts(result.impossibleParts, result.longestUsableU),
+                        navigateToResult = false,
+                    )
+                }
+                is OptimizeResult.InvalidInput -> {
+                    // Should be unreachable — the UI validates first. If it does
+                    // happen it is a bug, and saying so beats a blank screen.
+                    local.value = local.value.copy(
+                        optimizing = false,
+                        invalidInputMessage = result.reason,
+                    )
+                }
+                is OptimizeResult.Success, is OptimizeResult.Shortfall -> {
+                    PlanCache.put(projectId, cutList, result)
+                    settings.recordOptimize()
+                    local.value = local.value.copy(
+                        optimizing = false,
+                        infeasible = null,
+                        invalidInputMessage = null,
+                        navigateToResult = true,
+                    )
+                }
+            }
+        }
+    }
+
+    fun onResultNavigationHandled() {
+        local.value = local.value.copy(navigateToResult = false)
+    }
+
+    /** Jumps the user to the tab holding what they need to fix. */
+    fun onFixInfeasibleParts() {
+        local.value = local.value.copy(infeasible = null, tab = EditorTab.PARTS)
+    }
+
+    fun onAddLongerStock() {
+        local.value = local.value.copy(infeasible = null, tab = EditorTab.STOCK)
     }
 
     // ── Dismissals ───────────────────────────────────────────────────────────

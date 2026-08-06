@@ -33,8 +33,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.stockcut.data.entitlement.PaywallTrigger
 import com.stockcut.data.model.PartEntry
 import com.stockcut.data.model.StockEntry
+import com.stockcut.ui.components.BannerKind
+import com.stockcut.ui.components.InlineBanner
 import com.stockcut.ui.theme.Space
 import com.stockcut.ui.theme.TouchTarget
+import com.stockcut.units.format
 
 /** Which entry sheet, if any, is open. */
 private sealed interface SheetTarget {
@@ -62,6 +65,20 @@ fun ProjectEditorScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var sheet by remember { mutableStateOf<SheetTarget?>(null) }
     val snackbarHost = remember { SnackbarHostState() }
+
+    // 🔴 The ONLY path to the cut plan. The ViewModel sets this exclusively for
+    // Success and Shortfall; an Infeasible result never sets it, so a plan that
+    // dropped a part is unreachable rather than merely discouraged.
+    LaunchedEffect(state.navigateToResult) {
+        if (state.navigateToResult) {
+            viewModel.onResultNavigationHandled()
+            onOptimize()
+        }
+    }
+
+    state.invalidInputMessage?.let { message ->
+        LaunchedEffect(message) { snackbarHost.showSnackbar(message) }
+    }
 
     // Undo snackbar, 5 s (docs/04 §9). A single row gets undo rather than a
     // confirmation dialog — undo is cheaper than a prompt for something this small.
@@ -100,19 +117,53 @@ fun ProjectEditorScreen(
         },
         bottomBar = {
             Button(
-                onClick = onOptimize,
-                enabled = state.canOptimize,
+                onClick = viewModel::onOptimize,
+                enabled = state.canOptimize && !state.optimizing,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(Space.screenHorizontal)
                     .heightIn(min = TouchTarget.primaryButtonHeight)
                     .semantics { contentDescription = "Optimize" },
             ) {
-                Text("Optimize", style = MaterialTheme.typography.titleMedium)
+                // Progress appears only past 300 ms (docs/03 S3): a flash of
+                // spinner on a 40 ms job is worse than no spinner at all.
+                Text(
+                    text = if (state.optimizing) "Optimizing…" else "Optimize",
+                    style = MaterialTheme.typography.titleMedium,
+                )
             }
         },
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+            state.infeasible?.let { infeasible ->
+                val unit = state.unitSystem
+                val denominator = state.denominator
+                val lengths = infeasible.parts
+                    .map { format(it.lengthU, unit, denominator) }
+                    .distinct()
+                val count = infeasible.parts.sumOf { it.quantity }
+                InlineBanner(
+                    kind = BannerKind.ERROR,
+                    headline = if (count == 1) {
+                        "1 part doesn't fit any stock length."
+                    } else {
+                        "$count parts don't fit any stock length."
+                    },
+                    detail = lengths.joinToString(" and ") +
+                        " " + (if (lengths.size == 1) "is" else "are") +
+                        " longer than your longest stock (" +
+                        format(infeasible.longestUsableU, unit, denominator) + ").",
+                    primaryAction = "Add longer stock" to viewModel::onAddLongerStock,
+                    secondaryAction = "Edit those parts" to viewModel::onFixInfeasibleParts,
+                    modifier = Modifier.padding(
+                        start = Space.screenHorizontal,
+                        end = Space.screenHorizontal,
+                        top = Space.sm,
+                        bottom = Space.sm,
+                    ),
+                )
+            }
+
             TabRow(selectedTabIndex = state.tab.ordinal) {
                 EditorTab.entries.forEach { tab ->
                     Tab(

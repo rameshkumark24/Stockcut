@@ -18,6 +18,8 @@ import androidx.navigation.navArgument
 import com.stockcut.AppContainer
 import com.stockcut.ui.editor.ProjectEditorScreen
 import com.stockcut.ui.editor.ProjectEditorViewModel
+import com.stockcut.ui.result.ResultScreen
+import com.stockcut.ui.result.ResultViewModel
 import com.stockcut.ui.projects.ProjectsScreen
 import com.stockcut.ui.projects.ProjectsViewModel
 import com.stockcut.ui.theme.Space
@@ -75,7 +77,14 @@ fun StockCutNavHost(
             arguments = listOf(navArgument(Routes.PROJECT_ARG) { type = NavType.LongType }),
         ) { entry ->
             val projectId = entry.arguments?.getLong(Routes.PROJECT_ARG) ?: 0L
-            Stub("Cut plan", "S4 — the plan for job $projectId")
+            val viewModel: ResultViewModel = viewModel(
+                key = "result-$projectId",
+                factory = ResultViewModel.factory(container, projectId),
+            )
+            ResultScreen(
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() },
+            )
         }
 
         composable(Routes.SETTINGS) { Stub("Settings", "S6 — defaults, theme, restore purchases") }
