@@ -10,16 +10,19 @@ Built for fabricators, welders, timber framers, and anyone cutting from linear s
 
 ## Status
 
-🟡 **Phases 3–4 complete — the engine and the data layer are built and tested. No UI yet.**
+🟡 **Phases 3–5 complete — the engine, the data layer and the whole UI are built and tested.**
 
 | Module | State |
 |---|---|
 | `:units` | Done — 5 unit systems, fractional inch, exact integer arithmetic |
 | `:optimizer` | Done — Best-Fit-Decreasing + improvement pass, self-verifying invariant |
 | `:data` | Done — Room schema, DB-level constraints, DataStore, entitlement rules |
-| `:app` | **Not started** (Phase 5) |
+| `:app` | Done — 5 routes, all 7 screens, share as image, PDF export |
 
-89 tests green: 74 on the JVM, 15 instrumented.
+167 tests green: 126 on the JVM, 41 instrumented.
+
+**Next: Phase 6 — billing and ads.** That needs a Play Console account, which is
+part of W0 below.
 
 🔴 **Two W0 gates are still open and both are non-code** (see [`docs/07-implementation-plan.md`](docs/07-implementation-plan.md) W0). Phases 3–4 were built ahead of them:
 

@@ -102,21 +102,33 @@ See [`00-phase-0-scope-feasibility.md`](00-phase-0-scope-feasibility.md) and [`0
 > constraints and migrations are only verified when someone runs
 > `./gradlew :data:connectedDebugAndroidTest` against a device. Do it before any schema change.
 
-## Phase 5 — UI build
+## ✅ Phase 5 — UI build *(complete)*
 
-- [ ] Navigation graph, 5 routes
-- [ ] **`MeasurementField`** — accepts `1200`, `3/4`, `1 5/16`, `8' 3 1/2"`
-- [ ] S1 Projects list — all states
-- [ ] S2 Project editor — Parts / Stock / Setup tabs
-- [ ] Unit change re-formats display, **never mutates stored values** (tested)
-- [ ] S3 optimize transition + validation
-- [ ] 🔴 **Infeasible parts block navigation** — never show a plan that silently dropped a part
-- [ ] S4 Cut plan + **`CutPlanBar`**
-- [ ] Identical-bar collapsing (`×4 identical bars`)
-- [ ] Share as image via `FileProvider` — **no storage permission**
-- [ ] PDF export, legible in black and white
-- [ ] S6 Settings · S7 About
-- [ ] No spinner on operations under 300 ms
+- [x] Navigation graph, 5 routes
+- [x] **`MeasurementField`** — accepts `1200`, `3/4`, `1 5/16`, `8' 3 1/2"`
+- [x] S1 Projects list — all states
+- [x] S2 Project editor — Parts / Stock / Setup tabs
+- [x] Unit change re-formats display, **never mutates stored values** (tested, and verified on a device)
+- [x] S3 optimize transition + validation
+- [x] 🔴 **Infeasible parts block navigation** — verified on a device with a 7000 mm part against 6000 mm stock
+- [x] S4 Cut plan + **`CutPlanBar`**
+- [x] Identical-bar collapsing (`×4 identical bars`)
+- [x] Share as image via `FileProvider` — **no storage permission** (both manifests declare zero)
+- [x] PDF export, legible in black and white — every segment outlined, not just filled
+- [x] S6 Settings · S7 About
+- [x] No spinner on operations under 300 ms
+
+> ⚠️ **S7 is missing two links, and both are blocked on W0, not forgotten:**
+> *Report a problem* and the *privacy policy*. The app must link to the GitHub
+> Pages **redirect**, never the Google Form directly — that redirect is the only
+> kill switch this app has without a server, and [`09-feedback-channel.md`](09-feedback-channel.md) §9.5
+> is explicit that retrofitting it costs an app update. Neither the form nor the
+> redirect exists yet. The screen says so in plain words rather than showing
+> buttons that do nothing.
+>
+> **Restore purchases** is also absent — it needs Play Billing (Phase 6). It is
+> mandatory for reinstalls and reviewers look for it (gap audit §B4), so it
+> cannot be skipped, only deferred.
 
 ## Phase 6 — Monetisation
 
