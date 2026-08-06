@@ -59,38 +59,99 @@ val LocalStockCutColors = staticCompositionLocalOf<StockCutColors> {
     error("StockCutColors accessed outside StockCutTheme")
 }
 
-// `background` must be set explicitly alongside `surface`. Scaffold and several
-// other Material containers default to `background`, and an unset slot falls
-// back to M3's baseline lavender — which is exactly the generic look docs/04 §2
-// says to avoid. Caught by running the app, not by reading the theme.
+// EVERY slot a Material component might reach for is mapped, not just the four
+// the brief names. An unset slot silently falls back to M3's baseline lavender,
+// which is exactly the generic look docs/04 §2 exists to avoid — and it does not
+// look like a bug in code review, only on a screen. Three separate components
+// (Scaffold's background, Card, the FAB) were caught doing this by running the
+// app, which is why the whole scheme is now written out rather than patched
+// one slot at a time.
+//
+// The brief defines four surfaces and one brand colour, so the *Container slots
+// deliberately collapse onto them: a primary action is orange with white text,
+// wherever it appears and whichever slot the component happens to read.
 private val LightScheme = lightColorScheme(
     primary = PrimaryLight,
     onPrimary = OnPrimaryLight,
+    primaryContainer = PrimaryLight,
+    onPrimaryContainer = OnPrimaryLight,
+    inversePrimary = PrimaryDark,
+
+    secondary = PrimaryLight,
+    onSecondary = OnPrimaryLight,
+    secondaryContainer = PrimaryLight,
+    onSecondaryContainer = OnPrimaryLight,
+
+    tertiary = PrimaryLight,
+    onTertiary = OnPrimaryLight,
+    tertiaryContainer = PrimaryLight,
+    onTertiaryContainer = OnPrimaryLight,
+
     background = SurfaceLight,
     onBackground = OnSurfaceLight,
     surface = SurfaceLight,
     onSurface = OnSurfaceLight,
+    surfaceVariant = SurfaceLight,
+    onSurfaceVariant = OnSurfaceVariantLight,
+    surfaceTint = PrimaryLight,
+    inverseSurface = OnSurfaceLight,
+    inverseOnSurface = SurfaceLight,
+
+    surfaceContainerLowest = SurfaceContainerLight,
+    surfaceContainerLow = SurfaceContainerLight,
     surfaceContainer = SurfaceContainerLight,
     surfaceContainerHigh = SurfaceContainerLight,
-    surfaceContainerLow = SurfaceContainerLight,
-    onSurfaceVariant = OnSurfaceVariantLight,
+    surfaceContainerHighest = SurfaceContainerLight,
+
     outline = OutlineLight,
+    outlineVariant = OutlineLight,
+
     error = ErrorLight,
+    onError = OnPrimaryLight,
+    errorContainer = ErrorContainerLight,
+    onErrorContainer = ErrorLight,
 )
 
 private val DarkScheme = darkColorScheme(
     primary = PrimaryDark,
     onPrimary = OnPrimaryDark,
+    primaryContainer = PrimaryDark,
+    onPrimaryContainer = OnPrimaryDark,
+    inversePrimary = PrimaryLight,
+
+    secondary = PrimaryDark,
+    onSecondary = OnPrimaryDark,
+    secondaryContainer = PrimaryDark,
+    onSecondaryContainer = OnPrimaryDark,
+
+    tertiary = PrimaryDark,
+    onTertiary = OnPrimaryDark,
+    tertiaryContainer = PrimaryDark,
+    onTertiaryContainer = OnPrimaryDark,
+
     background = SurfaceDark,
     onBackground = OnSurfaceDark,
     surface = SurfaceDark,
     onSurface = OnSurfaceDark,
+    surfaceVariant = SurfaceDark,
+    onSurfaceVariant = OnSurfaceVariantDark,
+    surfaceTint = PrimaryDark,
+    inverseSurface = OnSurfaceDark,
+    inverseOnSurface = SurfaceDark,
+
+    surfaceContainerLowest = SurfaceContainerDark,
+    surfaceContainerLow = SurfaceContainerDark,
     surfaceContainer = SurfaceContainerDark,
     surfaceContainerHigh = SurfaceContainerDark,
-    surfaceContainerLow = SurfaceContainerDark,
-    onSurfaceVariant = OnSurfaceVariantDark,
+    surfaceContainerHighest = SurfaceContainerDark,
+
     outline = OutlineDark,
+    outlineVariant = OutlineDark,
+
     error = ErrorDark,
+    onError = OnPrimaryDark,
+    errorContainer = ErrorContainerDark,
+    onErrorContainer = ErrorDark,
 )
 
 /** Theme setting from docs/03-app-flow.md S6. Stored in DataStore as a String. */

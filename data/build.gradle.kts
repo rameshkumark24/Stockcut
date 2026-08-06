@@ -43,17 +43,13 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
 
-    // `api`, not `implementation`: this module's public surface returns Room
-    // types — StockCutDatabase extends RoomDatabase — so a consumer cannot call
-    // database.projectDao() without Room on its compile classpath.
-    //
-    // This is a symptom worth naming rather than hiding. docs/07 W2 lists
-    // "Repositories — Room ↔ domain mapping" as a deliverable and they were
-    // never built, so :app currently reaches for DAOs directly. When the
-    // repositories land, :data should expose only domain types and this can go
-    // back to `implementation`.
-    api(libs.room.runtime)
-    api(libs.room.ktx)
+    // `implementation`, not `api`: Room is an implementation detail of this
+    // module. Consumers talk to ProjectRepository / CutListRepository and get
+    // domain types back, so nothing outside :data needs Room on its classpath.
+    // If this ever has to become `api` again, something has started leaking
+    // entities and the repository layer is being bypassed.
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
     ksp(libs.room.compiler)
     implementation(libs.datastore.preferences)
 

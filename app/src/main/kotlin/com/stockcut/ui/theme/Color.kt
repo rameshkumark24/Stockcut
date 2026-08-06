@@ -47,9 +47,22 @@ val SuccessLight = Color(0xFF2A9D3F)
 val WarningLight = Color(0xFFD48806)
 val ErrorLight = Color(0xFFC0392B)
 
+/**
+ * A distinct tint, NOT the same value as surfaceContainer.
+ *
+ * Material resolves a component's content colour by matching its background
+ * against the scheme's slots and returning the paired "on" colour. Two slots
+ * holding the SAME value makes that lookup ambiguous — when errorContainer was
+ * also white, every Card title resolved to onErrorContainer and rendered red.
+ * Distinct values per slot is not decoration; it is what keeps the lookup
+ * deterministic.
+ */
+val ErrorContainerLight = Color(0xFFFCEBE9)
+
 val CutSegmentDark = Color(0xFF4A9BE8)
 val CutSegmentAltDark = Color(0xFF3579B5)
 val OffcutDark = Color(0xFF5F6870)
 val SuccessDark = Color(0xFF4FBF63)
 val WarningDark = Color(0xFFF0A92E)
 val ErrorDark = Color(0xFFF0685A)
+val ErrorContainerDark = Color(0xFF3A1E1A)

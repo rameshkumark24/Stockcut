@@ -5,11 +5,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.stockcut.ui.navigation.StockCutNavHost
 import com.stockcut.ui.theme.StockCutTheme
 import com.stockcut.ui.theme.ThemeMode
 
@@ -27,21 +25,15 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
+        val container = (application as StockCutApplication).container
+
         setContent {
             // TODO(Phase 5): read the theme from SettingsStore once S6 exists.
             StockCutTheme(themeMode = ThemeMode.SYSTEM) {
-                StockCutApp()
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    StockCutNavHost(container = container)
+                }
             }
-        }
-    }
-}
-
-@Composable
-private fun StockCutApp() {
-    Surface(modifier = Modifier.fillMaxSize()) {
-        Scaffold { innerPadding ->
-            // The navigation graph (5 routes, docs/03-app-flow.md) lands here next.
-            Placeholder(modifier = Modifier.padding(innerPadding))
         }
     }
 }
