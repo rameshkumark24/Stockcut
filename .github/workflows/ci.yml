@@ -26,6 +26,13 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
+      # This repo is developed on Windows, where git's core.fileMode is false and
+      # the executable bit is never recorded. If gradlew is ever re-added without
+      # it, every job here fails in 0s with "Permission denied" and the error
+      # looks nothing like its cause. One line, permanently.
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
       - name: Test :units and :optimizer
         run: ./gradlew :units:test :optimizer:test
 
@@ -97,6 +104,9 @@ jobs:
           packages: 'platforms;android-36 build-tools;36.0.0'
 
       - uses: gradle/actions/setup-gradle@v4
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
 
       - name: Unit tests (JVM — entitlement rules, seed job)
         run: ./gradlew :data:testDebugUnitTest
