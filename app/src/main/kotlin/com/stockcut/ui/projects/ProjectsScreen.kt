@@ -23,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -63,7 +64,14 @@ fun ProjectsScreen(
 
     // A newly created job opens immediately — the user asked for a job, not for
     // a row in a list.
-    state.navigateToProject?.let { id ->
+    // LaunchedEffect, NOT a bare call in the composition body.
+    //
+    // Navigating during composition is a side effect in a phase that must be
+    // free of them: composition can run more than once before the state clears,
+    // firing navigate() twice and pushing two copies of the editor onto the back
+    // stack — so Back appears to do nothing the first time it is pressed.
+    LaunchedEffect(state.navigateToProject) {
+        val id = state.navigateToProject ?: return@LaunchedEffect
         viewModel.onNavigationHandled()
         onOpenProject(id)
     }

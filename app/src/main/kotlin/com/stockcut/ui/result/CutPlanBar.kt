@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -52,10 +53,19 @@ fun CutPlanBar(
     val colors = LocalStockCutColors.current
     val segments = bar.segmentWeights(kerfU)
 
+    // The bar is a drawing, but the labels inside it are text, so its height has
+    // to follow the system font scale or those labels clip at large sizes.
+    // docs/04 §3: "no fixed-height rows" — this is the one place that could
+    // plausibly have argued it was exempt, and it is not.
+    // Capped, because past ~2x the bar would dominate the screen without the
+    // labels getting any more readable.
+    val fontScale = LocalDensity.current.fontScale.coerceIn(1f, 2f)
+    val barHeight = (44 * fontScale).dp
+
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(44.dp)
+            .height(barHeight)
             .clip(RoundedCornerShape(4.dp)),
     ) {
         segments.forEachIndexed { index, segment ->
