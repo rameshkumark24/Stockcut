@@ -28,8 +28,8 @@ import com.stockcut.units.format
  */
 object PlanRenderer {
 
-    private const val WIDTH = 1080
-    private const val MARGIN = 48f
+    const val WIDTH = 1080
+    const val MARGIN = 48f
     private const val BAR_HEIGHT = 84f
     private const val GAP = 28f
 
@@ -74,8 +74,8 @@ object PlanRenderer {
      * a band of dead whitespace — harmless, but it is the artifact a tradesman
      * sends to someone else, so it should not look unfinished.
      */
-    private const val HEADER_HEIGHT = MARGIN + 44f + 48f + GAP + 20f
-    private const val GROUP_HEIGHT = 16f + BAR_HEIGHT + 34f + GAP + 10f
+    const val HEADER_HEIGHT = MARGIN + 44f + 48f + GAP + 20f
+    const val GROUP_HEIGHT = 16f + BAR_HEIGHT + 34f + GAP + 10f
 
     /** Exact height needed for [plan] at the fixed render width. */
     fun measureHeight(plan: Plan): Int {
@@ -99,18 +99,32 @@ object PlanRenderer {
         // renders black text on black.
         canvas.drawColor(Color.WHITE)
 
-        var y = MARGIN + 44f
-        canvas.drawText(jobName, MARGIN, y, titlePaint)
-
-        y += 48f
-        canvas.drawText(summaryLine(plan, unitSystem, denominator), MARGIN, y, summaryPaint)
-
-        // Lands exactly on HEADER_HEIGHT — see the note on that constant.
-        y += GAP + 20f
+        var y = drawHeader(canvas, plan, jobName, unitSystem, denominator)
         for (group in plan.groupIdenticalBars()) {
             y = drawGroup(canvas, group, y, kerfU, unitSystem, denominator)
         }
         return bitmap
+    }
+
+    /**
+     * Title and summary. Returns the y the first bar starts at, which is exactly
+     * [HEADER_HEIGHT].
+     *
+     * Public so the PDF exporter can draw it on page 1 and skip it on later
+     * pages, without duplicating the layout.
+     */
+    fun drawHeader(
+        canvas: Canvas,
+        plan: Plan,
+        jobName: String,
+        unitSystem: UnitSystem,
+        denominator: Int,
+    ): Float {
+        var y = MARGIN + 44f
+        canvas.drawText(jobName, MARGIN, y, titlePaint)
+        y += 48f
+        canvas.drawText(summaryLine(plan, unitSystem, denominator), MARGIN, y, summaryPaint)
+        return y + GAP + 20f
     }
 
     private fun summaryLine(plan: Plan, unitSystem: UnitSystem, denominator: Int): String {
@@ -120,7 +134,7 @@ object PlanRenderer {
         return "$bars · $waste% waste · $offcut offcut total"
     }
 
-    private fun drawGroup(
+    fun drawGroup(
         canvas: Canvas,
         group: BarGroup,
         top: Float,

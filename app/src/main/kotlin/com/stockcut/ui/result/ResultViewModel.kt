@@ -6,12 +6,16 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stockcut.AppContainer
+import com.stockcut.data.entitlement.Entitlement
+import com.stockcut.data.entitlement.Gate
+import com.stockcut.data.entitlement.Tier
 import com.stockcut.data.repository.CutListRepository
 import com.stockcut.data.repository.toOptimizeRequest
 import com.stockcut.optimizer.OptimizeResult
 import com.stockcut.optimizer.Plan
 import com.stockcut.optimizer.optimize
 import com.stockcut.units.UnitSystem
+import com.stockcut.data.settings.SettingsStore
 import com.stockcut.units.format
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,7 +32,13 @@ data class ResultUiState(
     val denominator: Int = 16,
     val kerfU: Long = 0,
     val jobName: String = "",
-)
+    val tier: Tier = Tier.FREE,
+    /** True while the paywall for PDF export is showing. */
+    val showPdfPaywall: Boolean = false,
+) {
+    /** PDF is the paid export; sharing an image is free at both tiers. */
+    val canExportPdf: Boolean get() = Entitlement.canExportPdf(tier) is Gate.Allowed
+}
 
 /**
  * S4's state.
@@ -41,6 +51,7 @@ data class ResultUiState(
 class ResultViewModel(
     private val projectId: Long,
     private val cutLists: CutListRepository,
+    private val settings: SettingsStore,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ResultUiState())
@@ -48,6 +59,34 @@ class ResultViewModel(
 
     init {
         load()
+        observeTier()
+    }
+
+    /**
+     * The tier is observed, not read once: a purchase completed on the paywall
+     * must unlock the PDF button on this screen without the user navigating away
+     * and back.
+     */
+    private fun observeTier() {
+        viewModelScope.launch {
+            settings.settings.collect { s ->
+                _uiState.value = _uiState.value.copy(tier = s.tier)
+            }
+        }
+    }
+
+    /**
+     * @return true if the export may proceed. False raises the paywall instead —
+     * PDF is the one output money actually buys (docs/02 §6).
+     */
+    fun onExportPdfRequested(): Boolean {
+        if (_uiState.value.canExportPdf) return true
+        _uiState.value = _uiState.value.copy(showPdfPaywall = true)
+        return false
+    }
+
+    fun onPdfPaywallDismissed() {
+        _uiState.value = _uiState.value.copy(showPdfPaywall = false)
     }
 
     private fun load() {
@@ -61,6 +100,7 @@ class ResultViewModel(
             val unit = cutList.project.unitSystem
             val denominator = cutList.project.fractionDenominator
 
+            val tier = _uiState.value.tier
             _uiState.value = when (result) {
                 is OptimizeResult.Success -> ResultUiState(
                     plan = result.plan,
@@ -69,6 +109,7 @@ class ResultViewModel(
                     denominator = denominator,
                     kerfU = cutList.project.kerfU,
                     jobName = cutList.project.name,
+                    tier = tier,
                 )
                 is OptimizeResult.Shortfall -> ResultUiState(
                     plan = result.plan,
@@ -78,11 +119,12 @@ class ResultViewModel(
                     denominator = denominator,
                     kerfU = cutList.project.kerfU,
                     jobName = cutList.project.name,
+                    tier = tier,
                 )
                 // Unreachable: S3 refuses to navigate for either of these.
                 is OptimizeResult.Infeasible,
                 is OptimizeResult.InvalidInput,
-                -> ResultUiState(unitSystem = unit, denominator = denominator)
+                -> ResultUiState(unitSystem = unit, denominator = denominator, tier = tier)
             }
         }
     }
@@ -116,7 +158,9 @@ class ResultViewModel(
     companion object {
         fun factory(container: AppContainer, projectId: Long): ViewModelProvider.Factory =
             viewModelFactory {
-                initializer { ResultViewModel(projectId, container.cutLists) }
+                initializer {
+                    ResultViewModel(projectId, container.cutLists, container.settings)
+                }
             }
     }
 }

@@ -17,7 +17,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -138,7 +140,54 @@ fun ResultScreen(
                     Text("Share image", style = MaterialTheme.typography.titleMedium)
                 }
             }
+
+            item {
+                // Shown to everyone, with a lock for free users, rather than
+                // hidden — a feature nobody can see is a feature nobody buys,
+                // and hiding it also hides why the paid tier exists.
+                OutlinedButton(
+                    onClick = {
+                        if (!viewModel.onExportPdfRequested()) return@OutlinedButton
+                        context.startActivity(
+                            PlanPdf.shareIntent(
+                                context = context,
+                                plan = plan,
+                                jobName = state.jobName,
+                                kerfU = state.kerfU,
+                                unitSystem = state.unitSystem,
+                                denominator = state.denominator,
+                            ),
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = TouchTarget.primaryButtonHeight)
+                        .semantics { contentDescription = "Export PDF" },
+                ) {
+                    Text(
+                        text = if (state.canExportPdf) "Export PDF" else "Export PDF (paid)",
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                }
+            }
         }
+    }
+
+    if (state.showPdfPaywall) {
+        AlertDialog(
+            onDismissRequest = viewModel::onPdfPaywallDismissed,
+            // Names what they just hit, not a generic "Go Pro" (docs/03 S5).
+            title = { Text("Unlock PDF export") },
+            text = {
+                Text(
+                    "Print the plan and pin it up in the shop. " +
+                        "$4.99, one time. Not a subscription.",
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = viewModel::onPdfPaywallDismissed) { Text("Close") }
+            },
+        )
     }
 }
 
