@@ -76,9 +76,24 @@ fun ProjectEditorScreen(
     val activity = androidx.compose.ui.platform.LocalContext.current as? android.app.Activity
     LaunchedEffect(state.navigateToResult) {
         if (!state.navigateToResult) return@LaunchedEffect
-        viewModel.onResultNavigationHandled()
 
+        // 🔴 DO NOT clear navigateToResult here.
+        //
+        // It is this effect's KEY. Clearing it first cancels the coroutine, and
+        // the very next line suspends — so onOptimize() was never reached and
+        // tapping Optimize silently did nothing. It only appeared to work when
+        // the read happened to finish before recomposition, which made it a
+        // coin flip on the app's payoff action. Found by two E2E tests running
+        // identical steps and disagreeing.
+        //
+        // The flag is cleared below, after navigation, where cancellation no
+        // longer matters because everything left is non-suspending.
         val settings = container.settings.settings.first()
+
+        val proceed = {
+            viewModel.onResultNavigationHandled()
+            onOptimize()
+        }
 
         // The interstitial goes HERE — between finishing entry and seeing the
         // plan — and never mid-task (docs/03 S3). onFinished always fires, so a
@@ -95,21 +110,10 @@ fun ProjectEditorScreen(
                         container.settings.recordInterstitial(System.currentTimeMillis())
                     }
                 },
-                onFinished = { onOptimize() },
+                onFinished = proceed,
             )
         } else {
-            onOptimize()
-        }
-
-        // Review prompt: only after a SUCCESSFUL optimize, >= 3 lifetime, at
-        // most once per 90 days. Never on launch, never after a crash.
-        if (activity != null) {
-            com.stockcut.ui.ReviewPrompt.maybeAsk(
-                activity = activity,
-                settings = container.settings,
-                optimizeCount = settings.optimizeCount,
-                lastPromptAtMillis = settings.lastReviewPromptAt,
-            )
+            proceed()
         }
     }
 

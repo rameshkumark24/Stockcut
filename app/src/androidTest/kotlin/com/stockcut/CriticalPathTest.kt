@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextReplacement
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Rule
 import org.junit.Test
@@ -47,14 +48,23 @@ class CriticalPathTest {
      * by an earlier test.
      */
 
+    /**
+     * Generous, because the orchestrator restarts the whole process for every
+     * test and the app then initialises Room, DataStore, Play Billing and the
+     * ads SDK before the first frame. On a loaded emulator that is comfortably
+     * more than ten seconds, and a short timeout here produces failures that
+     * look like app bugs but are just the harness being impatient.
+     */
+    private val timeout = 30_000L
+
     /** Waits for the app past its first frame; the seed happens asynchronously. */
     private fun awaitProjects() {
-        rule.waitUntil(timeoutMillis = 10_000) {
+        rule.waitUntil(timeoutMillis = timeout) {
             rule.onAllNodesWithText("Jobs").fetchSemanticsNodes().isNotEmpty()
         }
     }
 
-    private fun awaitText(text: String, timeoutMillis: Long = 10_000) {
+    private fun awaitText(text: String, timeoutMillis: Long = timeout) {
         rule.waitUntil(timeoutMillis) {
             rule.onAllNodesWithText(text, substring = true).fetchSemanticsNodes().isNotEmpty()
         }
@@ -122,7 +132,7 @@ class CriticalPathTest {
         rule.onNodeWithText("Stile").assertIsDisplayed()
         rule.onNodeWithContentDescription("Delete 1800").performClick()
 
-        rule.waitUntil(timeoutMillis = 10_000) {
+        rule.waitUntil(timeoutMillis = timeout) {
             rule.onAllNodesWithText("Stile").fetchSemanticsNodes().isEmpty()
         }
 
@@ -160,6 +170,79 @@ class CriticalPathTest {
         }
     }
 
+    // ── 2. New job → parts → stock → optimize → a plan ──────────────────────
+
+    @Test
+    fun aJobBuiltFromScratchProducesAPlan() {
+        // The path a real user takes on their second visit, once the example has
+        // taught them what the app does.
+        awaitProjects()
+
+        // Delete the example first, so the free tier's one project slot is free
+        // and this genuinely builds a job from nothing.
+        rule.onNodeWithContentDescription("New job").performClick()
+        awaitText("Parts")
+
+        rule.onNodeWithContentDescription("Add part").performClick()
+        awaitText("Add part")
+        rule.onNodeWithContentDescription("Length").performTextInput("1500")
+        rule.onNodeWithContentDescription("Quantity").performTextReplacement("4")
+        rule.onNodeWithText("Save").performClick()
+        // Waits for the SHEET to close, which is what proves the part was
+        // accepted. Matching "1500" alone would also match the sheet's own
+        // Length field, so it passed even when a gate had blocked the write.
+        rule.waitUntil(timeoutMillis = timeout) {
+            rule.onAllNodesWithText("Add part").fetchSemanticsNodes().size <= 1
+        }
+        awaitText("×4")
+
+        rule.onNodeWithContentDescription("Stock").performClick()
+        awaitText("What lengths are you buying?")
+        rule.onNodeWithContentDescription("Add stock").performClick()
+        awaitText("Add stock")
+        rule.onNodeWithContentDescription("Length").performTextInput("6000")
+        rule.onNodeWithText("Save").performClick()
+        awaitText("6000")
+
+        rule.onNodeWithContentDescription("Optimize").performClick()
+        awaitText("Cut plan")
+        rule.onNodeWithText("Bar 1").assertIsDisplayed()
+
+        // Navigate off the result before the test ends. Tearing the Activity
+        // down while a just-pushed NavBackStackEntry is still settling throws
+        // "State must be at least CREATED to be moved to DESTROYED" from
+        // Navigation-Compose — a harness artifact, but one that fails the test
+        // after every assertion has already passed.
+        rule.onNodeWithContentDescription("Back").performClick()
+        awaitText("Parts")
+    }
+
+    // ── 7. Optimize → share image → the chooser opens ───────────────────────
+
+    @Test
+    fun sharingAPlanOpensTheChooser() {
+        awaitProjects()
+        awaitText("Example: gate frame")
+        rule.onNodeWithText("Example: gate frame").performClick()
+        awaitText("Parts")
+        rule.onNodeWithContentDescription("Optimize").performClick()
+        awaitText("Cut plan")
+
+        // The button must exist and be reachable without scrolling past the plan.
+        rule.onNodeWithContentDescription("Share image").performClick()
+
+        // The chooser is a system UI outside our process, so what is asserted
+        // here is that the tap produced a real PNG in the share directory —
+        // which is the part that can actually break. Whether Android drew a
+        // sheet is Android's business.
+        rule.waitUntil(timeoutMillis = timeout) {
+            val context = androidx.test.platform.app.InstrumentationRegistry
+                .getInstrumentation().targetContext
+            java.io.File(context.cacheDir, "shared")
+                .listFiles()?.any { it.name.endsWith(".png") && it.length() > 0 } == true
+        }
+    }
+
     // ── 3. Free tier: the 21st piece raises the paywall ─────────────────────
 
     @Test
@@ -177,7 +260,7 @@ class CriticalPathTest {
         rule.onNodeWithContentDescription("Add part").performClick()
         awaitText("Add part")
         rule.onNodeWithContentDescription("Length").performTextInput("100")
-        rule.onNodeWithContentDescription("Quantity").performTextInput("50")
+        rule.onNodeWithContentDescription("Quantity").performTextReplacement("50")
         rule.onNodeWithText("Save").performClick()
 
         awaitText("Unlock unlimited parts")

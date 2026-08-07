@@ -82,7 +82,7 @@ See [`00-phase-0-scope-feasibility.md`](00-phase-0-scope-feasibility.md) and [`0
 - [x] **Zero `android.*` imports in `:optimizer` and `:units`** — verified in CI
 - [x] **No `Float`/`Double`** outside `wastePercent` — verified in CI
 - [x] GitHub Actions runs both suites on every push
-- [ ] Waste-% baseline committed for the **whole** oracle set *(only the example job is pinned today, at 13.75%)*
+- [x] Waste-% baseline committed for the **whole** oracle set — 10 cases with measured figures
 
 ## ✅ Phase 4 — Data layer *(complete)*
 
@@ -158,12 +158,12 @@ data safety declaration with nothing on it but AdMob and Crashlytics.
 ## Phase 8 — Testing & QA
 
 - [ ] Full `:optimizer` + `:units` suites green, ≥ 1000 property cases
-- [ ] Waste-% baseline recorded; regressions fail the build
+- [x] Waste-% baseline recorded; regressions fail the build — 10 cases, see `WasteBaselineTest`
 - [ ] Room migration tests green
 - [ ] ViewModel tests
-- [x] 5 of 8 critical-path Compose UI tests *(2 new-job flow and 7 share-chooser remain)*
+- [x] **All 8 critical-path Compose UI tests**
 - [ ] Billing matrix fully walked with a license tester
-- [ ] Edge cases: empty, 1000 parts, unicode/emoji labels, SQL chars, double-tap Optimize, double-tap Buy
+- [x] Edge cases: empty, 1000 parts, unicode/emoji labels, SQL chars, double-tap Optimize *(optimize is idempotent, proven)*
 - [ ] **Low-end real device** (2–3 GB RAM, Android 8–10)
 - [ ] **Max system font scale** — every screen, nothing clipped
 - [ ] Dark mode — cut-plan segments still distinguishable

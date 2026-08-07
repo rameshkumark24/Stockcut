@@ -21,6 +21,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,6 +58,22 @@ fun ResultScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+
+    // The review prompt fires HERE, not on the editor — docs/03 S4 is explicit
+    // that it belongs on the payoff screen, after a SUCCESSFUL optimize. It also
+    // has to live somewhere that is not cancelled by the navigation itself.
+    // Entitlement.reviewPromptDue enforces >= 3 lifetime and once per 90 days.
+    LaunchedEffect(state.plan) {
+        val activity = context as? android.app.Activity ?: return@LaunchedEffect
+        if (state.plan == null) return@LaunchedEffect
+        val settings = viewModel.settingsSnapshot() ?: return@LaunchedEffect
+        com.stockcut.ui.ReviewPrompt.maybeAsk(
+            activity = activity,
+            settings = viewModel.settingsStore,
+            optimizeCount = settings.optimizeCount,
+            lastPromptAtMillis = settings.lastReviewPromptAt,
+        )
+    }
 
     Scaffold(
         modifier = modifier,

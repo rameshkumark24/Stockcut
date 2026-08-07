@@ -19,7 +19,7 @@ Built for fabricators, welders, timber framers, and anyone cutting from linear s
 | `:data` | Done — Room schema, DB-level constraints, DataStore, entitlement rules |
 | `:app` | Done — 5 routes, all 7 screens, share as image, PDF export |
 
-178 tests green: 132 on the JVM, 46 instrumented.
+187 tests green: 139 on the JVM, 48 instrumented.
 
 **Next: Phase 6 — billing and ads.** Almost none of it can be *tested* until a
 Play Console account, an in-app product and license testers exist. See

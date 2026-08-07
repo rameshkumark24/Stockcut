@@ -12,6 +12,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import com.stockcut.ui.theme.Space
 import com.stockcut.ui.theme.TouchTarget
@@ -57,7 +59,12 @@ fun EmptyState(
                 .fillMaxWidth()
                 // heightIn so the button grows with the font scale instead of
                 // clipping its own label.
-                .heightIn(min = TouchTarget.primaryButtonHeight),
+                .heightIn(min = TouchTarget.primaryButtonHeight)
+                // The empty state's action had no content description, which
+                // made it unreachable to a screen reader — and to a test, which
+                // is how it was noticed. Every screen has an empty state, so
+                // this was four unlabelled primary buttons.
+                .semantics { contentDescription = actionLabel },
         ) {
             Text(actionLabel, style = MaterialTheme.typography.titleMedium)
         }

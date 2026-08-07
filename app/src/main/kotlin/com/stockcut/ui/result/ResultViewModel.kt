@@ -21,6 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -53,6 +54,11 @@ class ResultViewModel(
     private val cutLists: CutListRepository,
     private val settings: SettingsStore,
 ) : ViewModel() {
+
+    /** Exposed so S4 can drive the review prompt, which belongs on this screen. */
+    val settingsStore: SettingsStore get() = settings
+
+    suspend fun settingsSnapshot() = runCatching { settings.settings.first() }.getOrNull()
 
     private val _uiState = MutableStateFlow(ResultUiState())
     val uiState: StateFlow<ResultUiState> = _uiState.asStateFlow()
