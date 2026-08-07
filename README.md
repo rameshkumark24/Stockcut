@@ -19,7 +19,7 @@ Built for fabricators, welders, timber framers, and anyone cutting from linear s
 | `:data` | Done — Room schema, DB-level constraints, DataStore, entitlement rules |
 | `:app` | Done — 5 routes, all 7 screens, share as image, PDF export |
 
-167 tests green: 126 on the JVM, 41 instrumented.
+178 tests green: 132 on the JVM, 46 instrumented.
 
 **Next: Phase 6 — billing and ads.** Almost none of it can be *tested* until a
 Play Console account, an in-app product and license testers exist. See
@@ -80,6 +80,7 @@ The tools that solve this are on iOS, in a browser (needs signal and a keyboard)
 | [`docs/10-owner-actions.md`](docs/10-owner-actions.md) | **Everything that must happen outside the code, in dependency order** |
 | [`docs/11-play-and-admob-setup.md`](docs/11-play-and-admob-setup.md) | Step-by-step: in-app product, license testers, AdMob, Firebase, keystore |
 | [`docs/13-remaining-to-launch.md`](docs/13-remaining-to-launch.md) | **Everything left until the app is live, and who owns each item** |
+| [`docs/14-compliance-audit.md`](docs/14-compliance-audit.md) | Secrets scan across git history, and the dependency licence audit |
 | [`privacy-policy.html`](privacy-policy.html) | Published by GitHub Pages from the repo root |
 | [`CLAUDE.md`](CLAUDE.md) | Agent rules — hard constraints, conventions, do-nots |
 
