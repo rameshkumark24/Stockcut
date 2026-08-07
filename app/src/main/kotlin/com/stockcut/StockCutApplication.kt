@@ -2,6 +2,7 @@ package com.stockcut
 
 import android.app.Application
 import android.os.StrictMode
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 
 /**
  * Holds the one [AppContainer].
@@ -19,8 +20,21 @@ class StockCutApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         enableStrictModeInDebug()
+        configureCrashlytics()
         // Construction is cheap — every field inside is lazy.
         container = AppContainer(this)
+    }
+
+    /**
+     * Crashlytics: RELEASE ONLY (docs/02 §7).
+     *
+     * Debug crashes are already in front of whoever caused them, on the machine
+     * that built the app. Sending them would bury the real ones from real users
+     * under noise from development — and the Gradle config deliberately skips
+     * Firebase for debug builds, so there is nothing to report to anyway.
+     */
+    private fun configureCrashlytics() {
+        FirebaseCrashlytics.getInstance().isCrashlyticsCollectionEnabled = !BuildConfig.DEBUG
     }
 
     /**

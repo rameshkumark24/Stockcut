@@ -2,23 +2,43 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!--
-        NO PERMISSIONS AT ALL.
+        Exactly the three permissions CLAUDE.md rule 7 allows, and no others.
+        Each is here because a specific SDK needs it — none is speculative.
 
-        CLAUDE.md rule 7 allows exactly three - INTERNET, ACCESS_NETWORK_STATE
-        and com.android.vending.BILLING - and none is declared, because nothing
-        in the app currently uses one.
+        INTERNET + ACCESS_NETWORK_STATE : AdMob. The ads SDK cannot fetch an ad
+            without them, and it checks connectivity before trying.
+        BILLING                         : Play Billing, for the one-time unlock.
 
-        ACCESS_NETWORK_STATE was here briefly for the feedback form's
-        offline check. The form has been removed - this app collects nothing
-        from its users - so the permission went with it. Each permission lands
-        with the code that needs it and leaves when that code does.
+        Still NOT here, and never will be: storage, camera, location, contacts.
+        Sharing a plan and exporting a PDF both use FileProvider into the app's
+        own cache.
 
-        AdMob will need INTERNET and ACCESS_NETWORK_STATE, and Play Billing will
-        need BILLING, in Phase 6. Not before.
+        ⚠️ THE BUILT APK CONTAINS MORE THAN THESE THREE. Manifest merger pulls in
+        further permissions from the ads and Firebase SDKs. Verified by dumping
+        the release APK rather than by reading this file:
 
-        Sharing a cut plan and exporting a PDF both use FileProvider into the
-        app's own cache, so neither needs a storage permission.
+            com.google.android.gms.permission.AD_ID      AdMob, Android 13+
+            android.permission.ACCESS_ADSERVICES_AD_ID   Privacy Sandbox
+            android.permission.ACCESS_ADSERVICES_ATTRIBUTION
+            android.permission.ACCESS_ADSERVICES_TOPICS
+            android.permission.WAKE_LOCK                 GMS
+            android.permission.FOREGROUND_SERVICE        GMS
+
+        These are not declared here and cannot be avoided while using AdMob. Two
+        consequences worth knowing:
+
+        1. 🔴 AD_ID must be declared on the Play data safety form. AdMob collects
+           the advertising ID, and the privacy policy already says so.
+        2. FOREGROUND_SERVICE and WAKE_LOCK sit awkwardly beside NFR-10 ("no
+           background work at all"). The app itself starts none — they arrive
+           with GMS. Do not add code that uses them.
+
+        TRD §5 says to treat an unexpected permission as a bug. These were
+        checked, understood and are expected; anything BEYOND this list is not.
     -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="com.android.vending.BILLING" />
 
     <application
         android:name=".StockCutApplication"
@@ -30,6 +50,16 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.StockCut">
+
+        <!--
+            AdMob App ID. The value comes from a manifest placeholder that
+            defaults to Google's TEST app ID; the real one requires an explicit
+            build flag (see app/build.gradle.kts). Clicking a live ad in your own
+            app terminates the account, so the safe value is the default.
+        -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="${admobAppId}" />
 
         <activity
             android:name=".MainActivity"

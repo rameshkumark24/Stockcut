@@ -4,6 +4,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.crashlytics)
 }
 
 /**
@@ -70,6 +72,9 @@ android {
             // Keeps a debug build installable alongside a release one.
             applicationIdSuffix = ".debug"
         }
+        // NOTE: the .debug suffix means the debug applicationId is
+        // com.measure.stockcut.debug, which is NOT in google-services.json.
+        // That is fine and deliberate — see the task-disabling block below.
         release {
             // R8 per TRD §13.1 — cheap and reasonable, not anti-piracy theatre.
             isMinifyEnabled = true
@@ -115,6 +120,14 @@ dependencies {
     implementation(libs.compose.ui.tooling.preview)
     debugImplementation(libs.compose.ui.tooling)
 
+    // Phase 6. Every one of these is on the allowed list in docs/02 §9.
+    implementation(libs.billing.ktx)
+    implementation(libs.play.services.ads)
+    implementation(libs.user.messaging.platform)
+    implementation(libs.play.review.ktx)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics)
+
     // MeasurementField's logic lives in a plain state holder, so most of it is
     // tested here on the JVM in milliseconds rather than on a device.
     testImplementation(kotlin("test"))
@@ -136,4 +149,28 @@ dependencies {
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
     testLogging { events("passed", "failed", "skipped") }
+}
+
+/**
+ * Firebase is a RELEASE-ONLY concern here.
+ *
+ * docs/02 §7 sets Crashlytics to Off in debug and On in release, so a debug
+ * build has no reason to carry Firebase config. It also cannot: the .debug
+ * applicationId suffix means debug is com.measure.stockcut.debug, which has no
+ * client entry in google-services.json, and the plugin fails the build over it.
+ *
+ * The alternatives were worse. Registering a second Firebase app just to satisfy
+ * a build step that should not run is busywork, and dropping the .debug suffix
+ * would cost the ability to keep a debug and a release build side by side on one
+ * device — which is exactly what you want while testing a purchase flow.
+ *
+ * So the Firebase steps are switched off for debug and left on for release,
+ * which is what the spec asked for in the first place.
+ */
+tasks.matching {
+    it.name == "processDebugGoogleServices" ||
+        it.name.startsWith("uploadCrashlyticsMappingFileDebug") ||
+        it.name.startsWith("injectCrashlyticsMappingFileIdDebug")
+}.configureEach {
+    enabled = false
 }
