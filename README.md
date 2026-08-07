@@ -21,8 +21,9 @@ Built for fabricators, welders, timber framers, and anyone cutting from linear s
 
 167 tests green: 126 on the JVM, 41 instrumented.
 
-**Next: Phase 6 — billing and ads.** That needs a Play Console account, which is
-part of W0 below.
+**Next: Phase 6 — billing and ads.** Almost none of it can be *tested* until a
+Play Console account, an in-app product and license testers exist. See
+[`docs/10-owner-actions.md`](docs/10-owner-actions.md) for the step-by-step.
 
 🔴 **Two W0 gates are still open and both are non-code** (see [`docs/07-implementation-plan.md`](docs/07-implementation-plan.md) W0). Phases 3–4 were built ahead of them:
 
@@ -76,6 +77,7 @@ The tools that solve this are on iOS, in a browser (needs signal and a keyboard)
 | [`docs/07-implementation-plan.md`](docs/07-implementation-plan.md) | 9-week plan, milestones, gates |
 | [`docs/08-build-checklist.md`](docs/08-build-checklist.md) | **The executable checklist. Work from this one.** |
 | [`docs/09-feedback-channel.md`](docs/09-feedback-channel.md) | In-app feedback via Google Form, and its compliance impact |
+| [`docs/10-owner-actions.md`](docs/10-owner-actions.md) | **Everything that must happen outside the code, in dependency order** |
 | [`CLAUDE.md`](CLAUDE.md) | Agent rules — hard constraints, conventions, do-nots |
 
 ## Build
