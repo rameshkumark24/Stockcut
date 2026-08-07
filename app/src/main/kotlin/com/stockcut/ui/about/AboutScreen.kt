@@ -35,17 +35,18 @@ import com.stockcut.ui.theme.MeasurementTextStyle
 import com.stockcut.ui.theme.Space
 import com.stockcut.ui.theme.TouchTarget
 
+/** Published from this repo's root by GitHub Pages. */
+private const val PRIVACY_POLICY_URL =
+    "https://rameshkumark24.github.io/Stockcut/privacy-policy.html"
+
 /**
  * S7 — About and support.
  *
  * What is here: version, email support, rate on Play, licences.
  *
- * What is deliberately NOT here yet: the "Report a problem" link to the Google
- * Form, and the privacy policy link. Both are blocked on W0 — the form does not
- * exist, and neither does the GitHub Pages redirect the app must point at
- * INSTEAD of the form (docs/09 §9.5). That redirect is the only kill switch
- * this app has without a server, and retrofitting it needs exactly the app
- * update it exists to avoid. So the URL is not hardcoded to a guess.
+ * Report a problem opens the GitHub Pages REDIRECT in the user's browser, never
+ * the Google Form directly and never a WebView — see Feedback.kt for why both of
+ * those matter.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -166,12 +167,45 @@ fun AboutScreen(
                     .semantics { contentDescription = "Rate on Play" },
             ) { Text("Rate on Play") }
 
+            OutlinedButton(
+                onClick = {
+                    // Offline is the NORMAL condition in a workshop, not an
+                    // exception — so this silently uses the mail app instead of
+                    // showing an error the user can do nothing about.
+                    val intent = if (Feedback.isOnline(context)) {
+                        Feedback.browserIntent(diagnostics)
+                    } else {
+                        Feedback.mailtoIntent(diagnostics)
+                    }
+                    if (intent.resolveActivity(context.packageManager) != null) {
+                        context.startActivity(intent)
+                    } else {
+                        clipboard.setText(AnnotatedString(diagnostics))
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = TouchTarget.primaryButtonHeight)
+                    .semantics { contentDescription = "Report a problem" },
+            ) { Text("Report a problem or suggest a feature") }
+
+            OutlinedButton(
+                onClick = {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(PRIVACY_POLICY_URL))
+                    if (intent.resolveActivity(context.packageManager) != null) {
+                        context.startActivity(intent)
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = TouchTarget.primaryButtonHeight)
+                    .semantics { contentDescription = "Privacy policy" },
+            ) { Text("Privacy policy") }
+
             Text("Not built yet", style = MaterialTheme.typography.titleMedium)
             Text(
-                // Named honestly rather than shown as buttons that do nothing.
-                "Report a problem, the privacy policy link, and Restore purchases " +
-                    "are not wired up yet. The first two need the feedback form and " +
-                    "its redirect page to exist; the third needs in-app billing.",
+                // Named honestly rather than shown as a button that does nothing.
+                "Restore purchases arrives with in-app billing.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
