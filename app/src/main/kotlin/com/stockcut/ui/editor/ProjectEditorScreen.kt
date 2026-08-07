@@ -30,6 +30,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import com.stockcut.data.entitlement.PaywallTrigger
 import com.stockcut.data.model.PartEntry
 import com.stockcut.data.model.StockEntry
@@ -57,6 +59,7 @@ private sealed interface SheetTarget {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProjectEditorScreen(
+    container: com.stockcut.AppContainer,
     viewModel: ProjectEditorViewModel,
     onOptimize: () -> Unit,
     onBack: () -> Unit,
@@ -65,14 +68,52 @@ fun ProjectEditorScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var sheet by remember { mutableStateOf<SheetTarget?>(null) }
     val snackbarHost = remember { SnackbarHostState() }
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
 
     // 🔴 The ONLY path to the cut plan. The ViewModel sets this exclusively for
     // Success and Shortfall; an Infeasible result never sets it, so a plan that
     // dropped a part is unreachable rather than merely discouraged.
+    val activity = androidx.compose.ui.platform.LocalContext.current as? android.app.Activity
     LaunchedEffect(state.navigateToResult) {
-        if (state.navigateToResult) {
+        if (!state.navigateToResult) return@LaunchedEffect
+
+        // 🔴 DO NOT clear navigateToResult here.
+        //
+        // It is this effect's KEY. Clearing it first cancels the coroutine, and
+        // the very next line suspends — so onOptimize() was never reached and
+        // tapping Optimize silently did nothing. It only appeared to work when
+        // the read happened to finish before recomposition, which made it a
+        // coin flip on the app's payoff action. Found by two E2E tests running
+        // identical steps and disagreeing.
+        //
+        // The flag is cleared below, after navigation, where cancellation no
+        // longer matters because everything left is non-suspending.
+        val settings = container.settings.settings.first()
+
+        val proceed = {
             viewModel.onResultNavigationHandled()
             onOptimize()
+        }
+
+        // The interstitial goes HERE — between finishing entry and seeing the
+        // plan — and never mid-task (docs/03 S3). onFinished always fires, so a
+        // failed or skipped ad can never strand the user on the editor after a
+        // successful optimize.
+        if (activity != null) {
+            container.ads.maybeShowInterstitial(
+                activity = activity,
+                tier = settings.tier,
+                optimizeCount = settings.optimizeCount,
+                lastInterstitialAtMillis = settings.lastInterstitialAt,
+                onShown = {
+                    scope.launch {
+                        container.settings.recordInterstitial(System.currentTimeMillis())
+                    }
+                },
+                onFinished = proceed,
+            )
+        } else {
+            proceed()
         }
     }
 
@@ -115,6 +156,16 @@ fun ProjectEditorScreen(
                 },
             )
         },
+        // 🔴 NO BANNER ON THIS SCREEN, deliberately.
+        //
+        // It was here, directly above Optimize, and that was wrong twice over.
+        // AdMob policy forbids ads adjacent to buttons (gap audit §B5) because
+        // accidental clicks are invalid traffic, and invalid traffic suspends
+        // accounts. And this is the WORK screen — someone entering cut lengths
+        // with dusty hands should not be aiming past an ad to reach Optimize.
+        //
+        // Ads live on the projects list, which is a browsing screen, and nowhere
+        // near the cut plan.
         bottomBar = {
             Button(
                 onClick = viewModel::onOptimize,
@@ -262,16 +313,11 @@ fun ProjectEditorScreen(
         )
     }
 
-    state.paywallTrigger?.let { trigger ->
-        AlertDialog(
-            onDismissRequest = viewModel::onPaywallDismissed,
-            title = { Text(paywallHeadline(trigger)) },
-            text = { Text("$4.99, one time. Not a subscription.") },
-            confirmButton = {
-                TextButton(onClick = viewModel::onPaywallDismissed) { Text("Close") }
-            },
-        )
-    }
+    com.stockcut.billing.PaywallHost(
+        container = container,
+        trigger = state.paywallTrigger,
+        onDismiss = viewModel::onPaywallDismissed,
+    )
 
     // A ceiling money cannot lift gets an explanation, never an offer.
     state.hardLimitMessage?.let { message ->

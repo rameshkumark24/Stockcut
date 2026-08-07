@@ -50,6 +50,7 @@ fun StockCutNavHost(
                 factory = ProjectsViewModel.factory(container),
             )
             ProjectsScreen(
+                container = container,
                 viewModel = viewModel,
                 onOpenProject = { id -> navController.navigate(Routes.project(id)) },
                 onOpenSettings = { navController.navigate(Routes.SETTINGS) },
@@ -69,6 +70,7 @@ fun StockCutNavHost(
                 factory = ProjectEditorViewModel.factory(container, projectId),
             )
             ProjectEditorScreen(
+                container = container,
                 viewModel = viewModel,
                 onOptimize = { navController.navigate(Routes.result(projectId)) },
                 onBack = { navController.popBackStack() },
@@ -85,6 +87,7 @@ fun StockCutNavHost(
                 factory = ResultViewModel.factory(container, projectId),
             )
             ResultScreen(
+                container = container,
                 viewModel = viewModel,
                 onBack = { navController.popBackStack() },
             )
@@ -94,7 +97,11 @@ fun StockCutNavHost(
             val viewModel: SettingsViewModel = viewModel(
                 factory = SettingsViewModel.factory(container),
             )
-            SettingsScreen(viewModel = viewModel, onBack = { navController.popBackStack() })
+            SettingsScreen(
+                container = container,
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() },
+            )
         }
 
         composable(Routes.ABOUT) {

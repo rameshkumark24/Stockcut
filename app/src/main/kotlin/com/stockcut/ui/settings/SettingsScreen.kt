@@ -20,6 +20,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import kotlinx.coroutines.launch
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
@@ -43,11 +44,14 @@ import com.stockcut.units.UnitSystem
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
+    container: com.stockcut.AppContainer,
     viewModel: SettingsViewModel,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    val activity = androidx.compose.ui.platform.LocalContext.current
 
     // Re-created when the unit or stored value changes, so the field always
     // renders the stored Long in the currently chosen unit.
@@ -139,15 +143,41 @@ fun SettingsScreen(
 
             Text("Purchase", style = MaterialTheme.typography.titleMedium)
             Text(
-                // Honest placeholder. Restore purchases is mandatory for
-                // reinstalls and reviewers look for it (gap audit §B4), but it
-                // needs Play Billing, which is Phase 6. Saying so beats a button
-                // that does nothing.
-                "Unlock and Restore purchases arrive with in-app billing. " +
-                    "Nothing is purchasable yet.",
+                text = if (state.tier == com.stockcut.data.entitlement.Tier.PAID) {
+                    "Unlocked. Thanks."
+                } else {
+                    "Free plan. Unlock for unlimited parts and jobs, PDF export " +
+                        "and no ads."
+                },
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            // 🔴 Mandatory for reinstalls and new devices, and reviewers look
+            // for it (gap audit §B4). Present here AND on the paywall.
+            Button(
+                onClick = { scope.launch { container.billing.restorePurchases() } },
+                modifier = Modifier
+                    .heightIn(min = TouchTarget.primaryButtonHeight)
+                    .semantics { contentDescription = "Restore purchases" },
+            ) { Text("Restore purchases") }
+
+            // Must stay reachable for users whose region grants ongoing consent
+            // options — they have the right to change their mind.
+            val privacyOptionsRequired by container.consent.privacyOptionsRequired
+                .collectAsStateWithLifecycle()
+            if (privacyOptionsRequired) {
+                Text("Privacy", style = MaterialTheme.typography.titleMedium)
+                Button(
+                    onClick = {
+                        (activity as? android.app.Activity)?.let {
+                            container.consent.showPrivacyOptions(it)
+                        }
+                    },
+                    modifier = Modifier
+                        .heightIn(min = TouchTarget.primaryButtonHeight)
+                        .semantics { contentDescription = "Ad privacy settings" },
+                ) { Text("Ad privacy settings") }
+            }
         }
     }
 }

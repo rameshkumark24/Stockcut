@@ -32,6 +32,7 @@ class SettingsStore(private val context: Context) {
         val optimizeCount = intPreferencesKey("optimize_count")
         val lastReviewPromptAt = longPreferencesKey("last_review_prompt_at")
         val exampleProjectDeleted = booleanPreferencesKey("example_project_deleted")
+        val lastInterstitialAt = longPreferencesKey("last_interstitial_at")
     }
 
     val settings: Flow<Settings> = context.dataStore.data.map { prefs ->
@@ -44,6 +45,7 @@ class SettingsStore(private val context: Context) {
             optimizeCount = prefs[Keys.optimizeCount] ?: 0,
             lastReviewPromptAt = prefs[Keys.lastReviewPromptAt] ?: 0L,
             exampleProjectDeleted = prefs[Keys.exampleProjectDeleted] ?: false,
+            lastInterstitialAt = prefs[Keys.lastInterstitialAt] ?: 0L,
         )
     }
 
@@ -71,6 +73,11 @@ class SettingsStore(private val context: Context) {
             it[Keys.optimizeCount] = next
         }
         return next
+    }
+
+    /** Feeds the minimum-gap rule that protects someone iterating on one job. */
+    suspend fun recordInterstitial(nowMillis: Long) {
+        context.dataStore.edit { it[Keys.lastInterstitialAt] = nowMillis }
     }
 
     suspend fun recordReviewPrompt(nowMillis: Long) {
@@ -104,6 +111,7 @@ data class Settings(
     val optimizeCount: Int,
     val lastReviewPromptAt: Long,
     val exampleProjectDeleted: Boolean,
+    val lastInterstitialAt: Long = 0L,
 ) {
     val tier: Tier get() = if (isUnlocked) Tier.PAID else Tier.FREE
 }

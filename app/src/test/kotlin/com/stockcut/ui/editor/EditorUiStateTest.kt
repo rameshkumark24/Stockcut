@@ -174,3 +174,63 @@ class EditorUiStateTest {
         assertIs<Gate.Allowed>(Entitlement.canOptimize(Tier.PAID))
     }
 }
+
+/**
+ * Ad frequency. These exist because the cost of getting it wrong is an
+ * uninstall, and an uninstalled app earns nothing at all.
+ */
+class AdCadenceTest {
+
+    @Test
+    fun `a paid user never sees an interstitial`() {
+        assertFalse(Entitlement.interstitialDue(Tier.PAID, optimizeCount = 5))
+        assertFalse(Entitlement.interstitialDue(Tier.PAID, optimizeCount = 50))
+    }
+
+    @Test
+    fun `the free tier sees one every fifth optimize, not every third`() {
+        // Raised from 3 deliberately — see the note on Limits.INTERSTITIAL_EVERY.
+        for (count in 1..4) {
+            assertFalse(
+                Entitlement.interstitialDue(Tier.FREE, count),
+                "interrupted at optimize $count",
+            )
+        }
+        assertTrue(Entitlement.interstitialDue(Tier.FREE, 5))
+    }
+
+    @Test
+    fun `🔴 iterating on one job does not get ad after ad`() {
+        // The scenario that gets an app deleted: someone adjusting a job hits
+        // Optimize repeatedly, and the count alone would interrupt them again
+        // as soon as it came round.
+        val justShown = 1_000_000L
+        assertFalse(
+            Entitlement.interstitialDue(
+                tier = Tier.FREE,
+                optimizeCount = 10,
+                lastInterstitialAtMillis = justShown,
+                nowMillis = justShown + 60_000, // one minute later
+            ),
+            "showed two interstitials a minute apart",
+        )
+    }
+
+    @Test
+    fun `after the gap has passed, the cadence resumes`() {
+        val earlier = 1_000_000L
+        assertTrue(
+            Entitlement.interstitialDue(
+                tier = Tier.FREE,
+                optimizeCount = 10,
+                lastInterstitialAtMillis = earlier,
+                nowMillis = earlier + Limits.INTERSTITIAL_MIN_GAP_MILLIS + 1,
+            ),
+        )
+    }
+
+    @Test
+    fun `a first-time user is not interrupted before they have used anything`() {
+        assertFalse(Entitlement.interstitialDue(Tier.FREE, optimizeCount = 0))
+    }
+}

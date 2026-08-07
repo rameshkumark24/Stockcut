@@ -21,6 +21,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -187,6 +188,44 @@ fun AboutScreen(
                     .heightIn(min = TouchTarget.primaryButtonHeight)
                     .semantics { contentDescription = "Privacy policy" },
             ) { Text("Privacy policy") }
+
+            var showLicences by androidx.compose.runtime.remember {
+                androidx.compose.runtime.mutableStateOf(false)
+            }
+            OutlinedButton(
+                onClick = { showLicences = !showLicences },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = TouchTarget.primaryButtonHeight)
+                    .semantics { contentDescription = "Open-source licences" },
+            ) { Text(if (showLicences) "Hide licences" else "Open-source licences") }
+
+            if (showLicences) {
+                // Every dependency requires attribution; docs/14 confirms none
+                // is copyleft, so notices satisfy the whole obligation.
+                Column(verticalArrangement = Arrangement.spacedBy(Space.md)) {
+                    LICENCES.forEach { licence ->
+                        Column {
+                            Text(licence.name, style = MaterialTheme.typography.titleMedium)
+                            Text(
+                                licence.copyright,
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Text(
+                                licence.licence,
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                    Text(
+                        APACHE_NOTICE,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
 
             Text("Not built yet", style = MaterialTheme.typography.titleMedium)
             Text(

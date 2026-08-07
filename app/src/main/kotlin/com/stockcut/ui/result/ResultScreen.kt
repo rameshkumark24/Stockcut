@@ -21,6 +21,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,12 +51,29 @@ import com.stockcut.units.format
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ResultScreen(
+    container: com.stockcut.AppContainer,
     viewModel: ResultViewModel,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+
+    // The review prompt fires HERE, not on the editor — docs/03 S4 is explicit
+    // that it belongs on the payoff screen, after a SUCCESSFUL optimize. It also
+    // has to live somewhere that is not cancelled by the navigation itself.
+    // Entitlement.reviewPromptDue enforces >= 3 lifetime and once per 90 days.
+    LaunchedEffect(state.plan) {
+        val activity = context as? android.app.Activity ?: return@LaunchedEffect
+        if (state.plan == null) return@LaunchedEffect
+        val settings = viewModel.settingsSnapshot() ?: return@LaunchedEffect
+        com.stockcut.ui.ReviewPrompt.maybeAsk(
+            activity = activity,
+            settings = viewModel.settingsStore,
+            optimizeCount = settings.optimizeCount,
+            lastPromptAtMillis = settings.lastReviewPromptAt,
+        )
+    }
 
     Scaffold(
         modifier = modifier,
@@ -173,22 +191,15 @@ fun ResultScreen(
         }
     }
 
-    if (state.showPdfPaywall) {
-        AlertDialog(
-            onDismissRequest = viewModel::onPdfPaywallDismissed,
-            // Names what they just hit, not a generic "Go Pro" (docs/03 S5).
-            title = { Text("Unlock PDF export") },
-            text = {
-                Text(
-                    "Print the plan and pin it up in the shop. " +
-                        "$4.99, one time. Not a subscription.",
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = viewModel::onPdfPaywallDismissed) { Text("Close") }
-            },
-        )
-    }
+    com.stockcut.billing.PaywallHost(
+        container = container,
+        trigger = if (state.showPdfPaywall) {
+            com.stockcut.data.entitlement.PaywallTrigger.PDF_EXPORT
+        } else {
+            null
+        },
+        onDismiss = viewModel::onPdfPaywallDismissed,
+    )
 }
 
 /** `7 bars · 4.2% waste · 336 mm offcut total` (docs/03 S4). */

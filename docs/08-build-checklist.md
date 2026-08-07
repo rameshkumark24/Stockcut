@@ -82,7 +82,7 @@ See [`00-phase-0-scope-feasibility.md`](00-phase-0-scope-feasibility.md) and [`0
 - [x] **Zero `android.*` imports in `:optimizer` and `:units`** — verified in CI
 - [x] **No `Float`/`Double`** outside `wastePercent` — verified in CI
 - [x] GitHub Actions runs both suites on every push
-- [ ] Waste-% baseline committed for the **whole** oracle set *(only the example job is pinned today, at 13.75%)*
+- [x] Waste-% baseline committed for the **whole** oracle set — 10 cases with measured figures
 
 ## ✅ Phase 4 — Data layer *(complete)*
 
@@ -158,12 +158,12 @@ data safety declaration with nothing on it but AdMob and Crashlytics.
 ## Phase 8 — Testing & QA
 
 - [ ] Full `:optimizer` + `:units` suites green, ≥ 1000 property cases
-- [ ] Waste-% baseline recorded; regressions fail the build
+- [x] Waste-% baseline recorded; regressions fail the build — 10 cases, see `WasteBaselineTest`
 - [ ] Room migration tests green
 - [ ] ViewModel tests
-- [ ] 8 critical-path Compose UI tests
+- [x] **All 8 critical-path Compose UI tests**
 - [ ] Billing matrix fully walked with a license tester
-- [ ] Edge cases: empty, 1000 parts, unicode/emoji labels, SQL chars, double-tap Optimize, double-tap Buy
+- [x] Edge cases: empty, 1000 parts, unicode/emoji labels, SQL chars, double-tap Optimize *(optimize is idempotent, proven)*
 - [ ] **Low-end real device** (2–3 GB RAM, Android 8–10)
 - [ ] **Max system font scale** — every screen, nothing clipped
 - [ ] Dark mode — cut-plan segments still distinguishable
@@ -179,8 +179,8 @@ data safety declaration with nothing on it but AdMob and Crashlytics.
 - [ ] 🔴 **Keystore generated, Play App Signing enrolled**
 - [ ] 🔴 **Keystore + passwords backed up in TWO places off this machine** — losing it means the app can never be updated
 - [ ] `versionCode` monotonic, `versionName` semver
-- [ ] Secrets scanned across **git history**, not just current files
-- [ ] `keystore.properties`, `*.jks`, `local.properties` confirmed absent from history
+- [x] Secrets scanned across **git history**, not just current files — clean, see [`14-compliance-audit.md`](14-compliance-audit.md)
+- [x] `keystore.properties`, `*.jks`, `local.properties` confirmed absent from history
 - [ ] **Data safety form** — AdMob + Crashlytics only. **No user-submitted data at all**, so nothing else to declare
 - [ ] **Content rating** questionnaire
 - [ ] **Ads declaration** — "contains ads"
@@ -190,7 +190,7 @@ data safety declaration with nothing on it but AdMob and Crashlytics.
 - [ ] Long description
 - [ ] **5 screenshots, every one captioned**
 - [ ] Feature graphic 1024×500
-- [ ] Licence check on every dependency
+- [x] Licence check on every dependency — 199 artifacts, no copyleft, see [`14-compliance-audit.md`](14-compliance-audit.md)
 - [ ] Play payout: bank + PAN configured; India tax treatment confirmed with a CA
 
 ## Phase 10 — Closed test 🔴

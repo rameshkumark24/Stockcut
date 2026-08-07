@@ -124,13 +124,38 @@ class EntitlementTest {
     }
 
     @Test
-    fun `interstitial fires on every third optimize, never on the first`() {
+    fun `interstitial fires on every fifth optimize, never on the first`() {
+        // Was every third. Raised deliberately — the count is lifetime, this app
+        // is used iteratively, and 1-in-3 interruptions at the exact moment the
+        // answer appears is how a tool gets uninstalled. See the note on
+        // Limits.INTERSTITIAL_EVERY.
         assertFalse(Entitlement.interstitialDue(Tier.FREE, 0))
-        assertFalse(Entitlement.interstitialDue(Tier.FREE, 1))
-        assertFalse(Entitlement.interstitialDue(Tier.FREE, 2))
-        assertTrue(Entitlement.interstitialDue(Tier.FREE, 3))
-        assertFalse(Entitlement.interstitialDue(Tier.FREE, 4))
-        assertTrue(Entitlement.interstitialDue(Tier.FREE, 6))
+        for (count in 1..4) assertFalse(Entitlement.interstitialDue(Tier.FREE, count))
+        assertTrue(Entitlement.interstitialDue(Tier.FREE, 5))
+        assertFalse(Entitlement.interstitialDue(Tier.FREE, 6))
+        assertTrue(Entitlement.interstitialDue(Tier.FREE, 10))
+    }
+
+    @Test
+    fun `🔴 two interstitials never land inside the minimum gap`() {
+        // Protects the person adjusting one job, who re-optimizes repeatedly.
+        val shown = 5_000_000L
+        assertFalse(
+            Entitlement.interstitialDue(
+                tier = Tier.FREE,
+                optimizeCount = 10,
+                lastInterstitialAtMillis = shown,
+                nowMillis = shown + 60_000,
+            ),
+        )
+        assertTrue(
+            Entitlement.interstitialDue(
+                tier = Tier.FREE,
+                optimizeCount = 10,
+                lastInterstitialAtMillis = shown,
+                nowMillis = shown + Limits.INTERSTITIAL_MIN_GAP_MILLIS + 1,
+            ),
+        )
     }
 
     // ── Review prompt ─────────────────────────────────────────────────────────
