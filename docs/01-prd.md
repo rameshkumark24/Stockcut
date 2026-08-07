@@ -62,9 +62,9 @@ Ordered by priority. Every P0 is in v1; nothing else is.
 | US-13 | P1 | As Dave, I set a trim allowance because the end of the bar is damaged. |
 | US-14 | P1 | As Dave, I save my usual stock sizes so I don't re-enter them each job. |
 | US-15 | P2 | As Dave, I duplicate last month's job and change two numbers. |
-| US-16 | P0 | As Dave, when the cut plan looks wrong, I can tell the developer in two taps — because a wrong plan costs me steel. |
-| US-17 | P1 | As Dave, I can suggest a feature without leaving a public review. |
-| US-18 | P0 | As the developer, I get an email the moment someone reports a problem, so early users don't feel ignored. |
+| ~~US-16~~ | ~~P0~~ | ~~Report a wrong cut plan in two taps.~~ **Dropped 2026-08-07** — the app collects nothing from users. Correctness reports arrive by email or through the closed test. See `09`. |
+| ~~US-17~~ | ~~P1~~ | ~~Suggest a feature without leaving a public review.~~ **Dropped 2026-08-07.** |
+| ~~US-18~~ | ~~P0~~ | ~~Email notification on every report.~~ **Dropped 2026-08-07.** |
 
 ## 5. Features — v1 scope
 
@@ -117,19 +117,13 @@ Ordered by priority. Every P0 is in v1; nothing else is.
 - Privacy policy link
 - In-app review prompt — triggered **only after a successful optimize**, never on launch, never more than once per 90 days
 
-### 5.10 Feedback channel — Google Form
-Full spec: [`09-feedback-channel.md`](09-feedback-channel.md)
+### 5.10 Feedback channel — REMOVED
 
-- **"Report a problem or suggest a feature"** in About → opens a Google Form in the browser
-- **"This plan looks wrong"** in the cut-plan overflow → same form, pre-tagged as a correctness bug
-- Diagnostics (app/OS/device version, unit mode, tier) pre-filled and **visible to the user before sending**
-- **No email, name, or contact field** — the form is anonymous and collects no personal data
-- Separate **"Email support"** `mailto:` link in About for anyone who wants a reply
-- `mailto:` fallback when offline
-- Developer gets an **email notification** on every response
-- Never behind the paywall, never nagged, never triggered after a crash
+🔴 **The app collects nothing from its users.** There is no feedback form, no
+bug-report form and no survey. The only contact channel is a `mailto:` link in
+About, which opens the user's own mail app and sends nothing on its own.
 
-**Why it's P0 for a first app:** at 50 users you cannot A/B test or read analytics. A handful of real tradesmen telling you what's broken is the only signal you'll have — and the "What were you cutting?" field tells you whether the metal-trades wedge in Phase 0 was the right bet.
+Decision and reasoning: [`09-feedback-channel.md`](09-feedback-channel.md).
 
 ## 6. Out of scope for v1 — the "later" list
 

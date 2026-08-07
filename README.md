@@ -76,10 +76,11 @@ The tools that solve this are on iOS, in a browser (needs signal and a keyboard)
 | [`docs/06-test-plan.md`](docs/06-test-plan.md) | Property tests, oracle set, device matrix, release gate |
 | [`docs/07-implementation-plan.md`](docs/07-implementation-plan.md) | 9-week plan, milestones, gates |
 | [`docs/08-build-checklist.md`](docs/08-build-checklist.md) | **The executable checklist. Work from this one.** |
-| [`docs/09-feedback-channel.md`](docs/09-feedback-channel.md) | In-app feedback via Google Form, and its compliance impact |
+| [`docs/09-feedback-channel.md`](docs/09-feedback-channel.md) | **Removed** — why the app collects nothing from its users |
 | [`docs/10-owner-actions.md`](docs/10-owner-actions.md) | **Everything that must happen outside the code, in dependency order** |
 | [`docs/11-play-and-admob-setup.md`](docs/11-play-and-admob-setup.md) | Step-by-step: in-app product, license testers, AdMob, Firebase, keystore |
-| [`site/`](site/) | The privacy policy and feedback redirect, ready to publish on GitHub Pages |
+| [`docs/13-remaining-to-launch.md`](docs/13-remaining-to-launch.md) | **Everything left until the app is live, and who owns each item** |
+| [`privacy-policy.html`](privacy-policy.html) | Published by GitHub Pages from the repo root |
 | [`CLAUDE.md`](CLAUDE.md) | Agent rules — hard constraints, conventions, do-nots |
 
 ## Build

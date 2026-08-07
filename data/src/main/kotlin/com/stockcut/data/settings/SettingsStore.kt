@@ -32,8 +32,6 @@ class SettingsStore(private val context: Context) {
         val optimizeCount = intPreferencesKey("optimize_count")
         val lastReviewPromptAt = longPreferencesKey("last_review_prompt_at")
         val exampleProjectDeleted = booleanPreferencesKey("example_project_deleted")
-        val feedbackOpensToday = intPreferencesKey("feedback_opens_today")
-        val feedbackWindowStartedAt = longPreferencesKey("feedback_window_started_at")
     }
 
     val settings: Flow<Settings> = context.dataStore.data.map { prefs ->
@@ -95,22 +93,6 @@ class SettingsStore(private val context: Context) {
         context.dataStore.edit { it[Keys.theme] = theme }
     }
 
-    /** Soft cooldown for the feedback form — see docs/09 §9.3. Never a hard block. */
-    suspend fun recordFeedbackOpen(nowMillis: Long): Int {
-        var count = 0
-        context.dataStore.edit { prefs ->
-            val windowStart = prefs[Keys.feedbackWindowStartedAt] ?: 0L
-            val dayMillis = 24L * 60 * 60 * 1000
-            if (nowMillis - windowStart >= dayMillis) {
-                prefs[Keys.feedbackWindowStartedAt] = nowMillis
-                count = 1
-            } else {
-                count = (prefs[Keys.feedbackOpensToday] ?: 0) + 1
-            }
-            prefs[Keys.feedbackOpensToday] = count
-        }
-        return count
-    }
 }
 
 data class Settings(

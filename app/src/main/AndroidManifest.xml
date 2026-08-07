@@ -2,29 +2,23 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!--
-        CLAUDE.md rule 7 allows exactly three permissions and no others:
-        INTERNET, ACCESS_NETWORK_STATE and com.android.vending.BILLING.
+        NO PERMISSIONS AT ALL.
 
-        Only ONE is declared so far, and only because something actually uses it.
+        CLAUDE.md rule 7 allows exactly three - INTERNET, ACCESS_NETWORK_STATE
+        and com.android.vending.BILLING - and none is declared, because nothing
+        in the app currently uses one.
 
-        ACCESS_NETWORK_STATE: the feedback link checks for a connection before
-        choosing between the browser and a mailto. Offline is the NORMAL
-        condition in a workshop, and without this permission the check silently
-        reports "offline" every time and nobody ever reaches the form.
+        ACCESS_NETWORK_STATE was here briefly for the feedback form's
+        offline check. The form has been removed - this app collects nothing
+        from its users - so the permission went with it. Each permission lands
+        with the code that needs it and leaves when that code does.
 
-        NOT declared yet, deliberately:
-        - INTERNET is not needed to hand a URL to the browser via ACTION_VIEW;
-          the browser has it. AdMob will need it in Phase 6.
-        - BILLING arrives with Play Billing in Phase 6.
+        AdMob will need INTERNET and ACCESS_NETWORK_STATE, and Play Billing will
+        need BILLING, in Phase 6. Not before.
 
-        An app that asks for permissions before it has any use for them is
-        asking for trust it has not earned. Each one lands with the code that
-        needs it.
-
-        Sharing a cut plan uses FileProvider into the cache dir, so it needs no
-        storage permission at all.
+        Sharing a cut plan and exporting a PDF both use FileProvider into the
+        app's own cache, so neither needs a storage permission.
     -->
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:name=".StockCutApplication"
