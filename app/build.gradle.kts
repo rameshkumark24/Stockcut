@@ -44,6 +44,8 @@ android {
 
     buildFeatures {
         compose = true
+        // For BuildConfig.DEBUG, which gates StrictMode.
+        buildConfig = true
     }
 }
 
@@ -78,6 +80,7 @@ dependencies {
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)
 
+    androidTestImplementation(kotlin("test"))
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.test.junit)

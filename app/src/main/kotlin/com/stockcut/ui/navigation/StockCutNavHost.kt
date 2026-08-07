@@ -18,6 +18,9 @@ import androidx.navigation.navArgument
 import com.stockcut.AppContainer
 import com.stockcut.ui.editor.ProjectEditorScreen
 import com.stockcut.ui.editor.ProjectEditorViewModel
+import com.stockcut.ui.about.AboutScreen
+import com.stockcut.ui.settings.SettingsScreen
+import com.stockcut.ui.settings.SettingsViewModel
 import com.stockcut.ui.result.ResultScreen
 import com.stockcut.ui.result.ResultViewModel
 import com.stockcut.ui.projects.ProjectsScreen
@@ -87,9 +90,19 @@ fun StockCutNavHost(
             )
         }
 
-        composable(Routes.SETTINGS) { Stub("Settings", "S6 — defaults, theme, restore purchases") }
+        composable(Routes.SETTINGS) {
+            val viewModel: SettingsViewModel = viewModel(
+                factory = SettingsViewModel.factory(container),
+            )
+            SettingsScreen(viewModel = viewModel, onBack = { navController.popBackStack() })
+        }
 
-        composable(Routes.ABOUT) { Stub("About", "S7 — version, support, privacy policy") }
+        composable(Routes.ABOUT) {
+            val viewModel: SettingsViewModel = viewModel(
+                factory = SettingsViewModel.factory(container),
+            )
+            AboutScreen(viewModel = viewModel, onBack = { navController.popBackStack() })
+        }
     }
 }
 

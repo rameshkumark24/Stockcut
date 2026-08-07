@@ -6,10 +6,13 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.stockcut.ui.navigation.StockCutNavHost
 import com.stockcut.ui.theme.StockCutTheme
 import com.stockcut.ui.theme.ThemeMode
+import kotlinx.coroutines.flow.map
 
 /**
  * The single Activity. Everything else is Compose.
@@ -26,10 +29,16 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val container = (application as StockCutApplication).container
+        // Read here rather than inside a screen, because the theme wraps the
+        // whole app: choosing Dark in Settings has to repaint the screen behind
+        // the chooser too, not just the next screen the user opens.
+        val themeFlow = container.settings.settings.map { stored ->
+            runCatching { ThemeMode.valueOf(stored.theme) }.getOrDefault(ThemeMode.SYSTEM)
+        }
 
         setContent {
-            // TODO(Phase 5): read the theme from SettingsStore once S6 exists.
-            StockCutTheme(themeMode = ThemeMode.SYSTEM) {
+            val theme by themeFlow.collectAsStateWithLifecycle(initialValue = ThemeMode.SYSTEM)
+            StockCutTheme(themeMode = theme) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     StockCutNavHost(container = container)
                 }
