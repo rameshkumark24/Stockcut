@@ -78,6 +78,8 @@ The tools that solve this are on iOS, in a browser (needs signal and a keyboard)
 | [`docs/08-build-checklist.md`](docs/08-build-checklist.md) | **The executable checklist. Work from this one.** |
 | [`docs/09-feedback-channel.md`](docs/09-feedback-channel.md) | In-app feedback via Google Form, and its compliance impact |
 | [`docs/10-owner-actions.md`](docs/10-owner-actions.md) | **Everything that must happen outside the code, in dependency order** |
+| [`docs/11-play-and-admob-setup.md`](docs/11-play-and-admob-setup.md) | Step-by-step: in-app product, license testers, AdMob, Firebase, keystore |
+| [`site/`](site/) | The privacy policy and feedback redirect, ready to publish on GitHub Pages |
 | [`CLAUDE.md`](CLAUDE.md) | Agent rules — hard constraints, conventions, do-nots |
 
 ## Build
