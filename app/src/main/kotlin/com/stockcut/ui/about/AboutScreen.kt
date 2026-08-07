@@ -44,9 +44,15 @@ private const val PRIVACY_POLICY_URL =
  *
  * What is here: version, email support, rate on Play, licences.
  *
- * Report a problem opens the GitHub Pages REDIRECT in the user's browser, never
- * the Google Form directly and never a WebView — see Feedback.kt for why both of
- * those matter.
+ * 🔴 There is NO feedback form, and that is a deliberate product decision, not a
+ * missing feature. This app collects nothing from its users — no bug reports, no
+ * suggestions, no submissions of any kind.
+ *
+ * The only way to reach the developer is the mailto link below, which is not
+ * collection: it opens the user's OWN mail app, they see and edit everything,
+ * and they decide whether to send. Nothing reaches us unless a person chooses to
+ * write it and press send. Play also requires a support contact on the listing,
+ * so removing this too would leave a one-star review as the only channel.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -109,9 +115,11 @@ fun AboutScreen(
                 )
             }
             Text(
-                // Transparency is the design, not a compromise (docs/09 §4.2).
-                "Sent only if you choose to. It contains no name, no email, " +
-                    "no location, and nothing from your jobs.",
+                // Shown so the user knows exactly what an email would carry.
+                "Nothing here is sent anywhere. If you email support, this line " +
+                    "is added to the message, and you can delete it first. " +
+                    "It contains no name, no email, no location, and nothing " +
+                    "from your jobs.",
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -166,28 +174,6 @@ fun AboutScreen(
                     .heightIn(min = TouchTarget.primaryButtonHeight)
                     .semantics { contentDescription = "Rate on Play" },
             ) { Text("Rate on Play") }
-
-            OutlinedButton(
-                onClick = {
-                    // Offline is the NORMAL condition in a workshop, not an
-                    // exception — so this silently uses the mail app instead of
-                    // showing an error the user can do nothing about.
-                    val intent = if (Feedback.isOnline(context)) {
-                        Feedback.browserIntent(diagnostics)
-                    } else {
-                        Feedback.mailtoIntent(diagnostics)
-                    }
-                    if (intent.resolveActivity(context.packageManager) != null) {
-                        context.startActivity(intent)
-                    } else {
-                        clipboard.setText(AnnotatedString(diagnostics))
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = TouchTarget.primaryButtonHeight)
-                    .semantics { contentDescription = "Report a problem" },
-            ) { Text("Report a problem or suggest a feature") }
 
             OutlinedButton(
                 onClick = {

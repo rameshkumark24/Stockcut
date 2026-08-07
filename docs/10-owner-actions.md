@@ -50,8 +50,9 @@ gate and the reason the project exists.
 The package name is **permanent once published** — it cannot be changed, ever,
 without shipping a different app and losing every install and review.
 
-Today the code uses a placeholder: `com.stockcut`, set in exactly one place,
-[`app/build.gradle.kts`](../app/build.gradle.kts) `applicationId`.
+✅ **Settled 2026-08-07:** `com.measure.stockcut`, title
+**StockCut — Cut List Optimizer**. Verified free on Play before committing.
+Set in one place, [`app/build.gradle.kts`](../app/build.gradle.kts).
 
 1. Pick 3 candidate names.
 2. Search each on the Play Store. `docs/00-phase-0` §10 warns that **"CutList" is
@@ -120,53 +121,24 @@ days** before a personal developer account can publish to production.
 
 Host it free on **GitHub Pages**. No domain needed.
 
-It must cover: AdMob (advertising ID, per UMP consent), Crashlytics (crash logs
-and device state), and the feedback form (app/OS/device version, unit mode,
-tier, optimize count — no contact field), plus a retention period. `docs/09` §6.2
-suggests 24 months.
+It must cover **AdMob** (advertising ID, per UMP consent) and **Crashlytics**
+(crash logs and device state). That is the whole list — the app collects nothing
+from users itself, so there is no submitted data to declare.
 
-**I can draft this for you** — say the word. You review it, paste it into a
-GitHub Pages repo, and give me the URL.
-
----
-
-## 5. Create the feedback form and its redirect page
-
-Two things, and **the order matters**.
-
-1. **Google Form**, 4 fields only, per `docs/09` §2:
-   - What's this about? *(multiple choice: Something's broken · Idea for a
-     feature · The cut plan was wrong · Something else)*
-   - Tell me what happened *(paragraph, required)*
-   - What were you cutting? *(short answer — the most valuable field in the form)*
-   - Diagnostics *(short answer, pre-filled by the app)*
-
-   🔴 **No email, name, or contact field.** That is a deliberate design decision,
-   not an omission — it is what keeps the Play data-safety declaration to
-   categories Crashlytics already forces. If you ever add one, the data-safety
-   form and the privacy policy change in the same PR (`CLAUDE.md` rule 11).
-
-   Turn on email notification for new responses (Responses → ⋮ → Get email
-   notifications).
-
-2. **GitHub Pages redirect page** that points at the form. 🔴 **The app links to
-   the redirect, never the form directly.**
-
-   This is the only kill switch this app has without a server. If the form is
-   ever flooded or needs restructuring, you edit one line on the redirect page
-   and it is live in a minute — no app update, no store review. Retrofitting it
-   later costs exactly the app update it exists to avoid (`docs/09` §9.5).
-
-   The redirect must **preserve query parameters** so the pre-filled diagnostics
-   still arrive.
-
-3. Get the pre-filled link (Form → ⋮ → Get pre-filled link), type `DIAG` into
-   the Diagnostics field, and send me the resulting URL. The `entry.NNNNN` number
-   in it is what the app needs.
-
-**Once you give me the redirect URL, S7's two missing links land immediately.**
+✅ **Already written**: [`privacy-policy.html`](../privacy-policy.html) at the
+repo root, with your contact details filled in. Publish it via GitHub Pages
+(Settings → Pages → branch `main`, folder `/(root)`).
 
 ---
+
+## 5. ~~Feedback form and redirect page~~ — no longer needed
+
+🔴 **Dropped 2026-08-07.** The app collects nothing from its users, so there is
+no form to create and no redirect page to host. If you already made a form, you
+can delete it. See [`09-feedback-channel.md`](09-feedback-channel.md).
+
+The privacy policy still needs publishing (step 4) — AdMob and Crashlytics make
+that mandatory regardless.
 
 ## 6. Create the in-app product and license testers *(the actual Phase 6 blocker)*
 
@@ -237,7 +209,7 @@ Needed before the first upload, and it is the one unrecoverable mistake.
 | 2 | Create Play Console account | **$25** | 6, and the closed test |
 | 3 | ⏱ Start recruiting 15 testers | free | launch itself |
 | 4 | Privacy policy on GitHub Pages | free | store submission |
-| 5 | Google Form + redirect page | free | S7's two missing links |
+| ~~5~~ | ~~Google Form + redirect~~ — **dropped** | — | — |
 | 6 | In-app product + license testers | free | **Phase 6 billing** |
 | 7 | AdMob account + 2 ad unit IDs | free | **Phase 6 ads** |
 | 8 | Firebase project | free | Crashlytics |
@@ -252,7 +224,6 @@ Say the word on any of these — they are writing, not code, and none of them ne
 an account:
 
 - Draft the **privacy policy** text
-- Draft the **GitHub Pages redirect page** (HTML, ready to paste)
 - Draft the **store listing**: title, 80-char short description, long
   description — `docs/00-gap-audit` §B8 calls ASO the entire distribution channel
 - Write the **billing and ads code** against the API, ready to test the moment

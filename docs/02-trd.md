@@ -189,7 +189,7 @@ Each absence is a cost, a compliance burden, or a failure mode that does not exi
 | Crashlytics | Crash logs, device state | ❌ |
 | `mailto:` support link | Whatever the user chooses to write, from their own mail app | User-supplied, outside the app |
 
-**The feedback form has no email or name field.** Anyone wanting a reply uses the `mailto:` link instead, which means they hand over their address themselves, through their own mail client, entirely outside this app.
+**There is no feedback form.** The only contact channel is the `mailto:` link, which means the user hands over their address themselves, through their own mail client, entirely outside this app.
 
 **Architectural note:** the form opens via `Intent.ACTION_VIEW` in the user's browser, so *the app process never transmits anything* — the browser does, after the user has read the diagnostics string on screen and had the chance to delete it. That is a stronger position than an in-app POST, and it is why WebView is banned here rather than merely discouraged.
 

@@ -61,7 +61,10 @@ Kotlin · Jetpack Compose (Material 3) · Room · DataStore · Navigation-Compos
 
 10. **Never downgrade a paid user because an entitlement check failed offline.** The DataStore cache is authoritative when there is no network.
 
-11. **The feedback form collects no personal data. Never add an email, name, or contact field to it.** Replies happen through the separate `mailto:` support link, where the user supplies their address from their own mail app. The form opens via `Intent.ACTION_VIEW` in the external browser — never a WebView. The diagnostics string is visible and editable before sending, and must never contain an advertising ID, install ID, location, or project contents. **If you ever change what the form collects, the Play data safety form and the privacy policy change in the same PR** — an inaccurate declaration gets apps suspended, and it always happens this way: a field added after the declarations were written.
+11. **The app collects nothing from its users. There is no feedback form, no bug-report form, no survey, and no in-app submission of any kind.** This is a product decision, not a gap — do not add one back.
+    - The only contact channel is a `mailto:` link in About. That is not collection: it opens the user's own mail app, they see and edit the whole message, and nothing arrives unless they choose to send it.
+    - The diagnostics line exists solely to be pasted into that email, is **visible and editable on screen**, and must never contain an advertising ID, install ID, location, or project contents.
+    - **If you ever add any way for a user to send us data, the Play data safety form and the privacy policy change in the same PR.** An inaccurate declaration gets apps suspended, and it always happens the same way: a field added after the declarations were written.
 
 ---
 
@@ -82,7 +85,7 @@ Kotlin · Jetpack Compose (Material 3) · Room · DataStore · Navigation-Compos
 - Add 2D panel/sheet cutting — that is v2 and it is a different product
 - Add accounts, sync, sharing, or anything requiring a user identity
 - Add background work — no `WorkManager`, no services, no alarms
-- Use `WebView`
+- Use `WebView` — nothing in this app renders remote content, so there is nothing for one to do
 - Write "Oops!", exclamation marks, or emoji in product copy — see `docs/04-uiux-brief.md` §1
 - Reserve blank space for an ad that failed to load — collapse the container
 

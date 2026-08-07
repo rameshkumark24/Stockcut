@@ -45,8 +45,7 @@ See [`00-phase-0-scope-feasibility.md`](00-phase-0-scope-feasibility.md) and [`0
 - [ ] Play Console account created ($25 paid)
 - [ ] **Tester recruitment started** — spreadsheet of Gmail addresses, target 15, ≥ 3 real tradesmen
 - [ ] Privacy policy written and live on a public URL (GitHub Pages)
-- [ ] **Google Form for feedback created** — see [`09-feedback-channel.md`](09-feedback-channel.md)
-- [ ] 🔴 **Redirect page live on GitHub Pages**, pointing at the form — the app links to the *redirect*, never the form directly. This is your only kill switch without a server; retrofitting it needs an app update.
+- [x] ~~Redirect page for the feedback form~~ — **not needed**, the form was dropped 2026-08-07
 
 ---
 
@@ -118,17 +117,12 @@ See [`00-phase-0-scope-feasibility.md`](00-phase-0-scope-feasibility.md) and [`0
 - [x] S6 Settings · S7 About
 - [x] No spinner on operations under 300 ms
 
-> ⚠️ **S7 is missing two links, and both are blocked on W0, not forgotten:**
-> *Report a problem* and the *privacy policy*. The app must link to the GitHub
-> Pages **redirect**, never the Google Form directly — that redirect is the only
-> kill switch this app has without a server, and [`09-feedback-channel.md`](09-feedback-channel.md) §9.5
-> is explicit that retrofitting it costs an app update. Neither the form nor the
-> redirect exists yet. The screen says so in plain words rather than showing
-> buttons that do nothing.
->
-> **Restore purchases** is also absent — it needs Play Billing (Phase 6). It is
+> ⚠️ **Restore purchases** is absent — it needs Play Billing (Phase 6). It is
 > mandatory for reinstalls and reviewers look for it (gap audit §B4), so it
 > cannot be skipped, only deferred.
+>
+> There is deliberately **no "Report a problem" link**: the app collects nothing
+> from its users. See [`09-feedback-channel.md`](09-feedback-channel.md).
 
 ## Phase 6 — Monetisation
 
@@ -146,27 +140,20 @@ See [`00-phase-0-scope-feasibility.md`](00-phase-0-scope-feasibility.md) and [`0
 - [ ] Ad container collapses when a load fails — no blank grey box
 - [ ] In-app review prompt: after a *successful* optimize, ≥ 3 lifetime, ≤ 1 per 90 days
 
-## Phase 7 — Feedback channel *(new — see [`09-feedback-channel.md`](09-feedback-channel.md))*
+## ~~Phase 7 — Feedback channel~~ *(not applicable — removed 2026-08-07)*
 
-- [ ] Google Form created — 4 fields only
-- [ ] 🔴 **No email, name, or contact field** — the form is anonymous by design
-- [ ] Field 2 prompt worded to get reproducible detail (you cannot ask a follow-up)
-- [ ] Email notification on new response enabled
-- [ ] Pre-filled link generated, `entry.*` IDs extracted into `local.properties`
-- [ ] Diagnostics string built at runtime and prefilled — **visible and editable by the user**
-- [ ] Diagnostics contains no advertising ID, install ID, location, or project contents
-- [ ] Opens via `Intent.ACTION_VIEW` — **no WebView**
-- [ ] Separate `mailto:` support link in About, for users who want a reply
-- [ ] `mailto:` fallback when offline or no browser; copy-to-clipboard if neither
-- [ ] Entry points: About + "This plan looks wrong" on the cut plan screen
-- [ ] Never gated behind the paywall, never nagged, never after a crash
-- [ ] App links to the **GitHub Pages redirect**, not the Google Form URL directly
-- [ ] Redirect preserves query params so pre-filled diagnostics still arrive
-- [ ] Soft cooldown: 3 form opens per 24 h, `mailto:` offered on the 4th — **never a hard block**
-- [ ] Minimum-length validation on field 2
-- [ ] Data safety form covers it *(no new category — Crashlytics already declares Diagnostics)*
-- [ ] Privacy policy paragraph added, with a retention period
-- [ ] Triage routine agreed (weekly, 15 min)
+🔴 **The app collects nothing from its users.** No feedback form, no bug-report
+form, no survey, no in-app submission. Every item that was in this phase is void.
+
+See [`09-feedback-channel.md`](09-feedback-channel.md) for the decision and its
+reasoning. The short version: the compliance argument for the form only held
+while the form kept one exact shape, and the first one built in practice arrived
+carrying Name and Email fields. A channel whose correctness depends on nobody
+editing a form is a liability, and removing it costs one permission and gains a
+data safety declaration with nothing on it but AdMob and Crashlytics.
+
+- [x] Support contact: a `mailto:` link in About — **not** a collection channel;
+      it opens the user's own mail app and sends nothing on its own
 
 ## Phase 8 — Testing & QA
 
@@ -194,7 +181,7 @@ See [`00-phase-0-scope-feasibility.md`](00-phase-0-scope-feasibility.md) and [`0
 - [ ] `versionCode` monotonic, `versionName` semver
 - [ ] Secrets scanned across **git history**, not just current files
 - [ ] `keystore.properties`, `*.jks`, `local.properties` confirmed absent from history
-- [ ] **Data safety form** — AdMob + Crashlytics + feedback form, declared honestly
+- [ ] **Data safety form** — AdMob + Crashlytics only. **No user-submitted data at all**, so nothing else to declare
 - [ ] **Content rating** questionnaire
 - [ ] **Ads declaration** — "contains ads"
 - [ ] Privacy policy URL live and linked in the listing
@@ -248,7 +235,7 @@ The longest lead-time item and the **only thing that can hard-block launch**.
 - [ ] 15 recruited · [ ] ≥ 3 tradesmen · [ ] all opted in · [ ] 14 days held
 
 ### Legal & compliance *(W0 → Phase 9)*
-- [ ] Privacy policy live · [ ] covers AdMob, Crashlytics, feedback form
+- [ ] Privacy policy live · [ ] covers AdMob and Crashlytics
 - [ ] Data safety form matches reality
 - [ ] Account deletion: **N/A — no accounts** (record the reason, don't leave it blank)
 - [ ] Refund policy: Google's standard applies
