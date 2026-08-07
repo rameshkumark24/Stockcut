@@ -53,6 +53,7 @@ import java.util.Date
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProjectsScreen(
+    container: com.stockcut.AppContainer,
     viewModel: ProjectsViewModel,
     onOpenProject: (Long) -> Unit,
     onOpenSettings: () -> Unit,
@@ -83,6 +84,16 @@ fun ProjectsScreen(
                 title = { Text("Jobs", style = MaterialTheme.typography.headlineSmall) },
                 actions = { OverflowMenu(onOpenSettings, onOpenAbout) },
             )
+        },
+        bottomBar = {
+            // Free tier only, and it collapses entirely if no ad loads.
+            if (com.stockcut.data.entitlement.Entitlement.showsAds(state.tier)) {
+                val canRequestAds by container.consent.canRequestAds.collectAsStateWithLifecycle()
+                com.stockcut.ads.BannerAd(
+                    adUnitId = container.ads.bannerUnitId,
+                    canRequestAds = canRequestAds,
+                )
+            }
         },
         floatingActionButton = {
             // Visible even at the free limit. Hiding it would leave the user with
@@ -153,18 +164,15 @@ fun ProjectsScreen(
         )
     }
 
-    if (state.showPaywall) {
-        // The real PaywallSheet lands in Phase 6 with billing. Until then this
-        // states the limit honestly rather than pretending it does not exist.
-        AlertDialog(
-            onDismissRequest = viewModel::onPaywallDismissed,
-            title = { Text("Free plan saves one job") },
-            text = { Text("Unlock to save unlimited jobs. $4.99, one time. Not a subscription.") },
-            confirmButton = {
-                TextButton(onClick = viewModel::onPaywallDismissed) { Text("Close") }
-            },
-        )
-    }
+    com.stockcut.billing.PaywallHost(
+        container = container,
+        trigger = if (state.showPaywall) {
+            com.stockcut.data.entitlement.PaywallTrigger.PROJECTS
+        } else {
+            null
+        },
+        onDismiss = viewModel::onPaywallDismissed,
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

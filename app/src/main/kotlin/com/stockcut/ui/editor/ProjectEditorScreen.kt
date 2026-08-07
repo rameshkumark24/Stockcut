@@ -30,6 +30,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.flow.first
 import com.stockcut.data.entitlement.PaywallTrigger
 import com.stockcut.data.model.PartEntry
 import com.stockcut.data.model.StockEntry
@@ -57,6 +58,7 @@ private sealed interface SheetTarget {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProjectEditorScreen(
+    container: com.stockcut.AppContainer,
     viewModel: ProjectEditorViewModel,
     onOptimize: () -> Unit,
     onBack: () -> Unit,
@@ -69,10 +71,36 @@ fun ProjectEditorScreen(
     // 🔴 The ONLY path to the cut plan. The ViewModel sets this exclusively for
     // Success and Shortfall; an Infeasible result never sets it, so a plan that
     // dropped a part is unreachable rather than merely discouraged.
+    val activity = androidx.compose.ui.platform.LocalContext.current as? android.app.Activity
     LaunchedEffect(state.navigateToResult) {
-        if (state.navigateToResult) {
-            viewModel.onResultNavigationHandled()
+        if (!state.navigateToResult) return@LaunchedEffect
+        viewModel.onResultNavigationHandled()
+
+        val settings = container.settings.settings.first()
+
+        // The interstitial goes HERE — between finishing entry and seeing the
+        // plan — and never mid-task (docs/03 S3). onFinished always fires, so a
+        // failed or skipped ad can never strand the user on the editor after a
+        // successful optimize.
+        if (activity != null) {
+            container.ads.maybeShowInterstitial(
+                activity = activity,
+                tier = settings.tier,
+                optimizeCount = settings.optimizeCount,
+            ) { onOptimize() }
+        } else {
             onOptimize()
+        }
+
+        // Review prompt: only after a SUCCESSFUL optimize, >= 3 lifetime, at
+        // most once per 90 days. Never on launch, never after a crash.
+        if (activity != null) {
+            com.stockcut.ui.ReviewPrompt.maybeAsk(
+                activity = activity,
+                settings = container.settings,
+                optimizeCount = settings.optimizeCount,
+                lastPromptAtMillis = settings.lastReviewPromptAt,
+            )
         }
     }
 
@@ -116,6 +144,15 @@ fun ProjectEditorScreen(
             )
         },
         bottomBar = {
+            androidx.compose.foundation.layout.Column {
+                if (com.stockcut.data.entitlement.Entitlement.showsAds(state.tier)) {
+                    val canRequestAds by container.consent.canRequestAds
+                        .collectAsStateWithLifecycle()
+                    com.stockcut.ads.BannerAd(
+                        adUnitId = container.ads.bannerUnitId,
+                        canRequestAds = canRequestAds,
+                    )
+                }
             Button(
                 onClick = viewModel::onOptimize,
                 enabled = state.canOptimize && !state.optimizing,
@@ -131,6 +168,7 @@ fun ProjectEditorScreen(
                     text = if (state.optimizing) "Optimizing…" else "Optimize",
                     style = MaterialTheme.typography.titleMedium,
                 )
+            }
             }
         },
     ) { padding ->
@@ -262,16 +300,11 @@ fun ProjectEditorScreen(
         )
     }
 
-    state.paywallTrigger?.let { trigger ->
-        AlertDialog(
-            onDismissRequest = viewModel::onPaywallDismissed,
-            title = { Text(paywallHeadline(trigger)) },
-            text = { Text("$4.99, one time. Not a subscription.") },
-            confirmButton = {
-                TextButton(onClick = viewModel::onPaywallDismissed) { Text("Close") }
-            },
-        )
-    }
+    com.stockcut.billing.PaywallHost(
+        container = container,
+        trigger = state.paywallTrigger,
+        onDismiss = viewModel::onPaywallDismissed,
+    )
 
     // A ceiling money cannot lift gets an explanation, never an offer.
     state.hardLimitMessage?.let { message ->

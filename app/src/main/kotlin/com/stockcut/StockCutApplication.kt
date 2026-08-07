@@ -34,7 +34,17 @@ class StockCutApplication : Application() {
      * Firebase for debug builds, so there is nothing to report to anyway.
      */
     private fun configureCrashlytics() {
-        FirebaseCrashlytics.getInstance().isCrashlyticsCollectionEnabled = !BuildConfig.DEBUG
+        // 🔴 RETURN FIRST. Debug builds have no Firebase config at all — the
+        // Gradle setup skips google-services for them — so getInstance() throws
+        // "Default FirebaseApp is not initialized" and takes down every debug
+        // launch before the first frame.
+        //
+        // Setting the flag to !BuildConfig.DEBUG was not enough: the crash is in
+        // the getInstance() call itself, before any value is assigned. Found by
+        // running the app, not by reading it.
+        if (BuildConfig.DEBUG) return
+
+        FirebaseCrashlytics.getInstance().isCrashlyticsCollectionEnabled = true
     }
 
     /**
