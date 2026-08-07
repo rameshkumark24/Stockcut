@@ -24,8 +24,28 @@ object Limits {
     /** Performance cap, applies to BOTH tiers. Not a paywall. */
     const val MAX_PARTS_PER_PROJECT = 1_000
 
-    /** Free tier sees an interstitial after every Nth optimize. Never mid-task. */
-    const val INTERSTITIAL_EVERY = 3
+    /**
+     * Free tier sees an interstitial after every Nth optimize. Never mid-task.
+     *
+     * Raised from 3 to 5, deliberately deviating from docs/02 §6.
+     *
+     * The count is LIFETIME, so "every 3rd" is one interruption in three
+     * forever — and this app is used iteratively. A tradesman adjusting a job
+     * optimizes, looks, changes a length, optimizes again. At 1-in-3 a single
+     * afternoon's work is punctuated by ads at the exact moment the answer
+     * appears, which is the payoff the whole product exists to deliver.
+     *
+     * An uninstall earns nothing. A slightly rarer ad earns slightly less.
+     */
+    const val INTERSTITIAL_EVERY = 5
+
+    /**
+     * No two interstitials within this window, whatever the count says.
+     *
+     * The count alone does not protect the person iterating on one job, which
+     * is exactly when an interruption is most costly and least deserved.
+     */
+    const val INTERSTITIAL_MIN_GAP_MILLIS = 10L * 60 * 1000
 }
 
 sealed interface Gate {
@@ -91,11 +111,29 @@ object Entitlement {
 
     /**
      * @param optimizeCount lifetime successful optimizes, AFTER incrementing.
+     * @param lastInterstitialAtMillis 0 if one has never been shown.
+     *
      * Interstitials never interrupt an in-progress task — this is checked before
-     * navigating to the result, never during entry.
+     * navigating to the result, never during entry — and never appear twice
+     * inside [Limits.INTERSTITIAL_MIN_GAP_MILLIS], however many times someone
+     * re-optimizes while adjusting a job.
      */
-    fun interstitialDue(tier: Tier, optimizeCount: Int): Boolean =
-        tier == Tier.FREE && optimizeCount > 0 && optimizeCount % Limits.INTERSTITIAL_EVERY == 0
+    fun interstitialDue(
+        tier: Tier,
+        optimizeCount: Int,
+        lastInterstitialAtMillis: Long = 0L,
+        nowMillis: Long = System.currentTimeMillis(),
+    ): Boolean {
+        if (tier != Tier.FREE) return false
+        if (optimizeCount <= 0) return false
+        if (optimizeCount % Limits.INTERSTITIAL_EVERY != 0) return false
+        if (lastInterstitialAtMillis != 0L &&
+            nowMillis - lastInterstitialAtMillis < Limits.INTERSTITIAL_MIN_GAP_MILLIS
+        ) {
+            return false
+        }
+        return true
+    }
 
     /**
      * In-app review: only after a SUCCESSFUL optimize, at least 3 lifetime, and

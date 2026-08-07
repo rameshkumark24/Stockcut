@@ -86,13 +86,21 @@ fun ProjectsScreen(
             )
         },
         bottomBar = {
-            // Free tier only, and it collapses entirely if no ad loads.
+            // The ONLY banner in the app, and only on the free tier.
+            //
+            // This is a browsing screen, not a working one — the user is picking
+            // a job, not entering measurements. It collapses to nothing when no
+            // ad loads, and the padding below keeps it clear of the FAB, since
+            // AdMob policy forbids ads adjacent to buttons and a mis-tap here
+            // would be invalid traffic.
             if (com.stockcut.data.entitlement.Entitlement.showsAds(state.tier)) {
                 val canRequestAds by container.consent.canRequestAds.collectAsStateWithLifecycle()
-                com.stockcut.ads.BannerAd(
-                    adUnitId = container.ads.bannerUnitId,
-                    canRequestAds = canRequestAds,
-                )
+                Column(modifier = Modifier.padding(bottom = Space.lg)) {
+                    com.stockcut.ads.BannerAd(
+                        adUnitId = container.ads.bannerUnitId,
+                        canRequestAds = canRequestAds,
+                    )
+                }
             }
         },
         floatingActionButton = {

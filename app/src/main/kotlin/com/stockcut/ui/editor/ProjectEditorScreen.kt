@@ -31,6 +31,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import com.stockcut.data.entitlement.PaywallTrigger
 import com.stockcut.data.model.PartEntry
 import com.stockcut.data.model.StockEntry
@@ -67,6 +68,7 @@ fun ProjectEditorScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var sheet by remember { mutableStateOf<SheetTarget?>(null) }
     val snackbarHost = remember { SnackbarHostState() }
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
 
     // 🔴 The ONLY path to the cut plan. The ViewModel sets this exclusively for
     // Success and Shortfall; an Infeasible result never sets it, so a plan that
@@ -87,7 +89,14 @@ fun ProjectEditorScreen(
                 activity = activity,
                 tier = settings.tier,
                 optimizeCount = settings.optimizeCount,
-            ) { onOptimize() }
+                lastInterstitialAtMillis = settings.lastInterstitialAt,
+                onShown = {
+                    scope.launch {
+                        container.settings.recordInterstitial(System.currentTimeMillis())
+                    }
+                },
+                onFinished = { onOptimize() },
+            )
         } else {
             onOptimize()
         }
@@ -143,16 +152,17 @@ fun ProjectEditorScreen(
                 },
             )
         },
+        // 🔴 NO BANNER ON THIS SCREEN, deliberately.
+        //
+        // It was here, directly above Optimize, and that was wrong twice over.
+        // AdMob policy forbids ads adjacent to buttons (gap audit §B5) because
+        // accidental clicks are invalid traffic, and invalid traffic suspends
+        // accounts. And this is the WORK screen — someone entering cut lengths
+        // with dusty hands should not be aiming past an ad to reach Optimize.
+        //
+        // Ads live on the projects list, which is a browsing screen, and nowhere
+        // near the cut plan.
         bottomBar = {
-            androidx.compose.foundation.layout.Column {
-                if (com.stockcut.data.entitlement.Entitlement.showsAds(state.tier)) {
-                    val canRequestAds by container.consent.canRequestAds
-                        .collectAsStateWithLifecycle()
-                    com.stockcut.ads.BannerAd(
-                        adUnitId = container.ads.bannerUnitId,
-                        canRequestAds = canRequestAds,
-                    )
-                }
             Button(
                 onClick = viewModel::onOptimize,
                 enabled = state.canOptimize && !state.optimizing,
@@ -168,7 +178,6 @@ fun ProjectEditorScreen(
                     text = if (state.optimizing) "Optimizing…" else "Optimize",
                     style = MaterialTheme.typography.titleMedium,
                 )
-            }
             }
         },
     ) { padding ->

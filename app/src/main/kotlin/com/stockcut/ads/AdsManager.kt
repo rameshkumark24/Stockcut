@@ -82,9 +82,11 @@ class AdsManager(private val context: Context) {
         activity: Activity,
         tier: Tier,
         optimizeCount: Int,
+        lastInterstitialAtMillis: Long,
+        onShown: () -> Unit,
         onFinished: () -> Unit,
     ) {
-        val due = Entitlement.interstitialDue(tier, optimizeCount)
+        val due = Entitlement.interstitialDue(tier, optimizeCount, lastInterstitialAtMillis)
         val ad = interstitial
 
         if (!due || ad == null) {
@@ -94,6 +96,7 @@ class AdsManager(private val context: Context) {
             return
         }
 
+        onShown()
         ad.fullScreenContentCallback = object : FullScreenContentCallback() {
             override fun onAdDismissedFullScreenContent() {
                 interstitial = null
