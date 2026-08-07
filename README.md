@@ -79,6 +79,7 @@ The tools that solve this are on iOS, in a browser (needs signal and a keyboard)
 | [`docs/09-feedback-channel.md`](docs/09-feedback-channel.md) | **Removed** — why the app collects nothing from its users |
 | [`docs/10-owner-actions.md`](docs/10-owner-actions.md) | **Everything that must happen outside the code, in dependency order** |
 | [`docs/11-play-and-admob-setup.md`](docs/11-play-and-admob-setup.md) | Step-by-step: in-app product, license testers, AdMob, Firebase, keystore |
+| [`docs/13-remaining-to-launch.md`](docs/13-remaining-to-launch.md) | **Everything left until the app is live, and who owns each item** |
 | [`privacy-policy.html`](privacy-policy.html) | Published by GitHub Pages from the repo root |
 | [`CLAUDE.md`](CLAUDE.md) | Agent rules — hard constraints, conventions, do-nots |
 
