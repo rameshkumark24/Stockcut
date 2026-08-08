@@ -19,34 +19,37 @@ Built for fabricators, welders, timber framers, and anyone cutting from linear s
 | `:data` | Done — Room schema, DB-level constraints, DataStore, entitlement rules |
 | `:app` | Done — 5 routes, all 7 screens, share as image, PDF export, ads, consent |
 
-Release APK **4.1 MB** against a 12 MB budget.
+**195 tests green** (144 JVM, 51 instrumented). Signed release AAB **v1.0.0**,
+9.2 MB; release APK 4.1 MB against a 12 MB budget.
 
-### 💸 v1 is completely free
+### 💸 Completely free
 
 No in-app purchase, no paywall, no price. **AdMob is the only revenue.**
 
-v1 publishes on a friend's Play Console account — Play Billing pays the account
-holder, and there is no way to route purchase revenue anywhere else, so shipping
-the unlock would have put this app's money in someone else's bank account. AdMob
-is unaffected: ad unit IDs are compiled into the APK and AdMob pays whoever owns
-the AdMob account.
+A new app from an unknown developer converts close to nothing on a paid unlock.
+Ads earn less per user but earn from *every* user, and a free tool spreads — one
+tradesman shows the next one on site, which is this app's only real distribution
+channel.
 
 The billing code, paywall and tier gates all still exist behind
-`Monetization.PAYWALL_ENABLED`, tested on every build, ready to return once the
-app is transferred. Full reasoning:
+`Monetization.PAYWALL_ENABLED` and are tested on every build, so a paid unlock
+can be added later without rewriting anything. Full reasoning:
 [`docs/15-free-launch-and-paywall-plan.md`](docs/15-free-launch-and-paywall-plan.md).
 
-### What's left
+### What's left — none of it is code
 
-Not the closed test — the publishing account already has production access, which
-is granted per account, not per app.
+Every store asset is produced and waiting in [`store/`](store/): signed AAB,
+listing copy, 5 screenshots, feature graphic, `app-ads.txt`.
 
-- [ ] 🔴 Keystore + two off-machine backups
+- [ ] 🔴 Back up the upload keystore in two places off this machine
 - [ ] 🔴 Low-end real device: performance, and uninstall → reinstall auto-backup
-- [ ] Store listing — screenshots need a device
+- [ ] Play Console account ($25) + identity verification
+- [ ] ⏱ **12 testers, 14 continuous days** — required of any new personal
+      developer account, and about three weeks including the review
 - [ ] Oracle case `O-10` from a real tradesman job
 
-Step-by-step in [`docs/13-remaining-to-launch.md`](docs/13-remaining-to-launch.md).
+Step-by-step in [`docs/13-remaining-to-launch.md`](docs/13-remaining-to-launch.md);
+console-by-console in [`docs/17-upload-day-runbook.md`](docs/17-upload-day-runbook.md).
 
 ---
 

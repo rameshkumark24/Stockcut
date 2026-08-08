@@ -209,14 +209,16 @@ Privacy policy URL:
 
 ---
 
-## ⚠️ Publisher name — the one thing I cannot fill in
+## Publisher name
 
-The listing will show **your friend's verified developer name**, because it is
-his account. Two places in this repo currently say nothing about him and must
-match before submission:
+The listing shows the **verified developer name on your own Play Console
+account**, which is whatever name you verify with. Nothing in the repo needs
+changing for that — the privacy policy and About screen do not name a company,
+so they stay correct however you verify.
 
-- `privacy-policy.html` — the "who we are" line
-- The About screen
-
-Send me his verified name and I will update both in one commit. Getting this
-wrong is a data-safety inconsistency, which is the category Play acts on fastest.
+The one case that does need a change: if you decide to trade under a **business
+name** rather than your own. Then the privacy policy's "who we are" line and the
+About screen should say the same thing as the listing. Tell me the name and I
+will update both in one commit — a mismatch between the listing and the privacy
+policy is a data-safety inconsistency, which is the category Play acts on
+fastest.

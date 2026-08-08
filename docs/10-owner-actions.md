@@ -3,16 +3,17 @@
 > ⚠️ **Largely superseded — read
 > [`13-remaining-to-launch.md`](13-remaining-to-launch.md) instead.**
 >
-> This doc was written when v1 was a paid app going onto a new Play Console
-> account. Both changed on 2026-08-08: **v1 ships free** and publishes on a
-> friend's account that already has production access.
+> This doc was written when the app was going to be paid. That changed on
+> 2026-08-08: **StockCut ships completely free, earning only from AdMob**
+> ([`15-free-launch-and-paywall-plan.md`](15-free-launch-and-paywall-plan.md)).
 >
 > So everything here about the **in-app product, license testers, the billing
-> test matrix, the payments profile, and the 14-day closed test does not apply to
-> v1**. It applies again at the transfer, per
-> [`15-free-launch-and-paywall-plan.md`](15-free-launch-and-paywall-plan.md).
+> test matrix, and the payments profile does not apply**. It applies only if a
+> paid unlock is ever added.
 >
-> Still current: the keystore, the store listing, and the real-device testing.
+> Still current, and all covered in `13`: the Play Console account, the keystore,
+> the store listing, the real-device testing, and the **12-tester / 14-day closed
+> test**, which a new personal developer account still requires.
 
 **Why this doc exists:** Phases 3–5 are built. Phase 6 is billing and ads, and
 almost none of it can be *tested* until a Play Console account, an in-app

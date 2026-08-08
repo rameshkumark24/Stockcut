@@ -20,33 +20,35 @@ enum class PaywallTrigger { PARTS, PROJECTS, STOCK, PDF_EXPORT }
  * The single switch that decides whether this app sells anything.
  *
  * ─────────────────────────────────────────────────────────────────────────────
- * CURRENTLY OFF. StockCut v1 is completely free and earns only from AdMob.
+ * OFF. StockCut is completely free and earns only from AdMob.
  *
- * WHY, so nobody "fixes" this back:
+ * This is a deliberate product decision, not a temporary state waiting to be
+ * corrected — so do not "fix" it back.
  *
- * v1 launches on a friend's Play Console account, because a developer account
- * costs $25 and the owner does not have it yet. Play Billing pays the ACCOUNT
- * HOLDER — there is no way to route in-app purchase money to anyone else. So
- * shipping the unlock would put this app's main revenue line in someone else's
- * bank account and on someone else's tax record, recoverable only by a promise.
+ * The reasoning: a brand-new app from an unknown developer converts close to
+ * nothing on a paid unlock. Nobody pays $4.99 on sight for a tool with no
+ * reviews and no reputation. Ads earn less per user but they earn from EVERY
+ * user, including the ones who would never have paid, and they cost nothing to
+ * collect. A free tool also spreads — a tradesman shows it to the next one on
+ * site, which is this app's only real distribution channel.
  *
- * Turning the paywall off removes that problem entirely rather than managing it.
- * AdMob is unaffected: ad unit IDs are compiled into the APK and AdMob pays
- * whoever owns the AdMob account, whoever published the app.
+ * The price of that choice, stated honestly: the app learns nothing about
+ * willingness to pay. Whether $4.99 is right, whether $2.99 converts better,
+ * whether anyone pays at all — none of it is knowable while there is no
+ * purchase button. That was accepted with open eyes.
  *
  * ─────────────────────────────────────────────────────────────────────────────
- * TURNING IT BACK ON (planned, once the app is transferred to the owner's own
- * account — see docs/15-free-launch-and-paywall-plan.md)
+ * IF IT IS EVER TURNED BACK ON — see docs/15-free-launch-and-paywall-plan.md
  *
  * Flipping this to `true` restores every limit for everyone, including people
  * who have used the app unlimited for months. Do not flip it alone. Users who
  * installed before the cutoff must be grandfathered — the hook for that is
- * [com.stockcut.data.settings.Settings.firstRunAt], which v1 records precisely
- * so this stays possible.
+ * [com.stockcut.data.settings.Settings.firstRunAt].
  *
- * 🔴 That hook only works because it ships in v1. It cannot be added later:
- * there is no way to find out, in six months, when someone installed if the app
- * never wrote it down.
+ * 🔴 That hook only works because it ships from v1. It cannot be added later:
+ * there is no way to find out, a year from now, when someone installed if the
+ * app never wrote it down. That is why a value nothing currently reads is
+ * recorded on every first launch.
  */
 object Monetization {
     const val PAYWALL_ENABLED = false

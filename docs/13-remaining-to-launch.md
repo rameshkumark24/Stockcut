@@ -1,16 +1,31 @@
 # Everything remaining until the app is live on Play
 
-**Rewritten 2026-08-08**, after two decisions that changed most of this list:
+**Rewritten 2026-08-08.** Two settled decisions shape this list:
 
-1. **v1 ships completely free**, earning only from AdMob — see
+1. **StockCut is completely free**, earning only from AdMob — see
    [`15-free-launch-and-paywall-plan.md`](15-free-launch-and-paywall-plan.md).
-2. **v1 publishes on a friend's Play Console account**, which already has
-   production access.
-
-Together those delete the three slowest items that used to gate everything: the
-$25 account, the 14-day closed test, and the billing test matrix.
+2. **It publishes on the owner's own Play Console account**, opened when the $25
+   is available.
 
 **🧑 you** · **🤖 me** · **⏱ calendar time that effort cannot compress**
+
+---
+
+## 🔴 Read this before planning anything
+
+**The 12-tester / 14-day closed test applies to you.**
+
+Google requires it of every **personal** developer account created after
+13 November 2023. A new account is a new account: you run a closed test with at
+least **12 testers opted in continuously for 14 days**, then *apply* for
+production access, and that application is reviewed for up to 7 days.
+
+Nothing in this repository can shorten that. It is roughly **three weeks of
+calendar time after the day you pay**, and it cannot start until the account
+exists and a build is uploaded.
+
+The practical consequence: **pay the $25 as early as you can**, because the clock
+starts at the account, not at the code. The code has been ready since today.
 
 ---
 
@@ -23,152 +38,128 @@ $25 account, the 14-day closed test, and the billing test matrix.
 | Phase 4 `:data` | ✅ |
 | Phase 5 UI — all 7 screens, share, PDF | ✅ |
 | Phase 6 Ads + consent + review prompt | ✅ |
-| Phase 6 Billing | ⬛ **written, switched off** — v1 sells nothing |
-| Phase 7 Feedback channel | ⬛ removed — app collects nothing |
-| Phase 8 Testing & QA | ✅ except real-device items |
-| Phase 9 Store readiness | 🟡 needs the listing |
-| Phase 10 Closed test | ⬛ **not required** — the account has production access |
-| Phase 11 Launch | ❌ |
+| Phase 6 Billing | ⬛ written, switched off — the app sells nothing |
+| Phase 7 Feedback channel | ⬛ removed — the app collects nothing |
+| Phase 8 Testing & QA | ✅ except the real-device items |
+| Phase 9 Store readiness | ✅ **assets produced, ready to paste** |
+| Phase 10 Closed test | ⏱ blocked on the account |
+| Phase 11 Launch | blocked on Phase 10 |
 
-Release APK **4.1 MB** against a 12 MB budget (NFR-3).
+**195 tests green** (144 JVM, 51 instrumented). Signed release AAB **v1.0.0**,
+9.2 MB, verified inside the bundle: `com.measure.stockcut`, targetSdk 36,
+minSdk 26.
 
 ---
 
-## What is actually left
+## What is already produced and waiting
 
-**Everything that can be produced off the Play Console is done** — signed AAB,
-keystore, listing copy, screenshots, feature graphic, `app-ads.txt`. Step-by-step
-upload instructions: [`17-upload-day-runbook.md`](17-upload-day-runbook.md).
+Nothing here needs code. It is all sitting in the repo.
 
-Three things remain, and none of them costs money.
-
-1. 🔴 **Back up the keystore twice, off this machine.** It is generated and
-   working; it is not backed up. This is the only irreversible mistake available.
-2. 🔴 **A low-end real device** — the emulator cannot answer performance or
-   auto-backup questions honestly.
-3. **Your friend's developer name**, so the privacy policy and About screen name
-   the right publisher. Send it and I will update both.
+| Thing | Where |
+|---|---|
+| Signed release bundle | `app/build/outputs/bundle/release/app-release.aab` |
+| Upload keystore | `upload-keystore.jks` *(git-ignored)* |
+| Keystore passwords | `keystore.properties` *(git-ignored)* |
+| Listing copy, length-checked | [`16-store-listing.md`](16-store-listing.md) |
+| 5 screenshots | `store/screenshots/` |
+| Feature graphic 1024×500 | `store/feature-graphic.png` |
+| `app-ads.txt` | `store/app-ads.txt` |
+| Upload runbook | [`17-upload-day-runbook.md`](17-upload-day-runbook.md) |
 
 ---
 
 # 🧑 Yours
 
-## Publishing on your friend's account
+## Now — free, and does not wait for the $25
 
-Before anything else, confirm with him:
+- [ ] 🔴 **Back up `upload-keystore.jks` and its passwords in two places off this
+      machine.** It is generated and working; it is not backed up. Losing it means
+      the app can never be updated again — not patched, not renamed
+- [ ] Create a GitHub repo named exactly **`rameshkumark24.github.io`** and publish
+      `store/app-ads.txt` at its root. It must resolve at
+      `https://rameshkumark24.github.io/app-ads.txt` — the `/Stockcut/` project
+      page will not do, because `app-ads.txt` has to sit at the **domain root**
+- [ ] Line up your **15 testers** and confirm they will install from a Play link
+      when asked. Invited-but-not-installed does not count toward the 12
+- [ ] Burn the captions into the 5 screenshots
+- [ ] Export the 512×512 icon from `app/src/main/res/mipmap-xxxhdpi`
 
-- [ ] **Policy status is clean** — no strikes, no suspended apps. A strike means
-      walk away: terminations are account-wide, and a burned package name
-      (`com.measure.stockcut`) is burned permanently
-- [ ] He understands **StockCut's compliance becomes his account's risk**
-- [ ] He invites `rameshkumaroff@gmail.com` under **Users and permissions**,
-      scoped to this app: store presence, testing tracks, production releases,
-      reply to reviews
-- [ ] **Developer website** on the listing points at *your* GitHub Pages root —
-      this is what lets your AdMob account verify the app
-- [ ] His **verified developer name**, so the privacy policy and About screen name
-      the same publisher
-- [ ] Written agreement (WhatsApp is fine, dated): he transfers the app to your
-      account once you have the $25, and won't unpublish or edit without asking
+## 🔴 The real-device testing — I cannot do any of these
 
-**No payments profile needed.** The app sells nothing, so no money passes through
-his account at all — that is the whole reason v1 is free.
+The emulator cannot answer them honestly, and it is better to find these now than
+during the 14-day test.
 
-## AdMob — your account, your money
-
-- [ ] Create a repo named **`rameshkumark24.github.io`** — `app-ads.txt` must sit
-      at the **root** of the domain, and the current Pages site is a project page
-      (`/Stockcut/`), which will not do
-- [ ] Publish `app-ads.txt` there with your AdMob publisher line
-- [ ] Add the app in AdMob and verify ownership against that domain
-- [ ] AdMob address verification (a PIN posted to you) triggers at $10 earned;
-      payout threshold is $100
-
-## Keystore
-
-- [x] `upload-keystore.jks` generated — RSA 4096, alias `upload`, 10,000 days
-- [x] `keystore.properties` filled in, both git-ignored
-- [x] Release AAB builds signed and verifies
-- [ ] 🔴 **Back up the file and its passwords in two places off this machine**
-- [ ] Enrol in Play App Signing at first upload
-- [ ] Keep it yourself — your friend never needs it, and it survives the transfer
-
-## Store listing
-
-All written and length-checked in
-[`16-store-listing.md`](16-store-listing.md); assets in `store/`.
-
-- [x] Title, short description, full description
-- [x] **5 screenshots** captured from the real app, with captions
-- [x] Feature graphic **1024×500**
-- [x] Content rating / ads / IAP / data safety answers all decided
-- [ ] Paste it in and **burn the captions into the images**
-- [ ] App icon 512×512 — export from `mipmap-xxxhdpi`
-
-## Real-device testing — I cannot do these
-
-- [ ] 🔴 **Low-end real device** (2–3 GB RAM, Android 8–10) — *your actual user's
-      phone*
-- [ ] 🔴 **Uninstall → reinstall → jobs restored** via auto-backup. The rules are
-      written and have never been proven
-- [ ] Cold start **< 1.5 s**, release build on that device
-- [ ] **Airplane mode** — full core function, and confirm the ad slot collapses
-      rather than leaving a grey box
-- [ ] Sunlight — read a cut plan outdoors
-- [ ] Process death — background 20 min, return to the same state
+- [ ] **Low-end real phone** (2–3 GB RAM, Android 8–10) — *your actual user's phone*
+- [ ] **Uninstall → reinstall → jobs come back** via auto-backup. The rules are
+      written and have never been proven to work
+- [ ] Cold start **< 1.5 s** on that phone, release build
+- [ ] **Airplane mode** — full function, and the ad slot collapses rather than
+      leaving a grey box
+- [ ] Read a cut plan outdoors in sunlight
+- [ ] Background it 20 minutes, return to the same state
 - [ ] Split screen
 
-## Testers
+## When the $25 arrives
 
-Not a gate any more — the account already has production access. Still worth it:
+- [ ] Create the Play Console account and complete **identity verification**
+      *(days, not minutes — this is the first thing on the critical path)*
+- [ ] Create the app: **StockCut — Cut List Optimizer**, `com.measure.stockcut`,
+      App, Free
+- [ ] Upload `app-release.aab`, accept **Play App Signing**
+- [ ] Fill the listing from [`16-store-listing.md`](16-store-listing.md)
+- [ ] Declarations: **Ads = Yes**, **In-app purchases = No**, content rating,
+      and 🔴 **data safety must declare AD_ID**
+- [ ] Set **Developer website** to `https://rameshkumark24.github.io` so AdMob can
+      verify the app against a domain you control
 
-- [ ] ≥ 3 real tradesmen on internal testing before you go to production
-      *(release gate, `docs/06` §10)*
+## ⏱ Then the part that is pure waiting
+
+- [ ] Closed test: **12 testers opted in, 14 continuous days**
+- [ ] ≥ 3 of them real tradesmen *(release gate, `docs/06` §10 — not a Play rule,
+      a quality one)*
+- [ ] Apply for production access — answer with specifics about who tested it and
+      what changed, not boilerplate
+- [ ] Production, **staged rollout 20%** → watch Android Vitals 48 h → 100%
 
 ---
 
 # 🤖 Mine
 
-- [x] Free-tier gates lifted behind `Monetization.PAYWALL_ENABLED`
-- [x] `firstRunAt` recorded, so the future paywall can grandfather v1 users
-- [x] Purchase UI and "Restore purchases" hidden — an app that sells nothing must
-      not offer to sell
-- [x] Billing connection suppressed
+- [x] Free: every paywall limit lifted behind `Monetization.PAYWALL_ENABLED`
+- [x] `firstRunAt` recorded, so a future paywall could grandfather today's users
+- [x] Purchase UI and "Restore purchases" hidden; billing connection suppressed
 - [x] Ads: banner + interstitial every 5th optimize, 10-minute minimum gap
 - [x] UMP consent, re-enterable from Settings
 - [x] Crashlytics, release builds only
 - [x] All 8 critical-path E2E tests, plus "no paywall anywhere" and "PDF is free"
 - [x] Waste-% baselines across the whole oracle set
 - [x] Secrets scanned across git history · dependency licences checked
-- [x] Release signing config, degrading gracefully when no keystore exists
+- [x] Release signing, keystore generated, signed AAB verified from the bundle
+- [x] Store listing copy, screenshots, feature graphic, `app-ads.txt`
 - [ ] 🔴 Oracle case **`O-10`** — *blocked on a real tradesman job*. Send me one
       and it becomes a permanent regression test
-- [ ] Store listing copy — say the word
+- [ ] Publisher name in the privacy policy and About screen — **only if you want
+      to trade under something other than your own name**. Left alone otherwise
 
 ---
 
 ## Sequence
 
 ```
-NOW    confirm friend's account is clean · get the invite      🧑 minutes
-       app-ads.txt on a root-domain Pages repo                 🧑 minutes
-       keystore + two off-machine backups                      🧑 30 min
+NOW    keystore backups · app-ads.txt repo · captions        🧑 an hour
+       low-end device testing                                🧑 🔴
        ↓
-       I build a signed release AAB                            🤖
+       $25 → account → identity verification                 🧑 ⏱ days
        ↓
-       upload to Internal testing                              🧑
-       low-end device + auto-backup verification               🧑 🔴
-       screenshots + listing copy                              🧑🤖
+       upload AAB · listing · declarations                   🧑 an hour
        ↓
-       PRODUCTION — no closed test required
-       staged rollout 20% → watch Vitals 48 h → 100%
+       CLOSED TEST — 12 testers, 14 continuous days          ⏱ 2 weeks
+       ↓
+       production access application                         ⏱ up to 7 days
+       ↓
+       staged rollout 20% → Vitals 48 h → 100%
 ```
 
-**Realistic floor: a few days**, gated on the keystore, a real device, and
-screenshots. Not weeks — the two multi-week items are both gone.
-
-## Then, at about month 6
-
-Transfer the app to your own account, *then* switch the paywall on. Never the
-other way round. Full procedure in
-[`15-free-launch-and-paywall-plan.md`](15-free-launch-and-paywall-plan.md).
+**Realistic floor: about three weeks from the day you pay**, and none of it is
+code. The single highest-value thing you can do is open the account early — every
+other item either is already done or can be done while the clock runs.

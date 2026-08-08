@@ -101,10 +101,11 @@ If any other permission appears in the manifest, treat it as a bug.
 > ⚠️ **Superseded for v1 by
 > [`15-free-launch-and-paywall-plan.md`](15-free-launch-and-paywall-plan.md).**
 >
-> **v1 ships completely free — every row in the Free column below is lifted, and
-> the app earns only from AdMob.** Play Billing pays the account holder, and v1
-> publishes on a friend's account, so shipping the unlock would have put this
-> app's revenue in someone else's bank account.
+> **StockCut ships completely free — every row in the Free column below is
+> lifted, and the app earns only from AdMob.** A new app from an unknown
+> developer converts close to nothing on a paid unlock; ads earn less per user
+> but earn from every user, and a free tool spreads on site, which is this app's
+> only real distribution channel.
 >
 > The matrix below is not dead: it is exactly what returns when
 > `Monetization.PAYWALL_ENABLED` is switched back on, and `PaywallRulesTest`

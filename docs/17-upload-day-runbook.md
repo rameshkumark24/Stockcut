@@ -1,9 +1,9 @@
 # Upload day — the runbook
 
-**Everything that can be done off the Play Console is done.** This is the list of
-what happens in the console, in order, with the file to use at each step.
+**Everything that can be done off the Play Console is done.** This is what happens
+in the console, in order, with the file to use at each step.
 
-Nothing here needs code from me. If a step asks for a value, it is in this repo.
+No step here needs code from me. Where a step asks for a value, it is in this repo.
 
 ---
 
@@ -21,11 +21,11 @@ Nothing here needs code from me. If a step asks for a value, it is in this repo.
 | Privacy policy | `https://rameshkumark24.github.io/Stockcut/privacy-policy.html` |
 
 The bundle is **v1.0.0, versionCode 1**, `com.measure.stockcut`, targetSdk 36,
-minSdk 26 — all four verified inside the built AAB, not just in Gradle.
+minSdk 26 — all verified inside the built AAB, not just in Gradle.
 
 ---
 
-## 🔴 Step 0 — back up the keystore. Before anything else.
+## 🔴 Step 0 — back up the keystore. Do this today, not on upload day.
 
 If `upload-keystore.jks` is lost, **StockCut can never be updated again**. Not
 patched, not renamed, not fixed. The only remedy is a new package name and
@@ -33,34 +33,17 @@ starting from zero installs.
 
 - [ ] Copy `upload-keystore.jks` to a cloud drive that is not this machine
 - [ ] Copy it to a second place — a USB stick, or a different cloud account
-- [ ] Put the passwords from `keystore.properties` in a password manager
-- [ ] Confirm you can open the backup copy from another device
+- [ ] Put the passwords from `keystore.properties` into a password manager
+- [ ] Open the backup from another device to prove it is really there
 
-Do not skip this because you are keen to upload. It is the one irreversible
-mistake available today.
-
----
-
-## Step 1 — your friend's account
-
-- [ ] Confirm **no policy strikes** on the account
-- [ ] He creates the app: **StockCut — Cut List Optimizer**, `com.measure.stockcut`,
-      App, Free
-- [ ] He invites `rameshkumaroff@gmail.com` under **Users and permissions**,
-      app-scoped: store presence, testing tracks, production releases, reply to
-      reviews
-- [ ] Get his **verified developer name** and send it to me — the privacy policy
-      and About screen must name the same publisher
-
-**No payments profile is needed.** The app sells nothing, so no money goes through
-his account.
+This does not wait for the $25. It is the one irreversible mistake available.
 
 ---
 
-## Step 2 — app-ads.txt, so AdMob pays *you*
+## Step 1 — app-ads.txt, so AdMob can verify the app
 
-This is what links the app on his account to the AdMob account on yours. Skip it
-and ad revenue is unverified.
+Also free, also does not wait. AdMob takes a day or two to crawl, so doing it
+early means it is already verified when the listing goes up.
 
 - [ ] Create a GitHub repo named exactly **`rameshkumark24.github.io`**
       *(the `/Stockcut/` project page will not work — `app-ads.txt` must be at the
@@ -69,36 +52,49 @@ and ad revenue is unverified.
 - [ ] Enable Pages on that repo
 - [ ] Confirm `https://rameshkumark24.github.io/app-ads.txt` loads and shows the
       single `google.com, pub-…` line
-- [ ] Set the listing's **Developer website** to `https://rameshkumark24.github.io`
-- [ ] In AdMob, add the app and verify it against that domain
 
-AdMob takes a day or two to crawl. It is normal for it to say "not found" at first.
+It is normal for AdMob to say "not found" for the first day or two.
+
+---
+
+## Step 2 — the account ⏱
+
+**This is the critical path. Everything downstream waits on it.**
+
+- [ ] Pay the **$25** and create the Play Console account
+- [ ] Complete **identity verification** — days, not minutes
+- [ ] Create the app: **StockCut — Cut List Optimizer**, `com.measure.stockcut`,
+      type **App**, **Free**
+
+🔴 The package name is permanent. `com.measure.stockcut` can never be changed or
+reused once published.
 
 ---
 
 ## Step 3 — the release
 
-- [ ] **Internal testing** → create release → upload `app-release.aab`
-- [ ] Accept **Play App Signing** when offered *(your upload key stays yours; Google
-      holds the app signing key, and both survive the transfer later)*
-- [ ] Install from the internal test link on a real phone and check it launches
+- [ ] **Closed testing** → create a track → upload `app-release.aab`
+- [ ] Accept **Play App Signing** when offered. Google holds the app signing key;
+      your upload key stays yours
+- [ ] Install from the test link on a real phone and confirm it launches
 
 ---
 
 ## Step 4 — the listing
 
-Paste from [`16-store-listing.md`](16-store-listing.md). Everything is
+Paste from [`16-store-listing.md`](16-store-listing.md). Every field is
 length-checked.
 
 - [ ] App name, short description, full description
 - [ ] 5 screenshots **in the order given in that doc**, captions burned in
 - [ ] Feature graphic
-- [ ] App icon (from the app — Play pulls 512×512 separately; export from
-      `app/src/main/res/mipmap-xxxhdpi`)
+- [ ] App icon 512×512 — export from `app/src/main/res/mipmap-xxxhdpi`
 - [ ] Category **Tools**, contact email, privacy policy URL
+- [ ] **Developer website** → `https://rameshkumark24.github.io` (this is what
+      AdMob verifies against)
 
-🔴 After pasting the title, **look at it**. If it shows `â€"` instead of `—`,
-your editor mangled the encoding — retype the dash.
+🔴 After pasting the title, **look at it**. If it shows `â€"` instead of `—`, your
+editor mangled the encoding — retype the dash.
 
 ---
 
@@ -109,28 +105,25 @@ your editor mangled the encoding — retype the dash.
 - [ ] **In-app purchases: No**
 - [ ] **Data safety** — the full table is in
       [`16-store-listing.md`](16-store-listing.md#data-safety-form)
-- [ ] 🔴 Declare the **Advertising ID**. AdMob ships `AD_ID` in the manifest, Play
-      scans for it, and "no advertising ID" with AdMob present is a rejection —
-      or a removal after the fact
+- [ ] 🔴 Declare the **Advertising ID**. AdMob puts `AD_ID` in the manifest, Play
+      scans for it, and "no advertising ID" with AdMob present is a rejection — or
+      a removal after the fact
+
+**No payments profile is needed.** The app sells nothing.
 
 ---
 
-## Step 6 — 🔴 the real device, before production
+## Step 6 — ⏱ the closed test. Two weeks, and nothing shortens it.
 
-The emulator cannot answer these, and I could not either.
-
-- [ ] Low-end phone, 2–3 GB RAM — *your actual user's phone*
-- [ ] **Uninstall → reinstall → jobs come back** via auto-backup. Written, never
-      proven
-- [ ] Cold start under 1.5 s on that phone, release build
-- [ ] Airplane mode: full function, and the ad slot collapses rather than leaving
-      a grey box
-- [ ] Read a cut plan outdoors in sunlight
-- [ ] Background it 20 minutes, return, same state
-
-Get **3 real tradesmen** on the internal test before production. It is not a Play
-requirement — the account already has production access — but it is the last
-chance to hear "that's not how we'd cut it" cheaply.
+- [ ] Get **12 testers opted in via the Play link and actually installed**.
+      Invited-but-not-installed does not count
+- [ ] Keep **12 opted in for 14 continuous days**. If someone opts out mid-way the
+      count drops and the clock effectively restarts — over-recruit; you have 15
+- [ ] ≥ 3 real tradesmen among them *(release gate, `docs/06` §10 — our rule, not
+      Google's, and the last cheap chance to hear "that's not how we'd cut it")*
+- [ ] Apply for **production access**. Answer with specifics — who tested it, what
+      they said, what changed. Boilerplate answers get bounced
+- [ ] Wait up to **7 days** for review
 
 ---
 
@@ -145,12 +138,8 @@ chance to hear "that's not how we'd cut it" cheaply.
 ## After launch
 
 - Ad revenue accrues in **your** AdMob account. Payout threshold is $100; address
-  verification (a posted PIN) triggers at $10
+  verification (a PIN posted to you) triggers at $10
 - Expect very little at first. v1's job is users and reviews, not income
 - Send me a real job from a tradesman and it becomes oracle case `O-10`
-
-## At about month 6
-
-Transfer the app to your own Play Console account, **then** switch the paywall on.
-Never the other way round — the order is the entire reason v1 is free.
-Full procedure: [`15-free-launch-and-paywall-plan.md`](15-free-launch-and-paywall-plan.md).
+- If you ever want to add a paid unlock, the code is written and dormant:
+  [`15-free-launch-and-paywall-plan.md`](15-free-launch-and-paywall-plan.md)
