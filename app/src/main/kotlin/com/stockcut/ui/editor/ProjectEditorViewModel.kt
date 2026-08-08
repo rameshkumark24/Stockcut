@@ -9,6 +9,7 @@ import com.stockcut.AppContainer
 import com.stockcut.data.entitlement.Entitlement
 import com.stockcut.data.entitlement.Gate
 import com.stockcut.data.entitlement.Limits
+import com.stockcut.data.entitlement.Monetization
 import com.stockcut.data.entitlement.Tier
 import com.stockcut.data.model.PartEntry
 import com.stockcut.data.model.Project
@@ -77,9 +78,15 @@ data class EditorUiState(
 ) {
     val totalPieces: Int get() = parts.sumOf { it.quantity }
 
-    /** "14 / 20 parts" on the free tier; a plain count once unlocked. */
+    /**
+     * "14 / 20 pieces" when there is a limit to show; a plain count otherwise.
+     *
+     * With the paywall off there is no limit, and printing "/ 20" would advertise
+     * a ceiling this build does not enforce — a user would stop at 20 pieces on a
+     * job the app would happily have cut.
+     */
     val partsCountLabel: String
-        get() = if (tier == Tier.FREE) {
+        get() = if (Monetization.PAYWALL_ENABLED && tier == Tier.FREE) {
             "$totalPieces / ${Limits.FREE_PARTS_PER_PROJECT} pieces"
         } else {
             "$totalPieces pieces"

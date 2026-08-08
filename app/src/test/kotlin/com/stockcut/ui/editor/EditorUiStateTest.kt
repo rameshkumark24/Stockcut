@@ -93,13 +93,18 @@ class EditorUiStateTest {
     fun `the parts counter counts pieces, not rows`() {
         val s = state(parts = listOf(part(100, 7, id = 1), part(200, 5, id = 2)))
         assertEquals(12, s.totalPieces)
-        assertEquals("12 / 20 pieces", s.partsCountLabel)
     }
 
     @Test
-    fun `a paid user sees a count, not a limit they no longer have`() {
-        val s = state(tier = Tier.PAID, parts = listOf(part(100, 7)))
-        assertEquals("7 pieces", s.partsCountLabel)
+    fun `🔴 the counter advertises no limit while there is none to enforce`() {
+        // "12 / 20 pieces" in a build with no paywall would stop a user at 20 on
+        // a job the app would have cut without complaint — the label inventing a
+        // ceiling that the gate does not apply.
+        val free = state(parts = listOf(part(100, 7, id = 1), part(200, 5, id = 2)))
+        assertEquals("12 pieces", free.partsCountLabel)
+
+        val paid = state(tier = Tier.PAID, parts = listOf(part(100, 7)))
+        assertEquals("7 pieces", paid.partsCountLabel)
     }
 
     // ── Optimize ─────────────────────────────────────────────────────────────
@@ -123,41 +128,51 @@ class EditorUiStateTest {
     // ── Entitlement boundary ─────────────────────────────────────────────────
 
     @Test
-    fun `the free limit blocks the twenty-first piece and names its trigger`() {
-        assertIs<Gate.Allowed>(Entitlement.canAddParts(Tier.FREE, currentTotalQuantity = 19))
+    fun `nothing the editor can do raises a paywall in this build`() {
+        assertIs<Gate.Allowed>(Entitlement.canAddParts(Tier.FREE, currentTotalQuantity = 20))
+        assertIs<Gate.Allowed>(
+            Entitlement.canAddParts(Tier.FREE, currentTotalQuantity = 18, adding = 5),
+        )
+        assertIs<Gate.Allowed>(Entitlement.canAddStock(Tier.FREE, currentStockCount = 5))
+    }
 
-        val gate = Entitlement.canAddParts(Tier.FREE, currentTotalQuantity = 20)
+    @Test
+    fun `the free limit blocks the twenty-first piece and names its trigger`() {
+        // Dormant rule — see PaywallRulesTest for why these stay covered.
+        assertIs<Gate.Allowed>(
+            Entitlement.canAddParts(Tier.FREE, 19, paywallEnabled = true),
+        )
+        val gate = Entitlement.canAddParts(Tier.FREE, 20, paywallEnabled = true)
         assertEquals(PaywallTrigger.PARTS, assertIs<Gate.NeedsUpgrade>(gate).trigger)
     }
 
     @Test
     fun `a quantity that would jump the limit is caught, not just a single piece`() {
         // Adding 5 to an existing 18 must be blocked, even though 18 is under 20.
-        val gate = Entitlement.canAddParts(Tier.FREE, currentTotalQuantity = 18, adding = 5)
+        val gate = Entitlement.canAddParts(Tier.FREE, 18, adding = 5, paywallEnabled = true)
         assertIs<Gate.NeedsUpgrade>(gate)
     }
 
     @Test
-    fun `the thousand-piece cap is a hard limit for a PAID user, not a paywall`() {
-        // Showing a paid user an offer for a limit money cannot lift would be a lie.
-        val gate = Entitlement.canAddParts(
-            Tier.PAID,
-            currentTotalQuantity = Limits.MAX_PARTS_PER_PROJECT,
-        )
-        val hard = assertIs<Gate.HardLimit>(gate)
-        assertTrue(hard.message.contains("${Limits.MAX_PARTS_PER_PROJECT}"))
-    }
-
-    @Test
-    fun `the hard cap outranks the paywall for a free user too`() {
-        val gate = Entitlement.canAddParts(Tier.FREE, currentTotalQuantity = 1_500)
-        assertIs<Gate.HardLimit>(gate)
+    fun `the thousand-piece cap is a hard limit, not a paywall, in either build`() {
+        // Money cannot lift this one, so it must never be dressed as an offer —
+        // and it must keep applying now that there is no offer to make at all.
+        for (paywall in listOf(true, false)) {
+            val gate = Entitlement.canAddParts(
+                Tier.PAID,
+                currentTotalQuantity = Limits.MAX_PARTS_PER_PROJECT,
+                paywallEnabled = paywall,
+            )
+            val hard = assertIs<Gate.HardLimit>(gate, "paywallEnabled=$paywall")
+            assertTrue(hard.message.contains("${Limits.MAX_PARTS_PER_PROJECT}"))
+        }
+        assertIs<Gate.HardLimit>(Entitlement.canAddParts(Tier.FREE, 1_500))
     }
 
     @Test
     fun `the free stock limit is five`() {
-        assertIs<Gate.Allowed>(Entitlement.canAddStock(Tier.FREE, currentStockCount = 4))
-        val gate = Entitlement.canAddStock(Tier.FREE, currentStockCount = 5)
+        assertIs<Gate.Allowed>(Entitlement.canAddStock(Tier.FREE, 4, paywallEnabled = true))
+        val gate = Entitlement.canAddStock(Tier.FREE, 5, paywallEnabled = true)
         assertEquals(PaywallTrigger.STOCK, assertIs<Gate.NeedsUpgrade>(gate).trigger)
     }
 
@@ -183,8 +198,10 @@ class AdCadenceTest {
 
     @Test
     fun `a paid user never sees an interstitial`() {
-        assertFalse(Entitlement.interstitialDue(Tier.PAID, optimizeCount = 5))
-        assertFalse(Entitlement.interstitialDue(Tier.PAID, optimizeCount = 50))
+        // Dormant rule. In THIS build nobody can pay, so everybody sees ads —
+        // that case is asserted in EntitlementTest.
+        assertFalse(Entitlement.interstitialDue(Tier.PAID, 5, paywallEnabled = true))
+        assertFalse(Entitlement.interstitialDue(Tier.PAID, 50, paywallEnabled = true))
     }
 
     @Test

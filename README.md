@@ -10,27 +10,43 @@ Built for fabricators, welders, timber framers, and anyone cutting from linear s
 
 ## Status
 
-🟡 **Phases 3–5 complete — the engine, the data layer and the whole UI are built and tested.**
+✅ **Code complete. Everything remaining needs a real device or a Play Console.**
 
 | Module | State |
 |---|---|
 | `:units` | Done — 5 unit systems, fractional inch, exact integer arithmetic |
 | `:optimizer` | Done — Best-Fit-Decreasing + improvement pass, self-verifying invariant |
 | `:data` | Done — Room schema, DB-level constraints, DataStore, entitlement rules |
-| `:app` | Done — 5 routes, all 7 screens, share as image, PDF export |
+| `:app` | Done — 5 routes, all 7 screens, share as image, PDF export, ads, consent |
 
-187 tests green: 139 on the JVM, 48 instrumented.
+Release APK **4.1 MB** against a 12 MB budget.
 
-**Next: Phase 6 — billing and ads.** Almost none of it can be *tested* until a
-Play Console account, an in-app product and license testers exist. See
-[`docs/10-owner-actions.md`](docs/10-owner-actions.md) for the step-by-step.
+### 💸 v1 is completely free
 
-🔴 **Two W0 gates are still open and both are non-code** (see [`docs/07-implementation-plan.md`](docs/07-implementation-plan.md) W0). Phases 3–4 were built ahead of them:
+No in-app purchase, no paywall, no price. **AdMob is the only revenue.**
 
-- [ ] A real tradesman validates a hand-made cut plan on paper — *if this fails, the project stops*
-- [ ] App name cleared against the Play Store, package name fixed — **permanent once published**
+v1 publishes on a friend's Play Console account — Play Billing pays the account
+holder, and there is no way to route purchase revenue anywhere else, so shipping
+the unlock would have put this app's money in someone else's bank account. AdMob
+is unaffected: ad unit IDs are compiled into the APK and AdMob pays whoever owns
+the AdMob account.
 
-Also open, and the longest lead-time item: **tester recruitment**. A closed test needs 12 testers opted in for 14 continuous days before production access can even be applied for.
+The billing code, paywall and tier gates all still exist behind
+`Monetization.PAYWALL_ENABLED`, tested on every build, ready to return once the
+app is transferred. Full reasoning:
+[`docs/15-free-launch-and-paywall-plan.md`](docs/15-free-launch-and-paywall-plan.md).
+
+### What's left
+
+Not the closed test — the publishing account already has production access, which
+is granted per account, not per app.
+
+- [ ] 🔴 Keystore + two off-machine backups
+- [ ] 🔴 Low-end real device: performance, and uninstall → reinstall auto-backup
+- [ ] Store listing — screenshots need a device
+- [ ] Oracle case `O-10` from a real tradesman job
+
+Step-by-step in [`docs/13-remaining-to-launch.md`](docs/13-remaining-to-launch.md).
 
 ---
 

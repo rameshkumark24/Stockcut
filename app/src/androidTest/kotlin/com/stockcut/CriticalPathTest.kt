@@ -243,26 +243,77 @@ class CriticalPathTest {
         }
     }
 
-    // ── 3. Free tier: the 21st piece raises the paywall ─────────────────────
+    // ── 3. 🔴 Nothing in the app asks anyone for money ───────────────────────
 
     @Test
-    fun exceedingTheFreePartLimitRaisesThePaywall() {
+    fun passingTheOldFreeLimitRaisesNoPaywall() {
+        // This test used to assert the opposite: that a 21st piece raised the
+        // paywall. StockCut v1 ships completely free and earns only from AdMob
+        // (see Monetization), so the same journey must now simply work.
+        //
+        // It is kept — inverted rather than deleted — because "free" is a
+        // shipping promise, and an untested promise is the one that quietly
+        // stops being true.
         awaitProjects()
         awaitText("Example: gate frame")
         rule.onNodeWithText("Example: gate frame").performClick()
         awaitText("pieces")
 
-        // Comfortably past the free limit of 20, and comfortably UNDER the
-        // 1000-piece hard cap. 999 was wrong: 9 + 999 exceeds the cap, so the
-        // app correctly showed "that's as big as one job gets" — a HardLimit,
-        // not a paywall. Money cannot lift that one, so offering to sell
-        // something would have been a lie, and the app was right to refuse.
+        // Comfortably past the old free limit of 20, and comfortably UNDER the
+        // 1000-piece hard cap, which is a performance ceiling and still applies.
         rule.onNodeWithContentDescription("Add part").performClick()
         awaitText("Add part")
         rule.onNodeWithContentDescription("Length").performTextInput("100")
         rule.onNodeWithContentDescription("Quantity").performTextReplacement("50")
         rule.onNodeWithText("Save").performClick()
 
-        awaitText("Unlock unlimited parts")
+        // The sheet closes, which is what proves the write was accepted rather
+        // than swallowed by a gate.
+        rule.waitUntil(timeoutMillis = timeout) {
+            rule.onAllNodesWithText("Add part").fetchSemanticsNodes().size <= 1
+        }
+        awaitText("×50")
+
+        // No offer, of any kind, anywhere on the screen.
+        for (sales in listOf("Unlock", "Upgrade", "Restore purchases", "Buy")) {
+            assert(
+                rule.onAllNodesWithText(sales, substring = true)
+                    .fetchSemanticsNodes().isEmpty(),
+            ) { "the app offered to sell something ('$sales') in a free build" }
+        }
+
+        // And the plan still comes out the other end.
+        rule.onNodeWithContentDescription("Optimize").performClick()
+        awaitText("Cut plan")
+    }
+
+    // ── PDF export was the paid feature. It must now be free. ────────────────
+
+    @Test
+    fun pdfExportIsFreeAndNeverOffersAPurchase() {
+        awaitProjects()
+        awaitText("Example: gate frame")
+        rule.onNodeWithText("Example: gate frame").performClick()
+        awaitText("Parts")
+        rule.onNodeWithContentDescription("Optimize").performClick()
+        awaitText("Cut plan")
+
+        // "Export PDF (paid)" was the old label. The parenthetical is the tell
+        // that the gate is back.
+        assert(
+            rule.onAllNodesWithText("(paid)", substring = true)
+                .fetchSemanticsNodes().isEmpty(),
+        ) { "PDF export is still labelled as paid" }
+
+        rule.onNodeWithContentDescription("Export PDF").performClick()
+
+        // Same reasoning as the share test: the chooser is system UI, so what is
+        // asserted is that a real PDF landed in the share directory.
+        rule.waitUntil(timeoutMillis = timeout) {
+            val context = androidx.test.platform.app.InstrumentationRegistry
+                .getInstrumentation().targetContext
+            java.io.File(context.cacheDir, "shared")
+                .listFiles()?.any { it.name.endsWith(".pdf") && it.length() > 0 } == true
+        }
     }
 }

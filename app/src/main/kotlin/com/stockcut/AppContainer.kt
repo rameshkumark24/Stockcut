@@ -11,6 +11,7 @@ import com.stockcut.data.settings.SettingsStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * Manual dependency injection. The whole of it.
@@ -55,4 +56,32 @@ class AppContainer(context: Context) {
     val consent: ConsentManager by lazy { ConsentManager(appContext) }
 
     val ads: AdsManager by lazy { AdsManager(appContext) }
+
+    init {
+        stampFirstRun()
+    }
+
+    /**
+     * Records when this user first ran the app, for the grandfathering rule
+     * described on [com.stockcut.data.settings.SettingsStore.recordFirstRunIfAbsent].
+     *
+     * On [appScope], never on the main thread: it is a DataStore write, and cold
+     * start has a 1.5 s budget (NFR-2). Nothing waits on the result — no screen
+     * reads this value in v1, and the stamp being a few milliseconds late is
+     * irrelevant when it is only ever compared against a date months away.
+     */
+    private fun stampFirstRun() = appScope.launch {
+        // firstInstallTime is more truthful than "now" for anyone who installed
+        // before this field existed, and identical to it on a genuine first run.
+        val installedAt = runCatching {
+            appContext.packageManager
+                .getPackageInfo(appContext.packageName, 0)
+                .firstInstallTime
+        }.getOrNull()?.takeIf { it > 0L } ?: System.currentTimeMillis()
+
+        // Failing to stamp must never take the app down on launch. The cost of a
+        // miss is one user wrongly treated as new in six months; the cost of a
+        // crash here is the app not starting at all.
+        runCatching { settings.recordFirstRunIfAbsent(installedAt) }
+    }
 }

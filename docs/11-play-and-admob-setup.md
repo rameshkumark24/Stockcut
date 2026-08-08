@@ -3,6 +3,17 @@
 Everything in here needs your Google account, so none of it can be done for you.
 Each step ends with **"send me"** where the code needs a value back.
 
+> ⚠️ **Part 1 does not apply to v1.** v1 ships free — there is no in-app product
+> to create. Come back to Part 1 when the app has been transferred to your own
+> account and the paywall goes on
+> ([`15-free-launch-and-paywall-plan.md`](15-free-launch-and-paywall-plan.md)).
+>
+> **Parts 2–4 (AdMob, consent, keystore) are all still current**, and the AdMob
+> part matters more than ever: it is now the app's only revenue. One addition —
+> `app-ads.txt` must sit at the **root** of the domain named in the listing's
+> Developer website field, which means a repo called
+> `rameshkumark24.github.io`, not the `/Stockcut/` project page.
+
 ---
 
 # Part 1 — The in-app product

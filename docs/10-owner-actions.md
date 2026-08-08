@@ -1,5 +1,19 @@
 # Owner Actions — everything that must happen outside the code
 
+> ⚠️ **Largely superseded — read
+> [`13-remaining-to-launch.md`](13-remaining-to-launch.md) instead.**
+>
+> This doc was written when v1 was a paid app going onto a new Play Console
+> account. Both changed on 2026-08-08: **v1 ships free** and publishes on a
+> friend's account that already has production access.
+>
+> So everything here about the **in-app product, license testers, the billing
+> test matrix, the payments profile, and the 14-day closed test does not apply to
+> v1**. It applies again at the transfer, per
+> [`15-free-launch-and-paywall-plan.md`](15-free-launch-and-paywall-plan.md).
+>
+> Still current: the keystore, the store listing, and the real-device testing.
+
 **Why this doc exists:** Phases 3–5 are built. Phase 6 is billing and ads, and
 almost none of it can be *tested* until a Play Console account, an in-app
 product, and license testers exist. Those are account and paperwork tasks that

@@ -33,6 +33,7 @@ class SettingsStore(private val context: Context) {
         val lastReviewPromptAt = longPreferencesKey("last_review_prompt_at")
         val exampleProjectDeleted = booleanPreferencesKey("example_project_deleted")
         val lastInterstitialAt = longPreferencesKey("last_interstitial_at")
+        val firstRunAt = longPreferencesKey("first_run_at")
     }
 
     val settings: Flow<Settings> = context.dataStore.data.map { prefs ->
@@ -46,7 +47,35 @@ class SettingsStore(private val context: Context) {
             lastReviewPromptAt = prefs[Keys.lastReviewPromptAt] ?: 0L,
             exampleProjectDeleted = prefs[Keys.exampleProjectDeleted] ?: false,
             lastInterstitialAt = prefs[Keys.lastInterstitialAt] ?: 0L,
+            firstRunAt = prefs[Keys.firstRunAt] ?: 0L,
         )
+    }
+
+    /**
+     * Stamps when this user first ran the app, once, and never again.
+     *
+     * 🔴 This exists for ONE reason and it is not analytics — nothing is sent
+     * anywhere; the value never leaves the device.
+     *
+     * StockCut v1 ships completely free (see
+     * [com.stockcut.data.entitlement.Monetization]). When the paywall is
+     * eventually switched on, everyone already using the app must keep what they
+     * have — silently taking features back from existing users is the surest way
+     * to turn a working app into one-star reviews.
+     *
+     * Answering "was this person here before the cutoff?" is impossible unless
+     * the app wrote it down at the time, which is why this ships in v1 rather
+     * than alongside the paywall that needs it.
+     *
+     * Never overwritten: a second call on an existing install is a no-op, so
+     * reinstalling cannot quietly reclassify a long-time user as new.
+     */
+    suspend fun recordFirstRunIfAbsent(installedAtMillis: Long) {
+        context.dataStore.edit { prefs ->
+            if ((prefs[Keys.firstRunAt] ?: 0L) == 0L) {
+                prefs[Keys.firstRunAt] = installedAtMillis
+            }
+        }
     }
 
     /**
@@ -112,6 +141,8 @@ data class Settings(
     val lastReviewPromptAt: Long,
     val exampleProjectDeleted: Boolean,
     val lastInterstitialAt: Long = 0L,
+    /** When this user first ran the app; 0 until the first launch records it. */
+    val firstRunAt: Long = 0L,
 ) {
     val tier: Tier get() = if (isUnlocked) Tier.PAID else Tier.FREE
 }
