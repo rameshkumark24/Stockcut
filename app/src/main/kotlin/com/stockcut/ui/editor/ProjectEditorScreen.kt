@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -172,6 +173,19 @@ fun ProjectEditorScreen(
                 enabled = state.canOptimize && !state.optimizing,
                 modifier = Modifier
                     .fillMaxWidth()
+                    // 🔴 navigationBarsPadding, not a fixed gap.
+                    //
+                    // Scaffold does NOT apply window insets to an arbitrary
+                    // composable in the bottomBar slot — that is the slot's job.
+                    // Without this the button sits UNDER the navigation bar: on a
+                    // 3-button phone the Home and Back keys are drawn on top of
+                    // it, so tapping the lower half of Optimize leaves the app.
+                    //
+                    // Invisible on the emulator, which uses the short gesture
+                    // pill. Found on a real phone with 3-button navigation. This
+                    // is the app's primary action, so it was also the worst
+                    // possible place for it.
+                    .navigationBarsPadding()
                     .padding(Space.screenHorizontal)
                     .heightIn(min = TouchTarget.primaryButtonHeight)
                     .semantics { contentDescription = "Optimize" },

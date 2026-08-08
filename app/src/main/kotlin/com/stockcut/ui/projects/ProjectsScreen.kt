@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -95,7 +96,17 @@ fun ProjectsScreen(
             // would be invalid traffic.
             if (com.stockcut.data.entitlement.Entitlement.showsAds(state.tier)) {
                 val canRequestAds by container.consent.canRequestAds.collectAsStateWithLifecycle()
-                Column(modifier = Modifier.padding(bottom = Space.lg)) {
+                // navigationBarsPadding is not cosmetic here — it is an AdMob
+                // policy matter. Without it the banner is drawn under the
+                // navigation bar, which both obscures the ad and puts the Home
+                // and Back keys directly over it. Accidental taps on a partly
+                // hidden ad are exactly what invalid-traffic enforcement looks
+                // for, and that risks the whole AdMob account.
+                Column(
+                    modifier = Modifier
+                        .navigationBarsPadding()
+                        .padding(bottom = Space.lg),
+                ) {
                     com.stockcut.ads.BannerAd(
                         adUnitId = container.ads.bannerUnitId,
                         canRequestAds = canRequestAds,

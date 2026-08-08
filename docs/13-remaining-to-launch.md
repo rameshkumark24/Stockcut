@@ -84,20 +84,49 @@ Nothing here needs code. It is all sitting in the repo.
 - [ ] Burn the captions into the 5 screenshots
 - [ ] Export the 512×512 icon from `app/src/main/res/mipmap-xxxhdpi`
 
-## 🔴 The real-device testing — I cannot do any of these
+## Real-device testing
 
-The emulator cannot answer them honestly, and it is better to find these now than
-during the 14-day test.
+Run on a **vivo V2307, Android 15, 8 GB RAM, 3-button navigation**, release build,
+on 2026-08-08. It found two real bugs that no emulator run had shown — see below.
 
-- [ ] **Low-end real phone** (2–3 GB RAM, Android 8–10) — *your actual user's phone*
-- [ ] **Uninstall → reinstall → jobs come back** via auto-backup. The rules are
-      written and have never been proven to work
-- [ ] Cold start **< 1.5 s** on that phone, release build
-- [ ] **Airplane mode** — full function, and the ad slot collapses rather than
-      leaving a grey box
+- [x] **Uninstall → reinstall → jobs come back** via auto-backup. **Proven.** A
+      real uninstall then restore brought back every job including a user-created
+      one, and the example did not double-seed, so DataStore restored too
+- [x] Cold start **670 ms median** (release build, 5 runs) against a 1.5 s budget
+- [x] No crashes, no ANRs, no StrictMode violations in logcat
+- [x] Ad banner and Optimize button clear the navigation bar *(they did not — see
+      below)*
+- [ ] 🔴 **Low-end phone** (2–3 GB RAM, Android 8–10) — still outstanding. The
+      V2307 is a *good* phone; it proves correctness on real hardware, not
+      performance on slow hardware. 670 ms here could be 2 s there
 - [ ] Read a cut plan outdoors in sunlight
 - [ ] Background it 20 minutes, return to the same state
 - [ ] Split screen
+
+### 🔴 Two bugs found only by running on a real phone
+
+Both were invisible on the emulator, and for the same underlying reason: the
+emulator used **gesture navigation** and had its system theme matching the app's.
+
+**1. The Optimize button was under the navigation bar.** `Scaffold` does not
+apply window insets to an arbitrary composable in the `bottomBar` slot — that is
+the slot's own job — and the button had only a fixed padding. With 3-button
+navigation the Home and Back keys were drawn *on top of* the app's primary
+action, so tapping the lower half of Optimize left the app. The ad banner had the
+same fault, which is additionally an AdMob policy problem: a partly obscured ad
+next to system buttons is what invalid-traffic enforcement looks for.
+Fixed with `navigationBarsPadding()` on both.
+
+**2. Status bar icons were invisible.** `enableEdgeToEdge()` picks icon colour
+from the **system** dark-mode setting, not the app's theme. Phone in dark mode,
+app set to Light — a combination this app explicitly offers in Settings — gave
+white icons on a white background, so the clock and battery vanished. Fixed with
+a `SideEffect` in `StockCutTheme` that sets `isAppearanceLightStatusBars` from
+the app's own resolved theme.
+
+**The lesson worth keeping:** every emulator screenshot in `store/` was taken
+with gesture navigation. Gesture nav hides inset bugs, because the pill is short
+enough that a fixed padding looks fine. Test 3-button navigation.
 
 ## When the $25 arrives
 
