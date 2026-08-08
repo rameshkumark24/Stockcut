@@ -68,8 +68,21 @@ android {
 
         minSdk = 26
         targetSdk = 36
+        // 🔴 versionCode may only ever go UP, and Play remembers the highest one
+        // it has EVER seen — including from a build you uploaded and discarded.
+        // There is no way to reuse or lower a number. Bump it for every upload,
+        // even a re-upload of the same code after a rejected review.
         versionCode = 1
-        versionName = "0.1.0"
+
+        // 1.0.0 for the first public release. It was 0.1.0 while the app was
+        // being built, which is honest for a pre-release but wrong on a store
+        // listing: users read a leading 0 as "unfinished", and a tradesman
+        // deciding whether to trust a measurement tool is the last person to
+        // give the benefit of the doubt.
+        //
+        // MAJOR.MINOR.PATCH from here: PATCH for fixes, MINOR for features,
+        // MAJOR for a change that alters how a saved job behaves.
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

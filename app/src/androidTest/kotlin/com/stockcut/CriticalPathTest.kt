@@ -70,6 +70,30 @@ class CriticalPathTest {
         }
     }
 
+    /**
+     * Navigates off the result screen before a test ends.
+     *
+     * 🔴 Call this from any test that finishes on the cut plan — except the two
+     * that open a system chooser, where a share sheet sits above the app and a
+     * Compose Back tap would dismiss that instead. Those have never hit this,
+     * and adding a fragile tap to avoid a race they do not have would trade a
+     * rare failure for a common one.
+     *
+     * Tearing the Activity down while a just-pushed NavBackStackEntry is still
+     * settling throws "State must be at least CREATED to be moved to DESTROYED"
+     * out of Navigation-Compose. It is a harness artifact, not a product bug —
+     * but it fails the test after every assertion has already passed, and it is
+     * timing-dependent, so it appears and disappears with unrelated changes and
+     * looks like a real regression each time.
+     *
+     * It was originally worked around in one test. It then bit a second one, so
+     * the remedy lives here instead of being rediscovered per test.
+     */
+    private fun leaveResultScreen() {
+        rule.onNodeWithContentDescription("Back").performClick()
+        awaitText("Parts")
+    }
+
     // ── 1. First run → tap the example → see a cut plan ──────────────────────
 
     @Test
@@ -87,6 +111,7 @@ class CriticalPathTest {
 
         // The plan is real, not an empty shell.
         rule.onNodeWithText("Bar 1").assertIsDisplayed()
+        leaveResultScreen()
     }
 
     // ── 5. 🔴 A part longer than any stock BLOCKS navigation ─────────────────
@@ -168,6 +193,7 @@ class CriticalPathTest {
             activity.requestedOrientation =
                 android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
+        leaveResultScreen()
     }
 
     // ── 2. New job → parts → stock → optimize → a plan ──────────────────────
@@ -208,13 +234,7 @@ class CriticalPathTest {
         awaitText("Cut plan")
         rule.onNodeWithText("Bar 1").assertIsDisplayed()
 
-        // Navigate off the result before the test ends. Tearing the Activity
-        // down while a just-pushed NavBackStackEntry is still settling throws
-        // "State must be at least CREATED to be moved to DESTROYED" from
-        // Navigation-Compose — a harness artifact, but one that fails the test
-        // after every assertion has already passed.
-        rule.onNodeWithContentDescription("Back").performClick()
-        awaitText("Parts")
+        leaveResultScreen()
     }
 
     // ── 7. Optimize → share image → the chooser opens ───────────────────────
@@ -285,6 +305,7 @@ class CriticalPathTest {
         // And the plan still comes out the other end.
         rule.onNodeWithContentDescription("Optimize").performClick()
         awaitText("Cut plan")
+        leaveResultScreen()
     }
 
     // ── PDF export was the paid feature. It must now be free. ────────────────

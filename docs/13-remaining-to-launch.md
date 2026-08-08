@@ -36,13 +36,18 @@ Release APK **4.1 MB** against a 12 MB budget (NFR-3).
 
 ## What is actually left
 
-Only three things block launch now, and none of them costs money.
+**Everything that can be produced off the Play Console is done** — signed AAB,
+keystore, listing copy, screenshots, feature graphic, `app-ads.txt`. Step-by-step
+upload instructions: [`17-upload-day-runbook.md`](17-upload-day-runbook.md).
 
-1. 🔴 **The keystore** — generate it, back it up twice off-machine, enrol in Play
-   App Signing. Lose it and the app can never be updated again.
+Three things remain, and none of them costs money.
+
+1. 🔴 **Back up the keystore twice, off this machine.** It is generated and
+   working; it is not backed up. This is the only irreversible mistake available.
 2. 🔴 **A low-end real device** — the emulator cannot answer performance or
    auto-backup questions honestly.
-3. **The store listing** — screenshots need a device.
+3. **Your friend's developer name**, so the privacy policy and About screen name
+   the right publisher. Send it and I will update both.
 
 ---
 
@@ -81,28 +86,24 @@ his account at all — that is the whole reason v1 is free.
 
 ## Keystore
 
-- [ ] Generate `upload-keystore.jks` — command in
-      [`11-play-and-admob-setup.md`](11-play-and-admob-setup.md) Part 4
-- [ ] Fill `keystore.properties` from the example
-- [ ] 🔴 Back up the file **and its passwords** in **two places off this machine**
+- [x] `upload-keystore.jks` generated — RSA 4096, alias `upload`, 10,000 days
+- [x] `keystore.properties` filled in, both git-ignored
+- [x] Release AAB builds signed and verifies
+- [ ] 🔴 **Back up the file and its passwords in two places off this machine**
 - [ ] Enrol in Play App Signing at first upload
 - [ ] Keep it yourself — your friend never needs it, and it survives the transfer
 
 ## Store listing
 
-- [ ] Title: **StockCut — Cut List Optimizer**
-- [ ] **80-character short description** — the highest-weight ASO field
-- [ ] Long description
-- [ ] **5 screenshots, each captioned** — content specified in `docs/04` §11
-- [ ] Feature graphic **1024×500**
-- [ ] Content rating questionnaire
-- [ ] **Ads declaration — "contains ads"**
-- [ ] **In-app purchases — "No"** *(changed: v1 sells nothing)*
-- [ ] **Data safety form** — AdMob + Crashlytics only. 🔴 Must declare **AD_ID**.
-      Nothing user-submitted exists to declare, and there are no purchases
+All written and length-checked in
+[`16-store-listing.md`](16-store-listing.md); assets in `store/`.
 
-*I can draft the title, both descriptions and the captions. The images need a
-device.*
+- [x] Title, short description, full description
+- [x] **5 screenshots** captured from the real app, with captions
+- [x] Feature graphic **1024×500**
+- [x] Content rating / ads / IAP / data safety answers all decided
+- [ ] Paste it in and **burn the captions into the images**
+- [ ] App icon 512×512 — export from `mipmap-xxxhdpi`
 
 ## Real-device testing — I cannot do these
 
