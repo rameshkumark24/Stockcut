@@ -9,10 +9,12 @@ Each step ends with **"send me"** where the code needs a value back.
 > ([`15-free-launch-and-paywall-plan.md`](15-free-launch-and-paywall-plan.md)).
 >
 > **Parts 2–4 (AdMob, consent, keystore) are all still current**, and the AdMob
-> part matters more than ever: it is now the app's only revenue. One addition —
-> `app-ads.txt` must sit at the **root** of the domain named in the listing's
-> Developer website field, which means a repo called
-> `rameshkumark24.github.io`, not the `/Stockcut/` project page.
+> part matters more than ever: it is now the app's only revenue.
+>
+> `app-ads.txt` is already published at
+> `https://rameshkumark.vercel.app/app-ads.txt`, and the listing's Developer
+> website must point at that same domain — the file only ever resolves at a
+> domain **root**, never in a subdirectory.
 
 ---
 

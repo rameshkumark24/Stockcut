@@ -72,13 +72,24 @@ Nothing here needs code. It is all sitting in the repo.
 
 ## Now — free, and does not wait for the $25
 
-- [ ] 🔴 **Back up `upload-keystore.jks` and its passwords in two places off this
-      machine.** It is generated and working; it is not backed up. Losing it means
-      the app can never be updated again — not patched, not renamed
-- [ ] Create a GitHub repo named exactly **`rameshkumark24.github.io`** and publish
-      `store/app-ads.txt` at its root. It must resolve at
-      `https://rameshkumark24.github.io/app-ads.txt` — the `/Stockcut/` project
-      page will not do, because `app-ads.txt` has to sit at the **domain root**
+- [x] 🔴 **Back up `upload-keystore.jks` and its passwords off this machine** —
+      done 2026-08-08. Losing it would mean the app could never be updated again
+- [x] **`app-ads.txt` published** — 2026-08-09, at
+      [`https://rameshkumark.vercel.app/app-ads.txt`](https://rameshkumark.vercel.app/app-ads.txt),
+      verified live with `Content-Type: text/plain`.
+
+      It is served from the owner's portfolio (`My-Portfolio` repo, `public/`,
+      which Vite copies to the deploy root) rather than the GitHub Pages user
+      site this doc previously specified. `vercel.app` is a public-suffix domain,
+      so `rameshkumark.vercel.app` counts as a root and the file resolves without
+      a subdirectory. That removed the need for a `rameshkumark24.github.io` repo
+      entirely.
+
+      🔴 If AdMob still reports "app-ads.txt not found" a few days after the
+      listing is live, the crawler is not treating the Vercel subdomain as a
+      root. Fallback: the same one file on a `rameshkumark24.github.io` repo.
+      Not blocking either way — it affects ad demand quality, not whether ads
+      serve or whether you get paid.
 - [ ] Line up your **15 testers** and confirm they will install from a Play link
       when asked. Invited-but-not-installed does not count toward the 12
 - [ ] Burn the captions into the 5 screenshots
@@ -138,8 +149,8 @@ enough that a fixed padding looks fine. Test 3-button navigation.
 - [ ] Fill the listing from [`16-store-listing.md`](16-store-listing.md)
 - [ ] Declarations: **Ads = Yes**, **In-app purchases = No**, content rating,
       and 🔴 **data safety must declare AD_ID**
-- [ ] Set **Developer website** to `https://rameshkumark24.github.io` so AdMob can
-      verify the app against a domain you control
+- [ ] Set **Developer website** to `https://rameshkumark.vercel.app` so AdMob can
+      verify the app against the domain already serving `app-ads.txt`
 
 ## ⏱ Then the part that is pure waiting
 

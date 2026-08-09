@@ -45,13 +45,12 @@ This does not wait for the $25. It is the one irreversible mistake available.
 Also free, also does not wait. AdMob takes a day or two to crawl, so doing it
 early means it is already verified when the listing goes up.
 
-- [ ] Create a GitHub repo named exactly **`rameshkumark24.github.io`**
-      *(the `/Stockcut/` project page will not work — `app-ads.txt` must be at the
-      domain root)*
-- [ ] Add `store/app-ads.txt` to it as `app-ads.txt` at the top level
-- [ ] Enable Pages on that repo
-- [ ] Confirm `https://rameshkumark24.github.io/app-ads.txt` loads and shows the
-      single `google.com, pub-…` line
+- [x] **Done 2026-08-09.** It is served from the owner's portfolio at
+      `https://rameshkumark.vercel.app/app-ads.txt`, verified live with
+      `Content-Type: text/plain`.
+
+Nothing to do here unless AdMob later reports the file as missing — see
+[`13-remaining-to-launch.md`](13-remaining-to-launch.md) for the fallback.
 
 It is normal for AdMob to say "not found" for the first day or two.
 
@@ -90,8 +89,8 @@ length-checked.
 - [ ] Feature graphic
 - [ ] App icon 512×512 — export from `app/src/main/res/mipmap-xxxhdpi`
 - [ ] Category **Tools**, contact email, privacy policy URL
-- [ ] **Developer website** → `https://rameshkumark24.github.io` (this is what
-      AdMob verifies against)
+- [ ] **Developer website** → `https://rameshkumark.vercel.app` (this is what
+      AdMob verifies against, and it already serves `app-ads.txt`)
 
 🔴 After pasting the title, **look at it**. If it shows `â€"` instead of `—`, your
 editor mangled the encoding — retype the dash.

@@ -204,8 +204,20 @@ The app collects nothing from the user. Everything below comes from the two SDKs
 in the merged manifest, Play scans for it, and an app that declares "no
 advertising ID" while shipping AdMob gets rejected — or removed after the fact.
 
-Privacy policy URL:
-`https://rameshkumark24.github.io/Stockcut/privacy-policy.html`
+## The two URLs the listing needs
+
+| Field | Value |
+|---|---|
+| **Privacy policy** | `https://rameshkumark24.github.io/Stockcut/privacy-policy.html` |
+| **Developer website** | `https://rameshkumark.vercel.app` |
+
+They are deliberately on different hosts and both are correct.
+
+🔴 **Developer website is not cosmetic** — it is the domain AdMob crawls for
+`app-ads.txt`, which is already published at
+[`https://rameshkumark.vercel.app/app-ads.txt`](https://rameshkumark.vercel.app/app-ads.txt).
+Point this field anywhere else and the file stops being found, because crawlers
+only ever read a domain **root** and never a subdirectory.
 
 ---
 
