@@ -93,7 +93,7 @@ Nothing here needs code. It is all sitting in the repo.
 - [ ] Line up your **15 testers** and confirm they will install from a Play link
       when asked. Invited-but-not-installed does not count toward the 12
 - [ ] Burn the captions into the 5 screenshots
-- [ ] Export the 512×512 icon from `app/src/main/res/mipmap-xxxhdpi`
+- [x] 512×512 store icon rendered — `store/play-store-icon-512.png`
 
 ## Real-device testing
 

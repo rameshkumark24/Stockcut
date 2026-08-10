@@ -87,7 +87,8 @@ length-checked.
 - [ ] App name, short description, full description
 - [ ] 5 screenshots **in the order given in that doc**, captions burned in
 - [ ] Feature graphic
-- [ ] App icon 512×512 — export from `app/src/main/res/mipmap-xxxhdpi`
+- [ ] App icon 512×512 — `store/play-store-icon-512.png` *(rendered; there is no
+      raster icon in the project to export)*
 - [ ] Category **Tools**, contact email, privacy policy URL
 - [ ] **Developer website** → `https://rameshkumark.vercel.app` (this is what
       AdMob verifies against, and it already serves `app-ads.txt`)

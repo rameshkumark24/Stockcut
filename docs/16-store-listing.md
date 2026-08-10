@@ -162,6 +162,20 @@ uninstalls the app when the run finishes and takes the PNGs with it.
 
 ---
 
+## App icon — 512 × 512
+
+[`store/play-store-icon-512.png`](../store/play-store-icon-512.png)
+
+There was nothing to export: the launcher icon is an adaptive icon defined purely
+in XML, with **no raster asset anywhere in the project**. So it is rendered from
+the same vector and colour the app itself uses (`tools/make-store-icon.py`),
+which is what stops the store icon and the launcher icon drifting apart.
+
+It is cropped to the adaptive icon's **72×72 safe zone**, not the full 108×108
+viewport. Launchers mask the outer ring away, so the full viewport would have put
+a noticeably smaller bar on the listing than the one the same user finds on their
+home screen a minute later.
+
 ## Feature graphic — 1024 × 500
 
 [`store/feature-graphic.png`](../store/feature-graphic.png)
