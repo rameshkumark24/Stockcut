@@ -10,27 +10,46 @@ Built for fabricators, welders, timber framers, and anyone cutting from linear s
 
 ## Status
 
-🟡 **Phases 3–5 complete — the engine, the data layer and the whole UI are built and tested.**
+✅ **Code complete. Everything remaining needs a real device or a Play Console.**
 
 | Module | State |
 |---|---|
 | `:units` | Done — 5 unit systems, fractional inch, exact integer arithmetic |
 | `:optimizer` | Done — Best-Fit-Decreasing + improvement pass, self-verifying invariant |
 | `:data` | Done — Room schema, DB-level constraints, DataStore, entitlement rules |
-| `:app` | Done — 5 routes, all 7 screens, share as image, PDF export |
+| `:app` | Done — 5 routes, all 7 screens, share as image, PDF export, ads, consent |
 
-187 tests green: 139 on the JVM, 48 instrumented.
+**195 tests green** (144 JVM, 51 instrumented). Signed release AAB **v1.0.0**,
+9.2 MB; release APK 4.1 MB against a 12 MB budget.
 
-**Next: Phase 6 — billing and ads.** Almost none of it can be *tested* until a
-Play Console account, an in-app product and license testers exist. See
-[`docs/10-owner-actions.md`](docs/10-owner-actions.md) for the step-by-step.
+### 💸 Completely free
 
-🔴 **Two W0 gates are still open and both are non-code** (see [`docs/07-implementation-plan.md`](docs/07-implementation-plan.md) W0). Phases 3–4 were built ahead of them:
+No in-app purchase, no paywall, no price. **AdMob is the only revenue.**
 
-- [ ] A real tradesman validates a hand-made cut plan on paper — *if this fails, the project stops*
-- [ ] App name cleared against the Play Store, package name fixed — **permanent once published**
+A new app from an unknown developer converts close to nothing on a paid unlock.
+Ads earn less per user but earn from *every* user, and a free tool spreads — one
+tradesman shows the next one on site, which is this app's only real distribution
+channel.
 
-Also open, and the longest lead-time item: **tester recruitment**. A closed test needs 12 testers opted in for 14 continuous days before production access can even be applied for.
+The billing code, paywall and tier gates all still exist behind
+`Monetization.PAYWALL_ENABLED` and are tested on every build, so a paid unlock
+can be added later without rewriting anything. Full reasoning:
+[`docs/15-free-launch-and-paywall-plan.md`](docs/15-free-launch-and-paywall-plan.md).
+
+### What's left — none of it is code
+
+Every store asset is produced and waiting in [`store/`](store/): signed AAB,
+listing copy, 5 screenshots, feature graphic, `app-ads.txt`.
+
+- [ ] 🔴 Back up the upload keystore in two places off this machine
+- [ ] 🔴 Low-end real device: performance, and uninstall → reinstall auto-backup
+- [ ] Play Console account ($25) + identity verification
+- [ ] ⏱ **12 testers, 14 continuous days** — required of any new personal
+      developer account, and about three weeks including the review
+- [ ] Oracle case `O-10` from a real tradesman job
+
+Step-by-step in [`docs/13-remaining-to-launch.md`](docs/13-remaining-to-launch.md);
+console-by-console in [`docs/17-upload-day-runbook.md`](docs/17-upload-day-runbook.md).
 
 ---
 

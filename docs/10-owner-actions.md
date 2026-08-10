@@ -1,5 +1,20 @@
 # Owner Actions — everything that must happen outside the code
 
+> ⚠️ **Largely superseded — read
+> [`13-remaining-to-launch.md`](13-remaining-to-launch.md) instead.**
+>
+> This doc was written when the app was going to be paid. That changed on
+> 2026-08-08: **StockCut ships completely free, earning only from AdMob**
+> ([`15-free-launch-and-paywall-plan.md`](15-free-launch-and-paywall-plan.md)).
+>
+> So everything here about the **in-app product, license testers, the billing
+> test matrix, and the payments profile does not apply**. It applies only if a
+> paid unlock is ever added.
+>
+> Still current, and all covered in `13`: the Play Console account, the keystore,
+> the store listing, the real-device testing, and the **12-tester / 14-day closed
+> test**, which a new personal developer account still requires.
+
 **Why this doc exists:** Phases 3–5 are built. Phase 6 is billing and ads, and
 almost none of it can be *tested* until a Play Console account, an in-app
 product, and license testers exist. Those are account and paperwork tasks that

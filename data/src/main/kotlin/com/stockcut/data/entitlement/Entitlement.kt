@@ -16,6 +16,44 @@ enum class Tier { FREE, PAID }
 
 enum class PaywallTrigger { PARTS, PROJECTS, STOCK, PDF_EXPORT }
 
+/**
+ * The single switch that decides whether this app sells anything.
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * OFF. StockCut is completely free and earns only from AdMob.
+ *
+ * This is a deliberate product decision, not a temporary state waiting to be
+ * corrected — so do not "fix" it back.
+ *
+ * The reasoning: a brand-new app from an unknown developer converts close to
+ * nothing on a paid unlock. Nobody pays $4.99 on sight for a tool with no
+ * reviews and no reputation. Ads earn less per user but they earn from EVERY
+ * user, including the ones who would never have paid, and they cost nothing to
+ * collect. A free tool also spreads — a tradesman shows it to the next one on
+ * site, which is this app's only real distribution channel.
+ *
+ * The price of that choice, stated honestly: the app learns nothing about
+ * willingness to pay. Whether $4.99 is right, whether $2.99 converts better,
+ * whether anyone pays at all — none of it is knowable while there is no
+ * purchase button. That was accepted with open eyes.
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * IF IT IS EVER TURNED BACK ON — see docs/15-free-launch-and-paywall-plan.md
+ *
+ * Flipping this to `true` restores every limit for everyone, including people
+ * who have used the app unlimited for months. Do not flip it alone. Users who
+ * installed before the cutoff must be grandfathered — the hook for that is
+ * [com.stockcut.data.settings.Settings.firstRunAt].
+ *
+ * 🔴 That hook only works because it ships from v1. It cannot be added later:
+ * there is no way to find out, a year from now, when someone installed if the
+ * app never wrote it down. That is why a value nothing currently reads is
+ * recorded on every first launch.
+ */
+object Monetization {
+    const val PAYWALL_ENABLED = false
+}
+
 object Limits {
     const val FREE_PARTS_PER_PROJECT = 20
     const val FREE_PROJECTS = 1
@@ -63,40 +101,77 @@ sealed interface Gate {
 
 object Entitlement {
 
+    /*
+     * Every gate takes `paywallEnabled` as a defaulted parameter rather than
+     * reading Monetization directly.
+     *
+     * That is not indirection for its own sake. PAYWALL_ENABLED is a compile-time
+     * const, so a test cannot flip it — and without this parameter the paywall
+     * rules would be completely untestable for as long as they are switched off.
+     * They would then be re-enabled in six months having not been exercised once
+     * in the interim, which is exactly how dormant code comes back broken.
+     *
+     * Production call sites pass nothing and get the shipped behaviour.
+     */
+
     /**
      * @param currentTotalQuantity sum of part quantities already in the project,
      *   not the row count — the limit counts pieces to be cut.
      */
-    fun canAddParts(tier: Tier, currentTotalQuantity: Int, adding: Int = 1): Gate {
+    fun canAddParts(
+        tier: Tier,
+        currentTotalQuantity: Int,
+        adding: Int = 1,
+        paywallEnabled: Boolean = Monetization.PAYWALL_ENABLED,
+    ): Gate {
         require(adding > 0) { "adding must be positive" }
         val after = currentTotalQuantity + adding
+        // The hard cap is checked FIRST and is not part of the paywall — it
+        // protects the optimizer, and it applies just as much to a free build.
         if (after > Limits.MAX_PARTS_PER_PROJECT) {
             return Gate.HardLimit(
                 "A job can hold ${Limits.MAX_PARTS_PER_PROJECT} pieces. Split it into two jobs.",
             )
         }
+        if (!paywallEnabled) return Gate.Allowed
         if (tier == Tier.FREE && after > Limits.FREE_PARTS_PER_PROJECT) {
             return Gate.NeedsUpgrade(PaywallTrigger.PARTS)
         }
         return Gate.Allowed
     }
 
-    fun canAddProject(tier: Tier, currentProjectCount: Int): Gate =
-        if (tier == Tier.FREE && currentProjectCount + 1 > Limits.FREE_PROJECTS) {
+    fun canAddProject(
+        tier: Tier,
+        currentProjectCount: Int,
+        paywallEnabled: Boolean = Monetization.PAYWALL_ENABLED,
+    ): Gate =
+        if (paywallEnabled && tier == Tier.FREE &&
+            currentProjectCount + 1 > Limits.FREE_PROJECTS
+        ) {
             Gate.NeedsUpgrade(PaywallTrigger.PROJECTS)
         } else {
             Gate.Allowed
         }
 
-    fun canAddStock(tier: Tier, currentStockCount: Int): Gate =
-        if (tier == Tier.FREE && currentStockCount + 1 > Limits.FREE_STOCK_PER_PROJECT) {
+    fun canAddStock(
+        tier: Tier,
+        currentStockCount: Int,
+        paywallEnabled: Boolean = Monetization.PAYWALL_ENABLED,
+    ): Gate =
+        if (paywallEnabled && tier == Tier.FREE &&
+            currentStockCount + 1 > Limits.FREE_STOCK_PER_PROJECT
+        ) {
             Gate.NeedsUpgrade(PaywallTrigger.STOCK)
         } else {
             Gate.Allowed
         }
 
-    fun canExportPdf(tier: Tier): Gate =
-        if (tier == Tier.PAID) Gate.Allowed else Gate.NeedsUpgrade(PaywallTrigger.PDF_EXPORT)
+    fun canExportPdf(
+        tier: Tier,
+        paywallEnabled: Boolean = Monetization.PAYWALL_ENABLED,
+    ): Gate =
+        if (!paywallEnabled || tier == Tier.PAID) Gate.Allowed
+        else Gate.NeedsUpgrade(PaywallTrigger.PDF_EXPORT)
 
     /** Sharing as an image is free. It is how the app spreads. */
     fun canShareImage(tier: Tier): Gate = Gate.Allowed
@@ -107,7 +182,18 @@ object Entitlement {
     /** Editing and deleting existing rows is never gated, at any tier. */
     fun canEditExisting(tier: Tier): Gate = Gate.Allowed
 
-    fun showsAds(tier: Tier): Boolean = tier == Tier.FREE
+    /**
+     * With no paywall there is no way to buy ads away, so everyone sees them —
+     * they are the only thing paying for the app.
+     *
+     * This deliberately ignores [tier]. A stale `isUnlocked` left in DataStore by
+     * a pre-launch test build must not silently turn a user into unpaid,
+     * unmonetised traffic forever.
+     */
+    fun showsAds(
+        tier: Tier,
+        paywallEnabled: Boolean = Monetization.PAYWALL_ENABLED,
+    ): Boolean = if (!paywallEnabled) true else tier == Tier.FREE
 
     /**
      * @param optimizeCount lifetime successful optimizes, AFTER incrementing.
@@ -123,8 +209,11 @@ object Entitlement {
         optimizeCount: Int,
         lastInterstitialAtMillis: Long = 0L,
         nowMillis: Long = System.currentTimeMillis(),
+        paywallEnabled: Boolean = Monetization.PAYWALL_ENABLED,
     ): Boolean {
-        if (tier != Tier.FREE) return false
+        // Routed through showsAds so there is ONE answer to "does this person
+        // see ads", rather than two rules that can disagree.
+        if (!showsAds(tier, paywallEnabled)) return false
         if (optimizeCount <= 0) return false
         if (optimizeCount % Limits.INTERSTITIAL_EVERY != 0) return false
         if (lastInterstitialAtMillis != 0L &&

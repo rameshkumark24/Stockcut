@@ -59,6 +59,11 @@ Kotlin · Jetpack Compose (Material 3) · Room · DataStore · Navigation-Compos
 
 9. **Never gate correctness behind the paywall.** Free and paid run the identical optimizer. The paywall sells scale (more parts, more projects, PDF), never accuracy.
 
+9a. **The app sells nothing. `Monetization.PAYWALL_ENABLED` is `false` and StockCut is completely free, earning only from AdMob.** This is a deliberate product decision, not a temporary state: a new app from an unknown developer converts close to nothing on a paid unlock, ads earn from every user rather than the few who would pay, and a free tool spreads on site. See [`docs/15-free-launch-and-paywall-plan.md`](docs/15-free-launch-and-paywall-plan.md).
+    - The billing code, paywall sheet and tier gates all still exist, behind the flag. **Do not delete them** — a paid unlock may be added later, and `PaywallRulesTest` keeps them working in the meantime.
+    - `firstRunAt` is recorded in DataStore for one reason: grandfathering existing users *if* a paywall is ever added. It ships from v1 because it **cannot** be added later. Do not remove it, and do not send it anywhere.
+    - 🔴 **Do not flip the flag to `true` on your own.** It restores every limit for everyone, including people who have used the app unlimited for months. `EntitlementTest` fails the build if you do.
+
 10. **Never downgrade a paid user because an entitlement check failed offline.** The DataStore cache is authoritative when there is no network.
 
 11. **The app collects nothing from its users. There is no feedback form, no bug-report form, no survey, and no in-app submission of any kind.** This is a product decision, not a gap — do not add one back.

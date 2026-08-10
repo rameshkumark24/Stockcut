@@ -42,6 +42,11 @@ class MainActivity : ComponentActivity() {
         // Billing connects on every launch. This is also what re-grants the
         // unlock after a reinstall, and what picks up a refund — but only ever
         // from a POSITIVE answer from Play (CLAUDE.md rule 10).
+        //
+        // A no-op in v1: nothing is for sale, so connect() returns immediately
+        // without opening a Play connection. The call stays here so re-enabling
+        // the paywall does not also require remembering to re-add it — see
+        // docs/15-free-launch-and-paywall-plan.md.
         container.billing.connect()
 
         val themeFlow = container.settings.settings.map { stored ->

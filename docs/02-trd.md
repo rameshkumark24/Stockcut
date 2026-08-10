@@ -98,6 +98,21 @@ If any other permission appears in the manifest, treat it as a bug.
 
 ## 6. Entitlement matrix
 
+> ⚠️ **Superseded for v1 by
+> [`15-free-launch-and-paywall-plan.md`](15-free-launch-and-paywall-plan.md).**
+>
+> **StockCut ships completely free — every row in the Free column below is
+> lifted, and the app earns only from AdMob.** A new app from an unknown
+> developer converts close to nothing on a paid unlock; ads earn less per user
+> but earn from every user, and a free tool spreads on site, which is this app's
+> only real distribution channel.
+>
+> The matrix below is not dead: it is exactly what returns when
+> `Monetization.PAYWALL_ENABLED` is switched back on, and `PaywallRulesTest`
+> pins it on every build. Read it as the plan, not as current behaviour. One
+> figure has already changed — the interstitial is every **5th** optimize, not
+> every 3rd (see the note on `Limits.INTERSTITIAL_EVERY`).
+
 Replaces the checklist's "Auth & roles matrix" — there are no accounts, only two tiers.
 
 | Capability | Free | Paid ($4.99 one-time) |

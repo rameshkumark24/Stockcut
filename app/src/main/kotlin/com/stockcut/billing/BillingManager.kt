@@ -94,6 +94,19 @@ class BillingManager(
         .build()
 
     fun connect() {
+        // Nothing is for sale in this build, so do not open a billing connection
+        // at all. Connecting anyway would query a product that does not exist in
+        // Play Console, spend part of the cold-start budget on an IPC that can
+        // never affect anything, and log a confusing "item unavailable".
+        //
+        // Left as an early return rather than deleting the call sites: the
+        // paywall is planned to come back (see Monetization), and a class that
+        // simply declines to connect is far easier to re-enable correctly than
+        // one whose wiring has been unpicked across four screens.
+        if (!com.stockcut.data.entitlement.Monetization.PAYWALL_ENABLED) {
+            _state.value = State.Unavailable("Nothing is for sale in this build")
+            return
+        }
         if (client.isReady) return
         _state.value = State.Connecting
         client.startConnection(object : BillingClientStateListener {

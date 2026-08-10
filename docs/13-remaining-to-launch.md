@@ -1,205 +1,205 @@
 # Everything remaining until the app is live on Play
 
-**As of 2026-08-07.** Phases 0–5 are complete. This is what is left, who owns
-each item, and what blocks what.
+**Rewritten 2026-08-08.** Two settled decisions shape this list:
 
-Two columns matter more than the rest: **🧑 you** (accounts, money, paperwork,
-real devices) and **🤖 me** (code). Items marked ⏱ are calendar time and cannot
-be compressed by working harder.
+1. **StockCut is completely free**, earning only from AdMob — see
+   [`15-free-launch-and-paywall-plan.md`](15-free-launch-and-paywall-plan.md).
+2. **It publishes on the owner's own Play Console account**, opened when the $25
+   is available.
+
+**🧑 you** · **🤖 me** · **⏱ calendar time that effort cannot compress**
 
 ---
 
-## Where things actually stand
+## 🔴 Read this before planning anything
+
+**The 12-tester / 14-day closed test applies to you.**
+
+Google requires it of every **personal** developer account created after
+13 November 2023. A new account is a new account: you run a closed test with at
+least **12 testers opted in continuously for 14 days**, then *apply* for
+production access, and that application is reviewed for up to 7 days.
+
+Nothing in this repository can shorten that. It is roughly **three weeks of
+calendar time after the day you pay**, and it cannot start until the account
+exists and a build is uploaded.
+
+The practical consequence: **pay the $25 as early as you can**, because the clock
+starts at the account, not at the code. The code has been ready since today.
+
+---
+
+## Where things stand
 
 | | Status |
 |---|---|
-| Phase 0 Scope · Phase 1 Docs | ✅ complete |
-| Phase 3 `:units` + `:optimizer` | ✅ complete |
-| Phase 4 `:data` | ✅ complete |
-| Phase 5 UI — all 7 screens, share, PDF | ✅ complete |
-| Phase 6 Billing + ads | ❌ **not started** |
-| Phase 7 Feedback channel | ⬛ removed — app collects nothing |
-| Phase 8 Testing & QA | 🟡 partial |
-| Phase 9 Store readiness | ❌ not started |
-| Phase 10 Closed test | ❌ not started ⏱ |
-| Phase 11 Launch | ❌ not started |
+| Phase 0 Scope · Phase 1 Docs | ✅ |
+| Phase 3 `:units` + `:optimizer` | ✅ |
+| Phase 4 `:data` | ✅ |
+| Phase 5 UI — all 7 screens, share, PDF | ✅ |
+| Phase 6 Ads + consent + review prompt | ✅ |
+| Phase 6 Billing | ⬛ written, switched off — the app sells nothing |
+| Phase 7 Feedback channel | ⬛ removed — the app collects nothing |
+| Phase 8 Testing & QA | ✅ except the real-device items |
+| Phase 9 Store readiness | ✅ **assets produced, ready to paste** |
+| Phase 10 Closed test | ⏱ blocked on the account |
+| Phase 11 Launch | blocked on Phase 10 |
 
-**167 tests green.** CI green on `main`. Release build works under R8 and comes
-out at **1.7 MB** — comfortably inside the 12 MB NFR-3 budget.
-
----
-
-## 🔴 The three things that gate everything else
-
-Nothing downstream can start until these do. They are all yours, and two of them
-are slow.
-
-1. **Play Console account — $25.** Blocks the in-app product, license testers,
-   the closed test, and therefore Phase 6 testing, Phase 9, 10 and 11. Identity
-   verification takes days on top of the payment.
-2. ⏱ **The 14-day closed test.** 12 testers opted in *continuously*. Cannot start
-   until an account exists and a build is uploaded and approved. This is three
-   weeks of calendar time minimum, including the production-access review.
-3. 🔴 **The keystore.** Generate it, back it up twice off-machine, enrol in Play
-   App Signing. Losing it means the app can never be updated again.
+**195 tests green** (144 JVM, 51 instrumented). Signed release AAB **v1.0.0**,
+9.2 MB, verified inside the bundle: `com.measure.stockcut`, targetSdk 36,
+minSdk 26.
 
 ---
 
-# 🧑 Yours — accounts, money, paperwork
+## What is already produced and waiting
 
-## Immediate (minutes, unblocks me)
+Nothing here needs code. It is all sitting in the repo.
 
-- [ ] **Merge PR #3** — brings the privacy policy to the root of `main`
-- [ ] **Enable GitHub Pages** — Settings → Pages → `main` + **`/(root)`**, then
-      confirm `https://rameshkumark24.github.io/Stockcut/privacy-policy.html`
-      loads. Required for the store listing.
+| Thing | Where |
+|---|---|
+| Signed release bundle | `app/build/outputs/bundle/release/app-release.aab` |
+| Upload keystore | `upload-keystore.jks` *(git-ignored)* |
+| Keystore passwords | `keystore.properties` *(git-ignored)* |
+| Listing copy, length-checked | [`16-store-listing.md`](16-store-listing.md) |
+| 5 screenshots | `store/screenshots/` |
+| Feature graphic 1024×500 | `store/feature-graphic.png` |
+| `app-ads.txt` | `store/app-ads.txt` |
+| Upload runbook | [`17-upload-day-runbook.md`](17-upload-day-runbook.md) |
 
-## Play Console (blocks Phase 6 testing)
+---
 
-- [ ] Create account, pay **$25**, complete identity verification
-- [ ] Create the app entry as `com.measure.stockcut`
-- [ ] Upload the first billing build to **Internal testing**
-      *(needed before Monetise unlocks — I produce the build, you upload)*
-- [ ] Create the in-app product: **one-time, non-consumable, $4.99** →
-      **send me the product ID**
-- [ ] Add **license testers** (Settings → License testing, `RESPOND_NORMALLY`)
-- [ ] Payments profile: bank + tax details
-- [ ] 🔴 India: confirm export-of-service treatment of foreign app revenue
-      **with a CA**
+# 🧑 Yours
 
-## Keystore
+## Now — free, and does not wait for the $25
 
-- [ ] Generate `upload-keystore.jks` — command in
-      [`11-play-and-admob-setup.md`](11-play-and-admob-setup.md) Part 4
-- [ ] Fill in `keystore.properties` from the example
-- [ ] 🔴 Back up the file **and** its passwords in **two places off this machine**
-- [ ] Enrol in **Play App Signing** at first upload
+- [x] 🔴 **Back up `upload-keystore.jks` and its passwords off this machine** —
+      done 2026-08-08. Losing it would mean the app could never be updated again
+- [x] **`app-ads.txt` published** — 2026-08-09, at
+      [`https://rameshkumark.vercel.app/app-ads.txt`](https://rameshkumark.vercel.app/app-ads.txt),
+      verified live with `Content-Type: text/plain`.
 
-## Store listing — ASO is your entire distribution channel
+      It is served from the owner's portfolio (`My-Portfolio` repo, `public/`,
+      which Vite copies to the deploy root) rather than the GitHub Pages user
+      site this doc previously specified. `vercel.app` is a public-suffix domain,
+      so `rameshkumark.vercel.app` counts as a root and the file resolves without
+      a subdirectory. That removed the need for a `rameshkumark24.github.io` repo
+      entirely.
 
-- [ ] Title: **StockCut — Cut List Optimizer**
-- [ ] **80-character short description** — the highest-weight ASO field
-- [ ] Long description
-- [ ] **5 screenshots, each captioned** — content specified in `docs/04` §11
-- [ ] Feature graphic **1024×500**
-- [ ] Content rating questionnaire
-- [ ] **Ads declaration** — "contains ads"
-- [ ] **Data safety form** — AdMob + Crashlytics only. Nothing user-submitted
-      exists to declare.
+      🔴 If AdMob still reports "app-ads.txt not found" a few days after the
+      listing is live, the crawler is not treating the Vercel subdomain as a
+      root. Fallback: the same one file on a `rameshkumark24.github.io` repo.
+      Not blocking either way — it affects ad demand quality, not whether ads
+      serve or whether you get paid.
+- [ ] Line up your **15 testers** and confirm they will install from a Play link
+      when asked. Invited-but-not-installed does not count toward the 12
+- [ ] Burn the captions into the 5 screenshots
+- [x] 512×512 store icon rendered — `store/play-store-icon-512.png`
 
-*I can draft the title, both descriptions and the screenshot captions. The images
-themselves need a device.*
+## Real-device testing
 
-## Real-device testing — I cannot do these
+Run on a **vivo V2307, Android 15, 8 GB RAM, 3-button navigation**, release build,
+on 2026-08-08. It found two real bugs that no emulator run had shown — see below.
 
-The emulator cannot answer any of these honestly.
-
-- [ ] 🔴 **Low-end real device** (2–3 GB RAM, Android 8–10) — *this is your actual
-      user's phone*
-- [ ] 🔴 **Uninstall → reinstall → jobs restored** via auto-backup. The rules are
-      written but have never been proven to work.
-- [ ] Cold start **< 1.5 s** on that device *(release build — the 4.5 s I measured
-      was a debug build on an emulator and is not comparable)*
-- [ ] **Airplane mode** — full core function
-- [ ] Sunlight — read a cut plan outdoors
-- [ ] Process death — background 20 min, return to the same state
+- [x] **Uninstall → reinstall → jobs come back** via auto-backup. **Proven.** A
+      real uninstall then restore brought back every job including a user-created
+      one, and the example did not double-seed, so DataStore restored too
+- [x] Cold start **670 ms median** (release build, 5 runs) against a 1.5 s budget
+- [x] No crashes, no ANRs, no StrictMode violations in logcat
+- [x] Ad banner and Optimize button clear the navigation bar *(they did not — see
+      below)*
+- [ ] 🔴 **Low-end phone** (2–3 GB RAM, Android 8–10) — still outstanding. The
+      V2307 is a *good* phone; it proves correctness on real hardware, not
+      performance on slow hardware. 670 ms here could be 2 s there
+- [ ] Read a cut plan outdoors in sunlight
+- [ ] Background it 20 minutes, return to the same state
 - [ ] Split screen
 
-## Testers ⏱
+### 🔴 Two bugs found only by running on a real phone
 
-- [x] 15 collected
-- [ ] All 15 **opt in via the link and install from Play** — invited-but-not-
-      installed does not count
-- [ ] ≥ 3 are real tradesmen *(release gate, `docs/06` §10)*
-- [ ] Hold **12 opted in for 14 continuous days**
-- [ ] Apply for production access — answer with specifics, not boilerplate
+Both were invisible on the emulator, and for the same underlying reason: the
+emulator used **gesture navigation** and had its system theme matching the app's.
+
+**1. The Optimize button was under the navigation bar.** `Scaffold` does not
+apply window insets to an arbitrary composable in the `bottomBar` slot — that is
+the slot's own job — and the button had only a fixed padding. With 3-button
+navigation the Home and Back keys were drawn *on top of* the app's primary
+action, so tapping the lower half of Optimize left the app. The ad banner had the
+same fault, which is additionally an AdMob policy problem: a partly obscured ad
+next to system buttons is what invalid-traffic enforcement looks for.
+Fixed with `navigationBarsPadding()` on both.
+
+**2. Status bar icons were invisible.** `enableEdgeToEdge()` picks icon colour
+from the **system** dark-mode setting, not the app's theme. Phone in dark mode,
+app set to Light — a combination this app explicitly offers in Settings — gave
+white icons on a white background, so the clock and battery vanished. Fixed with
+a `SideEffect` in `StockCutTheme` that sets `isAppearanceLightStatusBars` from
+the app's own resolved theme.
+
+**The lesson worth keeping:** every emulator screenshot in `store/` was taken
+with gesture navigation. Gesture nav hides inset bugs, because the pill is short
+enough that a fixed padding looks fine. Test 3-button navigation.
+
+## When the $25 arrives
+
+- [ ] Create the Play Console account and complete **identity verification**
+      *(days, not minutes — this is the first thing on the critical path)*
+- [ ] Create the app: **StockCut — Cut List Optimizer**, `com.measure.stockcut`,
+      App, Free
+- [ ] Upload `app-release.aab`, accept **Play App Signing**
+- [ ] Fill the listing from [`16-store-listing.md`](16-store-listing.md)
+- [ ] Declarations: **Ads = Yes**, **In-app purchases = No**, content rating,
+      and 🔴 **data safety must declare AD_ID**
+- [ ] Set **Developer website** to `https://rameshkumark.vercel.app` so AdMob can
+      verify the app against the domain already serving `app-ads.txt`
+
+## ⏱ Then the part that is pure waiting
+
+- [ ] Closed test: **12 testers opted in, 14 continuous days**
+- [ ] ≥ 3 of them real tradesmen *(release gate, `docs/06` §10 — not a Play rule,
+      a quality one)*
+- [ ] Apply for production access — answer with specifics about who tested it and
+      what changed, not boilerplate
+- [ ] Production, **staged rollout 20%** → watch Android Vitals 48 h → 100%
 
 ---
 
-# 🤖 Mine — code
+# 🤖 Mine
 
-## Phase 6 — Monetisation *(the big one)*
-
-**Billing**
-- [ ] Play Billing Library **7.0.0+**
-- [ ] Purchase flow, **acknowledged immediately** — unacknowledged > 3 days is
-      auto-refunded by Google, so this is a money bug, not polish
-- [ ] Entitlement cached in DataStore, **authoritative offline**
-- [ ] 🔴 **Never downgrade a paid user on a failed offline check**
-- [ ] **Restore purchases** in Settings, About and the paywall
-- [ ] Real `PaywallSheet` — replaces the three `AlertDialog` placeholders now
-      standing in on S1, S2 and S4
-- [x] Free-tier gates *(20 parts / 1 project / 5 stock / no PDF — already built
-      and tested)*
-
-**Ads**
-- [ ] AdMob SDK + banner + interstitial *(IDs already wired, test-safe)*
-- [ ] 🔴 **UMP consent flow**, re-enterable from Settings
-- [ ] Interstitial after every 3rd optimize, **never mid-task**
-- [ ] Ad container **collapses** when a load fails — no blank grey box
-- [ ] `INTERNET` + `ACCESS_NETWORK_STATE` + `BILLING` permissions land here, with
-      the SDKs that need them
-
-**Other**
-- [ ] In-app review prompt — after a *successful* optimize, ≥ 3 lifetime,
-      ≤ 1 per 90 days *(the rules are already written and tested; only the Play
-      API call is missing)*
-- [ ] Crashlytics wired *(`google-services.json` is in place)*
-
-## Phase 8 — Testing gaps
-
-- [ ] **7 of 8 critical-path Compose tests.** Only #4 (fractional inch) is
-      automated. Missing: first-run → example → plan; new job → optimize;
-      21st part → paywall; infeasible blocks navigation; delete → undo;
-      share chooser; rotate result.
-      *Five of these I have verified by hand on a device — but by hand is not a
-      regression test.*
-- [ ] ViewModel tests (~15 wanted)
-- [ ] Waste-% baseline for the **whole** oracle set — only the example job is
-      pinned today, at 13.75%
-- [ ] Edge cases not yet exercised: 1000 parts end-to-end, double-tap Optimize,
-      double-tap Buy
+- [x] Free: every paywall limit lifted behind `Monetization.PAYWALL_ENABLED`
+- [x] `firstRunAt` recorded, so a future paywall could grandfather today's users
+- [x] Purchase UI and "Restore purchases" hidden; billing connection suppressed
+- [x] Ads: banner + interstitial every 5th optimize, 10-minute minimum gap
+- [x] UMP consent, re-enterable from Settings
+- [x] Crashlytics, release builds only
+- [x] All 8 critical-path E2E tests, plus "no paywall anywhere" and "PDF is free"
+- [x] Waste-% baselines across the whole oracle set
+- [x] Secrets scanned across git history · dependency licences checked
+- [x] Release signing, keystore generated, signed AAB verified from the bundle
+- [x] Store listing copy, screenshots, feature graphic, `app-ads.txt`
 - [ ] 🔴 Oracle case **`O-10`** — *blocked on a real tradesman job*. Send me one
-      and it becomes a permanent regression test.
-
-## Phase 9 — Release engineering
-
-- [ ] **Release signing config** in `build.gradle.kts`, reading
-      `keystore.properties` *(needs your keystore first — the release APK builds
-      today but comes out unsigned)*
-- [ ] `versionCode` / `versionName` bump policy
-- [ ] Secrets scanned across **git history**, not just current files
-- [ ] Licence check on every dependency
-- [ ] Confirm `targetSdk = 36` **in the built AAB**, not just the gradle file
+      and it becomes a permanent regression test
+- [ ] Publisher name in the privacy policy and About screen — **only if you want
+      to trade under something other than your own name**. Left alone otherwise
 
 ---
 
-## Rough sequence
+## Sequence
 
 ```
-NOW      merge PR #3 · enable Pages                          🧑 minutes
-         Phase 6 billing + ads code                          🤖 days
-         ↓
-         Play Console account + $25                          🧑 days (verification)
-         ↓
-         upload build to Internal testing                    🧑
-         create in-app product + license testers             🧑
-         ↓
-         walk the billing matrix                             🤖🧑 needs both
-         keystore + backups                                  🧑
-         store listing + screenshots                         🧑🤖
-         low-end device + auto-backup testing                🧑
-         ↓
-         CLOSED TEST — 12 testers, 14 days                   ⏱ 2 weeks
-         ↓
-         production access application                       ⏱ up to 7 days review
-         ↓
-         staged rollout at 20% → watch Vitals 48 h → 100%
+NOW    keystore backups · app-ads.txt repo · captions        🧑 an hour
+       low-end device testing                                🧑 🔴
+       ↓
+       $25 → account → identity verification                 🧑 ⏱ days
+       ↓
+       upload AAB · listing · declarations                   🧑 an hour
+       ↓
+       CLOSED TEST — 12 testers, 14 continuous days          ⏱ 2 weeks
+       ↓
+       production access application                         ⏱ up to 7 days
+       ↓
+       staged rollout 20% → Vitals 48 h → 100%
 ```
 
-**Realistic floor: about 4 weeks**, and only if the Play Console account is
-created in the next day or two. The 14-day test plus a review of up to 7 days is
-three of those weeks and no amount of effort shortens it.
-
-The single highest-value thing you can do today is **create the Play Console
-account**, because the closed-test clock cannot start until it exists.
+**Realistic floor: about three weeks from the day you pay**, and none of it is
+code. The single highest-value thing you can do is open the account early — every
+other item either is already done or can be done while the clock runs.

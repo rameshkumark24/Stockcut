@@ -141,25 +141,35 @@ fun SettingsScreen(
                 }
             }
 
-            Text("Purchase", style = MaterialTheme.typography.titleMedium)
-            Text(
-                text = if (state.tier == com.stockcut.data.entitlement.Tier.PAID) {
-                    "Unlocked. Thanks."
-                } else {
-                    "Free plan. Unlock for unlimited parts and jobs, PDF export " +
-                        "and no ads."
-                },
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            // 🔴 Mandatory for reinstalls and new devices, and reviewers look
-            // for it (gap audit §B4). Present here AND on the paywall.
-            Button(
-                onClick = { scope.launch { container.billing.restorePurchases() } },
-                modifier = Modifier
-                    .heightIn(min = TouchTarget.primaryButtonHeight)
-                    .semantics { contentDescription = "Restore purchases" },
-            ) { Text("Restore purchases") }
+            // Nothing is for sale in this build, so nothing here offers a sale.
+            //
+            // "Restore purchases" is mandatory when an app HAS purchases, but
+            // showing it when there are none is worse than useless: it implies a
+            // paid tier exists, and every tap reports "nothing to restore" to
+            // someone who never bought anything and now suspects they lost
+            // something. Kept behind the flag rather than deleted so it returns
+            // intact with the paywall.
+            if (com.stockcut.data.entitlement.Monetization.PAYWALL_ENABLED) {
+                Text("Purchase", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text = if (state.tier == com.stockcut.data.entitlement.Tier.PAID) {
+                        "Unlocked. Thanks."
+                    } else {
+                        "Free plan. Unlock for unlimited parts and jobs, PDF export " +
+                            "and no ads."
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                // 🔴 Mandatory for reinstalls and new devices, and reviewers look
+                // for it (gap audit §B4). Present here AND on the paywall.
+                Button(
+                    onClick = { scope.launch { container.billing.restorePurchases() } },
+                    modifier = Modifier
+                        .heightIn(min = TouchTarget.primaryButtonHeight)
+                        .semantics { contentDescription = "Restore purchases" },
+                ) { Text("Restore purchases") }
+            }
 
             // Must stay reachable for users whose region grants ongoing consent
             // options — they have the right to change their mind.

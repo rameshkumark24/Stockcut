@@ -160,9 +160,11 @@ fun ResultScreen(
             }
 
             item {
-                // Shown to everyone, with a lock for free users, rather than
-                // hidden — a feature nobody can see is a feature nobody buys,
-                // and hiding it also hides why the paid tier exists.
+                // Free for everyone in v1 — this was the paid feature, and the
+                // "(paid)" label below now never renders because canExportPdf is
+                // always true while the paywall is off. Both are left in place
+                // rather than stripped, so re-enabling the paywall restores the
+                // lock without anyone having to remember this screen existed.
                 OutlinedButton(
                     onClick = {
                         if (!viewModel.onExportPdfRequested()) return@OutlinedButton

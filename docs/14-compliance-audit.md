@@ -82,6 +82,42 @@ and it is reflected in the release APK at 4.1 MB against a 12 MB budget.
 ## Still to do before submission
 
 - [ ] Re-run both checks on the final release commit
-- [ ] Confirm `targetSdk = 36` **in the built AAB**, not just in Gradle
-- [ ] Open-source licences screen in About *(the artifacts are all
+- [x] Confirm `targetSdk = 36` **in the built AAB**, not just in Gradle
+- [x] Open-source licences screen in About *(the artifacts are all
       attribution-requiring; a licences list is the normal way to satisfy that)*
+
+---
+
+## 3. What the built AAB actually declares
+
+Checked on the signed bundle itself, not the Gradle files — the point of the item
+was that a manifest merge can change what ships.
+
+```bash
+unzip -p app/build/outputs/bundle/release/app-release.aab base/manifest/AndroidManifest.xml
+# proto-encoded; attribute names are plain strings, values follow as length-prefixed bytes
+```
+
+| Field | In the AAB |
+|---|---|
+| `package` | `com.measure.stockcut` ✅ |
+| `targetSdkVersion` | **36** ✅ |
+| `minSdkVersion` | 26 ✅ |
+| `compileSdkVersion` | 36 ✅ |
+| `versionName` | 1.0.0 |
+
+Signature, from `jarsigner -verify`: **SHA256withRSA, 4096-bit**, alias `upload`.
+
+### Permissions in the merged release manifest
+
+`INTERNET` · `ACCESS_NETWORK_STATE` · `WAKE_LOCK` · `FOREGROUND_SERVICE` ·
+`AD_ID` · three `ACCESS_ADSERVICES_*` · `com.android.vending.BILLING`
+
+All arrive from AdMob, Firebase or Play Billing. **The app declares none of its
+own** — the zero-permission posture holds.
+
+🔴 `AD_ID` is why the data safety form must declare the advertising ID. Play scans
+the manifest for exactly this, and a mismatch is a rejection.
+
+`BILLING` is unused in v1 and was deliberately left in place — see
+[`15-free-launch-and-paywall-plan.md`](15-free-launch-and-paywall-plan.md).
