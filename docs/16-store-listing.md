@@ -44,14 +44,12 @@ sign-up" pre-empt the two objections that stop installs on utility apps.
 
 ---
 
-## Full description — 2,038 / 4,000
+## Full description — 2,193 / 4,000
 
 ```
 Stop working out cut lists on the back of a delivery note.
 
-Tell StockCut the lengths you can buy and the pieces you need. It works out which
-piece comes off which bar, in seconds, with the least offcut — and it counts your
-saw blade, which is where hand-written cut lists go wrong.
+Tell StockCut the lengths you can buy and the pieces you need. It works out which piece comes off which bar, in seconds, with the least offcut — and it counts your saw blade, which is where hand-written cut lists go wrong.
 
 WHAT IT DOES
 
@@ -59,14 +57,11 @@ WHAT IT DOES
 • Accounts for kerf — every cut eats blade width, and ten cuts at 3 mm is 30 mm
 • Shows each bar as a diagram, so you can read it at the saw
 • Tells you the offcut left on every bar and the total waste percentage
-• Warns you when a piece is longer than anything you can buy, instead of quietly
-  dropping it
+• Warns you when a piece is longer than anything you can buy, instead of quietly dropping it
 
 METRIC AND IMPERIAL
 
-Millimetres, centimetres, metres, decimal inches, and fractional inches. Type
-1 5/16" and it takes it — no converting to decimals in your head, no rounding
-errors creeping into a job.
+Millimetres, centimetres, metres, decimal inches, and fractional inches. Type 1 5/16" and it takes it — no converting to decimals in your head, no rounding errors creeping into a job.
 
 BUILT FOR THE SITE, NOT THE OFFICE
 
@@ -78,18 +73,13 @@ BUILT FOR THE SITE, NOT THE OFFICE
 
 WHO IT IS FOR
 
-Fabricators, welders, metalworkers, carpenters, timber framers, shopfitters,
-window and door installers, fencers, and anyone cutting from linear stock:
-steel tube, box section, angle, flat bar, rebar, aluminium extrusion, timber
-studs, skirting, trim, pipe, and conduit.
+Fabricators, welders, metalworkers, carpenters, timber framers, shopfitters, window and door installers, fencers, and anyone cutting from linear stock: steel tube, box section, angle, flat bar, rebar, aluminium extrusion, timber studs, skirting, trim, pipe, and conduit.
 
-If you buy material in fixed lengths and cut pieces from it, this saves you
-material on every job.
+If you buy material in fixed lengths and cut pieces from it, this saves you material on every job.
 
 HOW IT WORKS
 
-1. Enter the lengths you can buy — 6 m bars, 8 ft studs, whatever your supplier
-   sells
+1. Enter the lengths you can buy — 6 m bars, 8 ft studs, whatever your supplier sells
 2. Enter the pieces you need and how many
 3. Set your blade width
 4. Tap Optimize
@@ -98,14 +88,11 @@ You get a plan: bar by bar, cut by cut, with the offcut on each.
 
 FREE
 
-StockCut is free and supported by ads. There is no subscription, no trial, and
-nothing is locked. Ads are kept deliberately light — a banner, and an occasional
-full-screen ad between jobs, never in the middle of one.
+StockCut is free and supported by ads. There is no subscription, no trial, and nothing is locked. Ads are kept deliberately light — a banner, and an occasional full-screen ad between jobs, never in the middle of one.
 
 WHAT IT IS NOT
 
-This is a 1D linear cut list optimizer. It solves bar, tube and length cutting.
-It does not do 2D sheet nesting for plywood or plate.
+This is a 1D linear cut list optimizer. It solves bar, tube and length cutting. It does not do 2D sheet nesting for plywood or plate.
 ```
 
 ---
