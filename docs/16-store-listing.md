@@ -1,7 +1,22 @@
 # Play Store listing — final copy
 
-**Ready to paste.** Every field below is within Play's limit and counted; the
-counts are verified by `tools/check-listing-lengths.ps1`.
+**Ready to paste.** Lengths, counts, layout and encoding are all verified by
+`tools/check-listing-lengths.ps1` — run it after any edit.
+
+> 🔴 **Copy every field from a UTF-8 aware editor** (VS Code), never from a
+> terminal. The copy uses em dashes (U+2014) and bullets (U+2022); a tool reading
+> this file as Windows ANSI turns each into two junk characters. That is not
+> hypothetical — it has happened twice here, once to the length checker and once
+> to the checker's own source.
+>
+> **The title is the easy case**: 29 characters, damage obvious at a glance. The
+> **full description is the dangerous one** — roughly fifteen em dashes and ten
+> bullets, now on long single lines, where a mangled character mid-paragraph is
+> easy to miss and no length check can catch it (2,238 plus mojibake is still
+> well under 4,000).
+>
+> After pasting each field into Play Console, look for `—` and `•`, not
+> `â€`.
 
 ASO is this app's entire distribution channel — there is no marketing budget, no
 website traffic and no social following. The store listing *is* the funnel.
@@ -17,18 +32,12 @@ StockCut — Cut List Optimizer
 > If Play rejects the em dash (it occasionally objects to non-ASCII in titles),
 > use `StockCut - Cut List Optimizer` — 29 characters, same meaning.
 
-> 🔴 **Copy this from a UTF-8 aware editor.** The em dash is a single character
-> (U+2014), but a tool that reads this file as Windows ANSI turns it into three
-> (`â€"`). That is not hypothetical — the length checker did exactly this on its
-> first run and reported the title as 31 characters. **After pasting into Play
-> Console, look at the title and confirm you see `—` and not `â€"`.**
-
 **Do not** add "Free", "Best", "#1" or emoji. Play's metadata policy prohibits
 promotional text and ranking claims in the title, and it is a common rejection.
 
 ---
 
-## Short description — 79 / 80
+## Short description — 76 / 80
 
 The single highest-weight ASO field. It is also the only text shown before
 someone taps "Read more", so it must carry the whole proposition.
@@ -44,16 +53,16 @@ sign-up" pre-empt the two objections that stop installs on utility apps.
 
 ---
 
-## Full description — 2,193 / 4,000
+## Full description — 2,238 / 4,000
 
 ```
 Stop working out cut lists on the back of a delivery note.
 
-Tell StockCut the lengths you can buy and the pieces you need. It works out which piece comes off which bar, in seconds, with the least offcut — and it counts your saw blade, which is where hand-written cut lists go wrong.
+Tell StockCut the lengths you can buy and the pieces you need. It works out which piece comes off which bar, in seconds, with as little offcut as it can find — and it counts your saw blade, which is where hand-written cut lists go wrong.
 
 WHAT IT DOES
 
-• Works out the fewest bars for the job
+• Works out how to cut the job from fewer bars
 • Accounts for kerf — every cut eats blade width, and ten cuts at 3 mm is 30 mm
 • Shows each bar as a diagram, so you can read it at the saw
 • Tells you the offcut left on every bar and the total waste percentage
@@ -67,7 +76,7 @@ BUILT FOR THE SITE, NOT THE OFFICE
 
 • Works with no signal. Everything runs on the phone
 • No account, no sign-up, no password
-• Nothing is uploaded. Your jobs stay on your device
+• Your jobs are never uploaded — they stay on your device
 • Large type and big touch targets, for reading with safety glasses on
 • Share a cut plan as an image or a PDF — send it to the apprentice, or print it
 
@@ -88,7 +97,7 @@ You get a plan: bar by bar, cut by cut, with the offcut on each.
 
 FREE
 
-StockCut is free and supported by ads. There is no subscription, no trial, and nothing is locked. Ads are kept deliberately light — a banner, and an occasional full-screen ad between jobs, never in the middle of one.
+StockCut is free and supported by ads. There is no subscription, no trial, and nothing is locked. Ads are kept deliberately light — a banner, and an occasional full-screen ad after you tap Optimize, never while you are entering a job.
 
 WHAT IT IS NOT
 

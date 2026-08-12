@@ -22,9 +22,12 @@ import com.stockcut.data.entitlement.Tier
  * cannot be reached by accident.
  *
  * Placement rules, from docs/03 S3 and docs/02 §6:
- *  - Interstitial after every 3rd optimize, and only between finishing entry and
- *    seeing the plan — NEVER mid-task.
- *  - Nothing at all for paid users.
+ *  - Interstitial after every Nth optimize — see Limits.INTERSTITIAL_EVERY,
+ *    which is 5, plus a 10-minute minimum gap. This comment said "every 3rd"
+ *    long after the constant was raised to 5; the number lives in one place
+ *    now and this refers to it rather than restating it.
+ *  - Only between finishing entry and seeing the plan — NEVER mid-task.
+ *  - Nothing at all when ads are switched off for a user.
  *  - A banner that fails to load collapses to zero height. No reserved grey box.
  */
 class AdsManager(private val context: Context) {
@@ -91,7 +94,7 @@ class AdsManager(private val context: Context) {
 
         if (!due || ad == null) {
             onFinished()
-            // Get the next one ready for the 3rd optimize from now.
+            // Get the next one ready for whenever the next one is due.
             preloadInterstitial(tier)
             return
         }

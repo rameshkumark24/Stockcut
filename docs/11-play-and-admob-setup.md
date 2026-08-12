@@ -116,7 +116,7 @@ AdMob → your app → **Ad units** → **Add ad unit**
 | # | Format | Name | Where it appears |
 |---|---|---|---|
 | 1 | **Banner** | `StockCut banner` | Bottom of the projects list and editor |
-| 2 | **Interstitial** | `StockCut interstitial` | After every 3rd optimize, free tier only |
+| 2 | **Interstitial** | `StockCut interstitial` | After every 5th optimize, with a 10-minute minimum gap |
 
 Each gives a **Ad unit ID** shaped `ca-app-pub-################/##########`
 *(note the `/`, not `~` — they are different things and easy to confuse)*.
