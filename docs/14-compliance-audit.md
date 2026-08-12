@@ -32,7 +32,8 @@ done
 | `local.properties` ever committed | none |
 | `google-services.json` ever committed | none |
 | Private-key blocks, Google API keys, passwords | none |
-| Real AdMob account ID (`7038016776482334`) | **never committed** — it lives only in the git-ignored `local.properties` |
+| AdMob **App ID and ad unit IDs** | **never committed** — they live only in the git-ignored `local.properties` |
+| AdMob **publisher ID** (`pub-7038016776482334`) | committed in `store/app-ads.txt`, **deliberately**. `app-ads.txt` is a public file by definition — it is served at a domain root so ad exchanges can read it. It is not a secret, and a decompiled APK gives up the ad unit IDs anyway |
 
 `keystore.properties.example` is present and correct: keys with no values.
 
