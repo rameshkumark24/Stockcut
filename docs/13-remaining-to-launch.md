@@ -17,9 +17,23 @@
 the release, store listing, all 10 App content declarations and store settings.
 Google's dialog warns of up to seven days; it took hours.
 
-The app is live on the **Alpha** closed track as v1.0.0 (1), delivered at
-**3.76 MB** per install (the AAB splits by ABI). Not publicly listed — only the
-15 invited testers can install it.
+The app is live on the **Alpha** closed track, delivered at **3.76 MB** per
+install (the AAB splits by ABI). Not publicly listed — only the 16 invited
+testers can install it.
+
+| Submission | Contents | Status |
+|---|---|---|
+| 1 | v1.0.0 (1), store listing, all 10 App content declarations, store settings | Published |
+| 2 | Feedback channel on the track (`rameshkumaroff@gmail.com`) | Published |
+| 3 | **v1.0.1 (2)** — removed a dead "Not built yet / Restore purchases arrives with in-app billing" placeholder from About, added a "How it works" section | In review |
+
+Two things that submission 3 illustrates and are worth remembering:
+
+- **App text can only be changed by shipping a build.** Store listing text is
+  edited in the console with no build at all; anything compiled into the APK is
+  not. That is why a one-line text fix cost a full release cycle.
+- **`versionCode` must increase for every upload**, even a text fix. Play
+  rejects same-or-lower and remembers the highest it has ever seen.
 
 ### What is running now
 
