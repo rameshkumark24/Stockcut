@@ -11,6 +11,45 @@
 
 ---
 
+## Where this actually stands — 13 Aug 2026
+
+**Submitted and PUBLISHED to closed testing the same day.** Submission 1 covered
+the release, store listing, all 10 App content declarations and store settings.
+Google's dialog warns of up to seven days; it took hours.
+
+The app is live on the **Alpha** closed track as v1.0.0 (1), delivered at
+**3.76 MB** per install (the AAB splits by ABI). Not publicly listed — only the
+15 invited testers can install it.
+
+### What is running now
+
+- ⏱ **The 14-day clock**, which starts when **12 testers are installed and opted
+  in** — not when the app was published. Earliest possible finish is 27 Aug 2026,
+  and only if all 12 install on day one.
+- **Pre-launch report** — Google runs the app on real physical devices after
+  every upload, free, and reports crashes, ANRs, accessibility and performance
+  with screenshots. **Read it.** It is the closest thing available to the
+  low-end-device testing that is still outstanding below.
+
+### Shipping updates during the test
+
+Local builds never reach testers. To push a fix:
+
+1. Bump `versionCode` in `app/build.gradle.kts` (now 1, next 2). Play rejects
+   same-or-lower and remembers the highest number it has ever seen.
+2. `./gradlew :app:bundleRelease`
+3. Upload to the same closed track, send for review — updates review faster.
+4. Testers get it automatically; Play auto-updates by default.
+
+🔴 **Uploading an update does NOT reset the 14 days.** Google counts testers
+opted in continuously, not the build sitting still. Fix things during the test
+rather than freezing the app out of fear. What *does* hurt is a tester
+uninstalling — that drops the count below 12.
+
+Store listing text and screenshots can be changed with no new build at all.
+
+---
+
 ## 🔴 Read this before planning anything
 
 **The 12-tester / 14-day closed test applies to you.**
@@ -139,21 +178,23 @@ the app's own resolved theme.
 with gesture navigation. Gesture nav hides inset bugs, because the pill is short
 enough that a fixed padding looks fine. Test 3-button navigation.
 
-## When the $25 arrives
+## ✅ Done 13 Aug 2026 — account through to publication
 
-- [ ] Create the Play Console account and complete **identity verification**
-      *(days, not minutes — this is the first thing on the critical path)*
-- [ ] Create the app: **StockCut — Cut List Optimizer**, `com.measure.stockcut`,
-      App, Free
-- [ ] Upload `app-release.aab`, accept **Play App Signing**
-- [ ] Fill the listing from [`16-store-listing.md`](16-store-listing.md)
-- [ ] Declarations: **Ads = Yes**, **In-app purchases = No**, content rating,
-      and 🔴 **data safety must declare AD_ID**
-- [ ] Set **Developer website** to `https://rameshkumark.vercel.app` so AdMob can
-      verify the app against the domain already serving `app-ads.txt`
+- [x] Play Console account created and identity-verified
+- [x] App created as `com.measure.stockcut`, App, **Free** *(permanent: a free
+      app can never be made paid; in-app purchases could still be added)*
+- [x] `app-release.aab` uploaded, **Play App Signing accepted** — so a lost
+      upload key is now recoverable rather than fatal
+- [x] Store listing, icon, feature graphic and 5 screenshots
+- [x] All 10 App content declarations, including AD_ID in data safety
+- [x] Developer website set to `https://rameshkumark.vercel.app`
+- [x] Countries: all · Testers: the 15-address list, attached to the track
+- [x] Submitted and **published**
 
 ## ⏱ Then the part that is pure waiting
 
+- [ ] Send the opt-in link to the 15, **after installing from it yourself**
+- [ ] Read the **pre-launch report** — free real-device results, already waiting
 - [ ] Closed test: **12 testers opted in, 14 continuous days**
 - [ ] ≥ 3 of them real tradesmen *(release gate, `docs/06` §10 — not a Play rule,
       a quality one)*
