@@ -72,17 +72,17 @@ android {
         // it has EVER seen — including from a build you uploaded and discarded.
         // There is no way to reuse or lower a number. Bump it for every upload,
         // even a re-upload of the same code after a rejected review.
-        versionCode = 1
+        versionCode = 2
 
-        // 1.0.0 for the first public release. It was 0.1.0 while the app was
-        // being built, which is honest for a pre-release but wrong on a store
-        // listing: users read a leading 0 as "unfinished", and a tradesman
-        // deciding whether to trust a measurement tool is the last person to
-        // give the benefit of the doubt.
+        // 1.0.0 was the first release, published to closed testing on
+        // 2026-08-13. Before that it was 0.1.0, which is honest for a
+        // pre-release but wrong on a store listing: users read a leading 0 as
+        // "unfinished", and a tradesman deciding whether to trust a measurement
+        // tool is the last person to give the benefit of the doubt.
         //
         // MAJOR.MINOR.PATCH from here: PATCH for fixes, MINOR for features,
         // MAJOR for a change that alters how a saved job behaves.
-        versionName = "1.0.0"
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

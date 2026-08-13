@@ -107,6 +107,46 @@ fun AboutScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
+            // 🔴 The app teaches by example, not by a tutorial: first run seeds a
+            // worked "Example: gate frame" job, and every empty state carries a
+            // headline and one line of explanation. This is the fallback for
+            // someone who deleted the example, or who wants the shape of the
+            // whole thing in one place — NOT a wall to get past before using it.
+            //
+            // It replaced a "Not built yet / Restore purchases arrives with
+            // in-app billing" placeholder that was still shipping long after the
+            // decision to sell nothing. Dead text telling users the app is
+            // unfinished, on the screen they open when confused.
+            Text("How it works", style = MaterialTheme.typography.titleMedium)
+            // One Text per step rather than one string with newline escapes.
+            // The Column already spaces its children, so this reads the same and
+            // avoids a multi-line string literal that a future edit can break.
+            Text(
+                "1.  Stock — the lengths you can buy. A 6 m bar, an 8 ft stud, " +
+                    "whatever your supplier sells.",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Text(
+                "2.  Parts — the pieces you need, and how many of each.",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Text(
+                "3.  Setup — your saw blade width. Every cut eats it, and ten " +
+                    "cuts at 3 mm is 30 mm gone.",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Text(
+                "4.  Optimize — you get a plan, bar by bar, with the offcut " +
+                    "left on each.",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Text(
+                "Share a plan as an image or a PDF to send to the saw. " +
+                    "Everything works with no signal.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
             Text("Diagnostics", style = MaterialTheme.typography.titleMedium)
             Card(modifier = Modifier.fillMaxWidth()) {
                 Text(
@@ -227,13 +267,6 @@ fun AboutScreen(
                 }
             }
 
-            Text("Not built yet", style = MaterialTheme.typography.titleMedium)
-            Text(
-                // Named honestly rather than shown as a button that does nothing.
-                "Restore purchases arrives with in-app billing.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
         }
     }
 }
