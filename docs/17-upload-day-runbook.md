@@ -129,9 +129,42 @@ editor mangled the encoding — retype the dash.
 
 ## Step 7 — production
 
+### 🔴 DO NOT PROMOTE THE CLOSED-TEST AAB. Build a new one.
+
+Every build so far carries **Google's public TEST ad IDs**
+(`ca-app-pub-3940256099942544`), because real IDs are opt-in — see the header of
+`app/build.gradle.kts`. Promoting the closed-test release to production would
+ship test ads to real users, and the app would earn **nothing**, indefinitely,
+with no error anywhere to tell you.
+
+Build the production artifact deliberately:
+
+```bash
+./gradlew clean :app:bundleRelease -Pstockcut.productionAds=true
+```
+
+Then verify before uploading — do not trust the flag:
+
+```bash
+unzip -p app/build/outputs/bundle/release/app-release.aab base/manifest/AndroidManifest.xml   | grep -ao 'ca-app-pub-[0-9]*'
+```
+
+It must print **7038016776482334** (your account), not 3940256099942544.
+Bump `versionCode` too — Play rejects same-or-lower.
+
+**Why the test IDs are used everywhere else:** clicking a live ad in your own app
+terminates the AdMob account permanently and forfeits earnings (CLAUDE.md rule
+8). During the closed test the users are sixteen people who know you personally,
+which is exactly the pattern invalid-traffic enforcement looks for. Test ads
+through the whole closed test; real ads only when strangers are installing it.
+
+### Then
+
 - [ ] Promote to production, **staged rollout at 20%**
 - [ ] Watch Android Vitals for 48 hours — crash rate and ANR rate
 - [ ] Go to 100%
+- [ ] Check AdMob shows impressions within a day. Zero impressions on live
+      traffic means the test IDs shipped after all
 
 ---
 
