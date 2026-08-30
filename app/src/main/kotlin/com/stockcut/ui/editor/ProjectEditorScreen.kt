@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
@@ -199,7 +200,31 @@ fun ProjectEditorScreen(
             }
         },
     ) { padding ->
-        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+        // 🔴 imePadding, because enableEdgeToEdge() kills adjustResize.
+        //
+        // AndroidManifest declares windowSoftInputMode="adjustResize", and that
+        // has done nothing since MainActivity started calling enableEdgeToEdge():
+        // it sets decorFitsSystemWindows=false, after which the window no longer
+        // resizes for the keyboard and the IME arrives ONLY as WindowInsets.ime,
+        // for the app to consume. Nothing consumed it — there was not one
+        // imePadding or WindowInsets.ime in the whole source tree.
+        //
+        // Scaffold does not cover this either: its contentWindowInsets defaults
+        // to systemBars, which excludes the IME.
+        //
+        // The visible bug was on Setup. Tapping Kerf or End trim opened the
+        // keyboard over the field being edited, and the form did not move,
+        // because the scroll viewport still believed it had full height — so
+        // bring-into-view saw the field as already visible and never scrolled.
+        // Typing a blind kerf value in a measurement app is about the worst
+        // place for this to land.
+        //
+        // Applied here rather than on the Scaffold so the bottomBar is left
+        // alone: Optimize is allowed to sit behind the keyboard while typing,
+        // and moving it would mean reasoning about navigationBarsPadding and the
+        // IME inset at the same time, which is how the last two inset bugs got
+        // in. 🔴 VERIFY ON A REAL PHONE before the production build.
+        Column(modifier = Modifier.fillMaxSize().padding(padding).imePadding()) {
             state.infeasible?.let { infeasible ->
                 val unit = state.unitSystem
                 val denominator = state.denominator

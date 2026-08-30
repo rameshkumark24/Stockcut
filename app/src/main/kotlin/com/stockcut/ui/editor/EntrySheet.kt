@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
@@ -67,9 +69,21 @@ fun EntrySheet(
     var quantityError by remember { mutableStateOf<String?>(null) }
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
+        // verticalScroll, because this form has to survive the keyboard.
+        //
+        // ModalBottomSheet lifts itself above the IME, so the sheet is not
+        // hidden — but that lift SHRINKS the height its content is given, and
+        // this Column had no scroll at all. Anything that no longer fits was
+        // simply clipped, with no way to reach it.
+        //
+        // The tail of this form is Quantity, Label and Save, so Save is the
+        // first thing to go. On a short phone, in landscape, or at a larger
+        // font scale, that strands the user in the app's MOST-USED sheet:
+        // every part and every stock length is entered through here.
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
                 .padding(
                     start = Space.screenHorizontal,
                     end = Space.screenHorizontal,

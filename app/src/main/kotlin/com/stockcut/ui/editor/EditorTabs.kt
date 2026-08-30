@@ -28,6 +28,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.text.KeyboardOptions
 import com.stockcut.data.model.PartEntry
 import com.stockcut.data.model.StockEntry
@@ -119,7 +121,15 @@ fun StockTab(
                 onAction = onAdd,
                 modifier = Modifier.weight(1f),
             )
-            QuickAddChips(state.unitSystem, state.denominator, onQuickAdd)
+            QuickAddChips(
+                state.unitSystem,
+                state.denominator,
+                onQuickAdd,
+                // Space.xl, not Space.screenHorizontal: it matches EmptyState's
+                // own inset, so the chips line up with the "Add stock" button
+                // directly above them instead of sitting 8dp to its left.
+                contentPadding = Space.xl,
+            )
         }
         return
     }
@@ -139,7 +149,15 @@ fun StockTab(
                 onDelete = { onDelete(entry) },
             )
         }
-        item { QuickAddChips(state.unitSystem, state.denominator, onQuickAdd) }
+        // 0.dp: this LazyColumn's contentPadding has already inset the item.
+        item {
+            QuickAddChips(
+                state.unitSystem,
+                state.denominator,
+                onQuickAdd,
+                contentPadding = 0.dp,
+            )
+        }
         item {
             Button(
                 onClick = onAdd,
@@ -161,12 +179,31 @@ fun StockTab(
  * Metric gets 3/6/12 m; imperial gets 8/10/12/16/20 ft. Offering metres to
  * someone working in feet is the kind of detail that tells a tradesman the app
  * was not built for them.
+ *
+ * 🔴 [contentPadding] is required, not decorative, and the caller must supply the
+ * value that suits ITS context — there is no single right answer:
+ *
+ *  - In the empty state the chips are a plain sibling of [EmptyState] inside a
+ *    bare Column, so nothing insets them. Passing 0 there left the first chip
+ *    flush against the left screen edge, visibly clipped, while the "Add stock"
+ *    button above it sat inset by [Space.xl]. Found on a real phone, 2026-08-30.
+ *  - In the populated list the row is a LazyColumn item and the LazyColumn's own
+ *    `contentPadding` has already inset it. Adding more here would double it.
+ *
+ * The padding is applied AFTER [horizontalScroll] on purpose, so it behaves like
+ * `LazyRow`'s `contentPadding`: it insets the chips at rest but scrolls away with
+ * them, letting the row use the full width once scrolled. Putting it before the
+ * scroll would shrink the viewport and clip chips at an arbitrary inner boundary
+ * instead of the screen edge — which matters for imperial, where there are five
+ * chips rather than three.
  */
 @Composable
 private fun QuickAddChips(
     unitSystem: UnitSystem,
     denominator: Int,
     onQuickAdd: (Long) -> Unit,
+    contentPadding: Dp,
+    modifier: Modifier = Modifier,
 ) {
     val imperial = unitSystem == UnitSystem.INCH_FRACTIONAL || unitSystem == UnitSystem.INCH_DECIMAL
     val lengths = if (imperial) {
@@ -176,10 +213,10 @@ private fun QuickAddChips(
     }
 
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .horizontalScroll(rememberScrollState())
-            .padding(vertical = Space.sm),
+            .padding(vertical = Space.sm, horizontal = contentPadding),
         horizontalArrangement = Arrangement.spacedBy(Space.sm),
     ) {
         lengths.forEach { lengthU ->
@@ -262,7 +299,14 @@ fun SetupTab(
         // Only meaningful in fractional inches, so it only appears there.
         if (state.unitSystem == UnitSystem.INCH_FRACTIONAL) {
             Text("Fraction", style = MaterialTheme.typography.titleMedium)
-            Row(horizontalArrangement = Arrangement.spacedBy(Space.sm)) {
+            // horizontalScroll, matching the same row in Settings: six chips
+            // (1/2 … 1/64) do not fit a plain Row at large font scale, and 1/64
+            // — the finest setting, the one a joiner reaches for — is last, so
+            // it is the one that gets clipped.
+            Row(
+                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(Space.sm),
+            ) {
                 SUPPORTED_DENOMINATORS.forEach { denominator ->
                     FilterChip(
                         selected = denominator == state.denominator,

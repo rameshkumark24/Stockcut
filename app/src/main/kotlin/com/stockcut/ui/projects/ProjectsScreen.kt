@@ -7,9 +7,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
@@ -102,9 +108,30 @@ fun ProjectsScreen(
                 // and Back keys directly over it. Accidental taps on a partly
                 // hidden ad are exactly what invalid-traffic enforcement looks
                 // for, and that risks the whole AdMob account.
+                // The cutout is unioned in as well, restricted with .only() to
+                // the edges a bottom bar can actually meet.
+                //
+                // targetSdk 36 plus enableEdgeToEdge() lays the window into the
+                // display cutout in EVERY orientation. Rotated, a top-corner
+                // punch-hole maps to a side edge low down, and AdSize.BANNER is
+                // a fixed 320×50 pinned to the start of the bar — so on a
+                // corner-cutout phone in one of the two landscape rotations the
+                // hole lands on the ad itself.
+                //
+                // 🔴 NOT safeDrawingPadding() and NOT a bare displayCutoutPadding().
+                // A bottomBar receives unconsumed insets, so either of those
+                // would also apply the STATUS BAR top inset here — 24-48dp of
+                // dead space above the ad in every orientation, trading a
+                // landscape-only corner nick for a permanent layout shift.
+                // .only(Horizontal + Bottom) leaves portrait byte-for-byte
+                // identical to the navigationBarsPadding() it replaces.
                 Column(
                     modifier = Modifier
-                        .navigationBarsPadding()
+                        .windowInsetsPadding(
+                            WindowInsets.navigationBars
+                                .union(WindowInsets.displayCutout)
+                                .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom),
+                        )
                         .padding(bottom = Space.lg),
                 ) {
                     com.stockcut.ads.BannerAd(

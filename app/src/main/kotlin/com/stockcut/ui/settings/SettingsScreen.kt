@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -81,6 +82,24 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                // 🔴 imePadding BEFORE verticalScroll, and the order is the point.
+                //
+                // Same root cause as the editor (see ProjectEditorScreen): with
+                // enableEdgeToEdge() the manifest's adjustResize is dead, the IME
+                // arrives only as WindowInsets.ime, and Scaffold's
+                // contentWindowInsets is systemBars, which excludes it.
+                //
+                // Placing it before verticalScroll SHRINKS THE SCROLL VIEWPORT by
+                // the keyboard height. That does two things at once: it keeps the
+                // content above the IME, and it gives the kerf field's
+                // bring-into-view something real to scroll into. After it, the
+                // viewport would keep its full height and bring-into-view would
+                // still think the field was already visible.
+                //
+                // Symptom without it: on a short phone, in landscape, or at font
+                // scale ~1.2+, the keyboard covers "Save default kerf" and there
+                // is zero scroll range, so dragging does nothing.
+                .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(Space.screenHorizontal),
             verticalArrangement = Arrangement.spacedBy(Space.lg),
@@ -108,7 +127,14 @@ fun SettingsScreen(
 
             if (state.defaultUnitSystem == UnitSystem.INCH_FRACTIONAL) {
                 Text("Fraction", style = MaterialTheme.typography.titleMedium)
-                Row(horizontalArrangement = Arrangement.spacedBy(Space.sm)) {
+                // horizontalScroll to match the unit row above. Without it the
+                // six denominators (1/2 … 1/64) are squeezed by a plain Row, and
+                // 1/64 — the finest setting, the one a joiner actually reaches
+                // for — is the one that gets clipped at large font scale.
+                Row(
+                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(Space.sm),
+                ) {
                     SUPPORTED_DENOMINATORS.forEach { denominator ->
                         FilterChip(
                             selected = denominator == state.defaultDenominator,
@@ -130,7 +156,12 @@ fun SettingsScreen(
             ) { Text("Save default kerf") }
 
             Text("Theme", style = MaterialTheme.typography.titleMedium)
-            Row(horizontalArrangement = Arrangement.spacedBy(Space.sm)) {
+            // Same treatment: three chips fit today, but "System" / "Light" /
+            // "Dark" are translatable and font-scalable, and neither is bounded.
+            Row(
+                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(Space.sm),
+            ) {
                 ThemeMode.entries.forEach { mode ->
                     FilterChip(
                         selected = mode == state.theme,
