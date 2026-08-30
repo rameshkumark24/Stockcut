@@ -143,7 +143,17 @@ Build the production artifact deliberately:
 ./gradlew clean :app:bundleRelease -Pstockcut.productionAds=true
 ```
 
-Then verify before uploading — do not trust the flag:
+**The build now fails loudly if it cannot honour that flag** (2026-08-30). Passing
+`-Pstockcut.productionAds=true` with an ID missing from `local.properties`, or
+with Google's test publisher pasted into it, throws instead of quietly falling
+back. Both branches were tested by deliberately breaking `local.properties` and
+confirming a non-zero exit.
+
+That matters because `local.properties` is git-ignored — it is exactly the file
+that is absent on a new machine or a fresh clone, which is when a release is most
+likely to be cut in a hurry.
+
+Then verify before uploading — the guard is good, but do not trust it alone:
 
 ```bash
 unzip -p app/build/outputs/bundle/release/app-release.aab base/manifest/AndroidManifest.xml   | grep -ao 'ca-app-pub-[0-9]*'
@@ -157,6 +167,26 @@ terminates the AdMob account permanently and forfeits earnings (CLAUDE.md rule
 8). During the closed test the users are sixteen people who know you personally,
 which is exactly the pattern invalid-traffic enforcement looks for. Test ads
 through the whole closed test; real ads only when strangers are installing it.
+
+### Ad content rating — set to **T (Teens)**, 2026-08-30
+
+Set in AdMob → the app → Blocking controls → ad content rating. The account
+default is **MA**, which permits "alcohol, weapons and sexual content" — not what
+belongs beside a tradesman's cut list, and inconsistent with a Tools app.
+
+**T excludes all three.** It still allows general health, social networks, scary
+imagery and fight sports, none of which is the concern. `PG` and `G` are stricter
+but block things nobody objected to, and each step down costs demand.
+
+AdMob's own estimate for MA → T: **−18 to −38% impressions, −18 to −41% revenue.**
+Accepted deliberately. It is a percentage of a number that starts near zero, and
+it is revisitable once there is real earnings data.
+
+🔴 **Deliberately NOT hard-coded in the app.** `setMaxAdContentRating` exists in
+the SDK and would survive a console change, but it would also put a revenue lever
+behind a full release cycle. The console setting applies server-side to every ad
+request for this app, so it is already fully effective. If the account-level
+rating is ever reset, this per-app setting is the thing to check first.
 
 ### Then
 

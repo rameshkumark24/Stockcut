@@ -28,12 +28,51 @@ val useProductionAds = (project.findProperty("stockcut.productionAds") as? Strin
 
 // Google's documented public test IDs. Safe to commit — they are the same for
 // everyone and serve test ads only.
-val testAppId = "ca-app-pub-3940256099942544~3347511713"
-val testBannerId = "ca-app-pub-3940256099942544/6300978111"
-val testInterstitialId = "ca-app-pub-3940256099942544/1033173712"
+val testPublisher = "ca-app-pub-3940256099942544"
+val testAppId = "$testPublisher~3347511713"
+val testBannerId = "$testPublisher/6300978111"
+val testInterstitialId = "$testPublisher/1033173712"
 
-fun adId(key: String, fallback: String): String =
-    if (useProductionAds) localProps.getProperty(key) ?: fallback else fallback
+/**
+ * 🔴 Asking for production ads and not getting them must FAIL THE BUILD.
+ *
+ * This used to be `localProps.getProperty(key) ?: fallback`, which meant a
+ * missing entry in local.properties silently produced a build carrying Google's
+ * test IDs. That build compiles, signs, uploads and installs, and then earns
+ * nothing — forever, from every user, with no error in Gradle, in Play, in
+ * logcat or in AdMob. The only symptom is a revenue line that stays at zero,
+ * and by the time it is noticed the release is already public.
+ *
+ * local.properties is git-ignored, so it is exactly the file that goes missing
+ * on a new machine, a fresh clone, or a rebuild after a disk wipe — the moments
+ * when a release is most likely to be cut in a hurry.
+ *
+ * Throwing here makes the failure loud and immediate. The manual AAB check in
+ * docs/17 Step 7 is still worth running, but it is now a backstop rather than
+ * the only thing standing between a typo and a year of unpaid impressions.
+ */
+fun adId(key: String, fallback: String): String {
+    if (!useProductionAds) return fallback
+
+    val id = localProps.getProperty(key)?.trim()
+    if (id.isNullOrEmpty()) {
+        throw GradleException(
+            "Production ads were requested (-Pstockcut.productionAds=true) but " +
+                "'$key' is missing from local.properties.\n" +
+                "Refusing to fall back to the test ID: that build would look correct, " +
+                "upload correctly, and earn nothing with no error anywhere.\n" +
+                "Add the real ID from AdMob, or drop the flag to build with test ads.",
+        )
+    }
+    if (id.startsWith(testPublisher)) {
+        throw GradleException(
+            "'$key' in local.properties is Google's TEST publisher ($testPublisher).\n" +
+                "That serves test ads to real users and earns nothing. Copy the real " +
+                "ad unit ID from AdMob instead.",
+        )
+    }
+    return id
+}
 
 /**
  * Release signing.
