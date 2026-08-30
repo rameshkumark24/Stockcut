@@ -3,6 +3,7 @@ package com.stockcut.ui.editor
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -34,9 +35,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import com.stockcut.data.entitlement.PaywallTrigger
 import com.stockcut.data.model.PartEntry
 import com.stockcut.data.model.StockEntry
+import com.stockcut.ui.findActivity
 import com.stockcut.ui.components.BannerKind
 import com.stockcut.ui.components.InlineBanner
 import com.stockcut.ui.theme.Space
@@ -75,7 +76,7 @@ fun ProjectEditorScreen(
     // 🔴 The ONLY path to the cut plan. The ViewModel sets this exclusively for
     // Success and Shortfall; an Infeasible result never sets it, so a plan that
     // dropped a part is unreachable rather than merely discouraged.
-    val activity = androidx.compose.ui.platform.LocalContext.current as? android.app.Activity
+    val activity = androidx.compose.ui.platform.LocalContext.current.findActivity()
     LaunchedEffect(state.navigateToResult) {
         if (!state.navigateToResult) return@LaunchedEffect
 
@@ -224,7 +225,25 @@ fun ProjectEditorScreen(
         // and moving it would mean reasoning about navigationBarsPadding and the
         // IME inset at the same time, which is how the last two inset bugs got
         // in. 🔴 VERIFY ON A REAL PHONE before the production build.
-        Column(modifier = Modifier.fillMaxSize().padding(padding).imePadding()) {
+        // 🔴 consumeWindowInsets is not optional here.
+        //
+        // Modifier.padding(PaddingValues) APPLIES spacing but CONSUMES nothing,
+        // so a following imePadding() still measures WindowInsets.ime from the
+        // window bottom and re-adds the part of it that `padding` already
+        // covered. With the Optimize bottomBar that is ~120dp of dead band
+        // between the last field and the keyboard — visible in emulator capture
+        // 09/10 as a blank strip below End trim that would not scroll, because
+        // Save trim had been pushed past the end of the shrunken viewport.
+        //
+        // consumeWindowInsets(padding) marks those insets handled without
+        // applying padding twice, so imePadding() adds only what is left.
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .consumeWindowInsets(padding)
+                .imePadding(),
+        ) {
             state.infeasible?.let { infeasible ->
                 val unit = state.unitSystem
                 val denominator = state.denominator
@@ -378,9 +397,3 @@ private fun tabLabel(tab: EditorTab): String = when (tab) {
 }
 
 /** Names what the user just hit, not a generic "Go Pro" (docs/03 S5). */
-private fun paywallHeadline(trigger: PaywallTrigger): String = when (trigger) {
-    PaywallTrigger.PARTS -> "Unlock unlimited parts"
-    PaywallTrigger.PROJECTS -> "Unlock unlimited jobs"
-    PaywallTrigger.STOCK -> "Unlock unlimited stock lengths"
-    PaywallTrigger.PDF_EXPORT -> "Unlock PDF export"
-}

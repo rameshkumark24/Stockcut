@@ -37,9 +37,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.stockcut.data.model.ProjectSummary
 import com.stockcut.ui.components.EmptyState
@@ -69,6 +72,11 @@ fun ProjectsScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var confirmDelete by remember { mutableStateOf<ProjectSummary?>(null) }
+
+    // The FAB's real height, so the list can leave exactly enough room beneath
+    // the last card. A constant cannot: the FAB grows with the system font.
+    val density = LocalDensity.current
+    var fabHeight by remember { mutableStateOf(0.dp) }
 
     // A newly created job opens immediately — the user asked for a job, not for
     // a row in a list.
@@ -148,6 +156,8 @@ fun ProjectsScreen(
                 onClick = viewModel::onNewJobClicked,
                 modifier = Modifier
                     .heightIn(min = TouchTarget.primaryButtonHeight)
+                    // Measured, not assumed — see the contentPadding below.
+                    .onSizeChanged { fabHeight = with(density) { it.height.toDp() } }
                     .semantics { contentDescription = "New job" },
             ) {
                 Text("New job")
@@ -172,8 +182,24 @@ fun ProjectsScreen(
                     start = Space.screenHorizontal,
                     end = Space.screenHorizontal,
                     top = Space.md,
-                    // Clears the FAB, so the last card is never trapped under it.
-                    bottom = Space.xxxl + Space.xl,
+                    // 🔴 Clears the FAB using its MEASURED height.
+                    //
+                    // This was a fixed Space.xxxl + Space.xl = 72dp, which is
+                    // exactly ExtendedFloatingActionButton's 56dp minimum plus
+                    // Scaffold's 16dp spacing — correct at font scale 1.0 and
+                    // wrong at every scale above it, with zero margin. The FAB
+                    // uses heightIn(min = ...) precisely so it GROWS with the
+                    // font scale, so at Android's larger text settings it was
+                    // taller than the gap left for it and the last job card was
+                    // trapped underneath: the exact outcome this padding exists
+                    // to prevent, and a Definition-of-done item ("works at max
+                    // font scale").
+                    //
+                    // fabHeight starts at 0 and is filled in on the FAB's first
+                    // layout pass, so the fallback keeps the old behaviour for
+                    // that one frame rather than briefly under-padding.
+                    bottom = (if (fabHeight > 0.dp) fabHeight else Space.xxxl) +
+                        Space.lg + Space.md,
                 ),
                 verticalArrangement = Arrangement.spacedBy(Space.betweenCards),
             ) {
@@ -268,7 +294,13 @@ private fun ProjectCard(
                 .padding(Space.cardInner),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
+            // weight(1f), not fillMaxWidth(): inside a Row, fillMaxWidth takes
+            // the whole incoming width and leaves nothing for siblings. It looks
+            // fine today only because the one sibling is a DropdownMenu, which
+            // is a Popup with no layout footprint — the first real sibling added
+            // here (an icon, a badge, a chevron) would be pushed off the card
+            // silently. MeasurementRow already does this correctly.
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = project.name,
                     style = MaterialTheme.typography.titleMedium,

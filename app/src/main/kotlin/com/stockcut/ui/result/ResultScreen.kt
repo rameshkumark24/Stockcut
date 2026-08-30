@@ -30,6 +30,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.stockcut.optimizer.Plan
+import com.stockcut.ui.findActivity
 import com.stockcut.ui.components.BannerKind
 import com.stockcut.ui.components.InlineBanner
 import com.stockcut.ui.theme.DisplayNumberTextStyle
@@ -64,7 +65,7 @@ fun ResultScreen(
     // has to live somewhere that is not cancelled by the navigation itself.
     // Entitlement.reviewPromptDue enforces >= 3 lifetime and once per 90 days.
     LaunchedEffect(state.plan) {
-        val activity = context as? android.app.Activity ?: return@LaunchedEffect
+        val activity = context.findActivity() ?: return@LaunchedEffect
         if (state.plan == null) return@LaunchedEffect
         val settings = viewModel.settingsSnapshot() ?: return@LaunchedEffect
         com.stockcut.ui.ReviewPrompt.maybeAsk(

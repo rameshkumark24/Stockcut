@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
@@ -27,8 +28,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.stockcut.ui.findActivity
 import com.stockcut.ui.components.MeasurementField
 import com.stockcut.ui.components.MeasurementFieldState
+import com.stockcut.ui.components.unitLabel
 import com.stockcut.ui.theme.Space
 import com.stockcut.ui.theme.ThemeMode
 import com.stockcut.ui.theme.TouchTarget
@@ -82,6 +85,11 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                // consumeWindowInsets for the same reason as the editor:
+                // padding(PaddingValues) applies spacing but consumes nothing,
+                // so without this the navigation-bar inset already inside
+                // `padding` is counted a second time by imePadding() below.
+                .consumeWindowInsets(padding)
                 // 🔴 imePadding BEFORE verticalScroll, and the order is the point.
                 //
                 // Same root cause as the editor (see ProjectEditorScreen): with
@@ -119,18 +127,21 @@ fun SettingsScreen(
                     FilterChip(
                         selected = system == state.defaultUnitSystem,
                         onClick = { viewModel.onDefaultsChanged(unitSystem = system) },
-                        label = { Text(unitLabel(system)) },
-                        modifier = Modifier.semantics { contentDescription = unitLabel(system) },
+                        label = { Text(unitLabel(system, state.defaultDenominator)) },
+                        modifier = Modifier.semantics {
+                            contentDescription = unitLabel(system, state.defaultDenominator)
+                        },
                     )
                 }
             }
 
             if (state.defaultUnitSystem == UnitSystem.INCH_FRACTIONAL) {
                 Text("Fraction", style = MaterialTheme.typography.titleMedium)
-                // horizontalScroll to match the unit row above. Without it the
-                // six denominators (1/2 … 1/64) are squeezed by a plain Row, and
-                // 1/64 — the finest setting, the one a joiner actually reaches
-                // for — is the one that gets clipped at large font scale.
+                // horizontalScroll to match the unit row above. The four
+                // denominators (SUPPORTED_DENOMINATORS = 8/16/32/64) fit a plain
+                // Row today, so this is insurance rather than a fix for anything
+                // observed: 1/64 is last, so it is what a longer list, a wider
+                // translation or a larger font scale would squeeze first.
                 Row(
                     modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(Space.sm),
@@ -210,7 +221,7 @@ fun SettingsScreen(
                 Text("Privacy", style = MaterialTheme.typography.titleMedium)
                 Button(
                     onClick = {
-                        (activity as? android.app.Activity)?.let {
+                        activity.findActivity()?.let {
                             container.consent.showPrivacyOptions(it)
                         }
                     },
@@ -223,13 +234,6 @@ fun SettingsScreen(
     }
 }
 
-private fun unitLabel(system: UnitSystem): String = when (system) {
-    UnitSystem.MM -> "mm"
-    UnitSystem.CM -> "cm"
-    UnitSystem.M -> "m"
-    UnitSystem.INCH_DECIMAL -> "inch"
-    UnitSystem.INCH_FRACTIONAL -> "inch ¹⁄₁₆"
-}
 
 private fun themeLabel(mode: ThemeMode): String = when (mode) {
     ThemeMode.SYSTEM -> "System"

@@ -37,6 +37,7 @@ import com.stockcut.ui.components.EmptyState
 import com.stockcut.ui.components.MeasurementField
 import com.stockcut.ui.components.MeasurementFieldState
 import com.stockcut.ui.components.MeasurementRow
+import com.stockcut.ui.components.unitLabel
 import com.stockcut.ui.theme.Space
 import com.stockcut.ui.theme.TouchTarget
 import com.stockcut.units.SUPPORTED_DENOMINATORS
@@ -192,10 +193,14 @@ fun StockTab(
  *
  * The padding is applied AFTER [horizontalScroll] on purpose, so it behaves like
  * `LazyRow`'s `contentPadding`: it insets the chips at rest but scrolls away with
- * them, letting the row use the full width once scrolled. Putting it before the
- * scroll would shrink the viewport and clip chips at an arbitrary inner boundary
- * instead of the screen edge — which matters for imperial, where there are five
- * chips rather than three.
+ * them, letting the row use the full width once scrolled.
+ *
+ * That full-width behaviour is real only at the EMPTY-STATE call site. In the
+ * populated list the LazyColumn's own `contentPadding` has already narrowed the
+ * item by 32dp before this row is measured, so the five imperial chips scroll
+ * and clip 16dp inside the screen edge whatever is passed here. That is correct
+ * there — the row lines up with the stock rows above it — but it is a property
+ * of the parent, not something this parameter can grant.
  */
 @Composable
 private fun QuickAddChips(
@@ -290,8 +295,10 @@ fun SetupTab(
                 FilterChip(
                     selected = system == state.unitSystem,
                     onClick = { onUnitSystemChanged(system, null) },
-                    label = { Text(unitLabel(system)) },
-                    modifier = Modifier.semantics { contentDescription = unitLabel(system) },
+                    label = { Text(unitLabel(system, state.denominator)) },
+                    modifier = Modifier.semantics {
+                        contentDescription = unitLabel(system, state.denominator)
+                    },
                 )
             }
         }
@@ -299,10 +306,11 @@ fun SetupTab(
         // Only meaningful in fractional inches, so it only appears there.
         if (state.unitSystem == UnitSystem.INCH_FRACTIONAL) {
             Text("Fraction", style = MaterialTheme.typography.titleMedium)
-            // horizontalScroll, matching the same row in Settings: six chips
-            // (1/2 … 1/64) do not fit a plain Row at large font scale, and 1/64
-            // — the finest setting, the one a joiner reaches for — is last, so
-            // it is the one that gets clipped.
+            // horizontalScroll, matching the same row in Settings. The four
+            // denominators (SUPPORTED_DENOMINATORS = 8/16/32/64) fit a plain Row
+            // today, so this is insurance, not a fix for anything observed:
+            // 1/64 is last, so it is what a longer list, a wider translation or
+            // a larger font scale would squeeze first.
             Row(
                 modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(Space.sm),
@@ -333,16 +341,30 @@ fun SetupTab(
             helperText = "Removed from the start of each length if the end is damaged.",
         )
         Button(
-            onClick = { if (trim.commit()) trim.valueU?.let(onTrimChanged) else onTrimChanged(0) },
+            // 🔴 An EMPTY field means "no trim". A TYPO does not.
+            //
+            // This was `if (commit()) ... else onTrimChanged(0)`, and commit()
+            // returns false for two unrelated reasons: the field is blank, and
+            // the text does not parse. Treating both as "clear it" meant that a
+            // job with a 50 mm trim, plus one fat-fingered entry, silently
+            // persisted trimU = 0 to Room — and then re-rendered the field blank
+            // via remember(project.trimU), so the typo that caused it vanished
+            // too. Every later cut plan would be 50 mm out with nothing on
+            // screen to explain why.
+            //
+            // Blank clears. A parse error leaves the saved value alone and lets
+            // commit()'s inline message stand. The Kerf button above always did
+            // the right thing here; this one did not.
+            onClick = {
+                if (trim.text.isBlank()) {
+                    trim.clear()
+                    onTrimChanged(0)
+                } else if (trim.commit()) {
+                    trim.valueU?.let(onTrimChanged)
+                }
+            },
             modifier = Modifier.heightIn(min = TouchTarget.primaryButtonHeight),
         ) { Text("Save trim") }
     }
 }
 
-private fun unitLabel(system: UnitSystem): String = when (system) {
-    UnitSystem.MM -> "mm"
-    UnitSystem.CM -> "cm"
-    UnitSystem.M -> "m"
-    UnitSystem.INCH_DECIMAL -> "inch"
-    UnitSystem.INCH_FRACTIONAL -> "inch ¹⁄₁₆"
-}
