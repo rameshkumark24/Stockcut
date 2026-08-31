@@ -148,6 +148,28 @@ Nothing here needs code. It is all sitting in the repo.
 - [ ] Burn the captions into the 5 screenshots
 - [x] 512×512 store icon rendered — `store/play-store-icon-512.png`
 
+## Real-device verification of 1.0.2 — 31 Aug 2026
+
+Run on the **vivo V2307, Android 15, 3-button navigation, dark theme**, debug
+build of **1.0.2 (versionCode 3)**, installed alongside the Play copy as
+`com.measure.stockcut.debug` so the store install and its data were untouched.
+
+| Check | Result |
+|---|---|
+| Setup → End trim with the keyboard up | ✅ form lifts, field clear of the IME. **This is the one the owner confirmed broken on this exact phone** |
+| Save trim reachable while typing | ✅ the form scrolls; before `consumeWindowInsets` it had zero scroll range |
+| Invalid trim text does not wipe a saved trim | ✅ saved 50, entered `1.2.3`, tapped Save trim, left and re-entered — still 50. Under the old code this wrote 0 |
+| Ad banner clears the 3-button navigation bar | ✅ |
+| Optimize clears the navigation bar | ✅ |
+| Status bar icons legible in dark theme | ✅ |
+
+🔴 Two items from the 1.0.2 change set are still UNVERIFIED on hardware: the
+**display-cutout union** on the ad banner (needs a corner-cutout phone in
+landscape; the V2307 did not exercise it) and behaviour at **large font scale**,
+which was checked on the emulator at 1.3x but not here.
+
+---
+
 ## Real-device testing
 
 Run on a **vivo V2307, Android 15, 8 GB RAM, 3-button navigation**, release build,
