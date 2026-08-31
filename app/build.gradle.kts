@@ -111,7 +111,7 @@ android {
         // it has EVER seen — including from a build you uploaded and discarded.
         // There is no way to reuse or lower a number. Bump it for every upload,
         // even a re-upload of the same code after a rejected review.
-        versionCode = 2
+        versionCode = 3
 
         // 1.0.0 was the first release, published to closed testing on
         // 2026-08-13. Before that it was 0.1.0, which is honest for a
@@ -121,7 +121,10 @@ android {
         //
         // MAJOR.MINOR.PATCH from here: PATCH for fixes, MINOR for features,
         // MAJOR for a change that alters how a saved job behaves.
-        versionName = "1.0.1"
+        // 1.0.2 (code 3): the first build with the edge-to-edge and keyboard
+        // fixes, plus the "Save trim" data-loss fix. PATCH, not MINOR — every
+        // change in it repairs behaviour rather than adding any.
+        versionName = "1.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
