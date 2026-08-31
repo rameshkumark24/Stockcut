@@ -148,6 +148,30 @@ Nothing here needs code. It is all sitting in the repo.
 - [ ] Burn the captions into the 5 screenshots
 - [x] 512×512 store icon rendered — `store/play-store-icon-512.png`
 
+## Android developer verification — DONE, no action needed
+
+Google's 15 July 2026 rule: any Play app whose **package name and signing keys**
+are not registered against a verified developer identity by **30 September 2026**
+is removed from Google Play globally, and eventually becomes uninstallable on
+certified devices in some countries even when sideloaded.
+
+Checked 31 Aug 2026 — Play Console → Android developer verification:
+
+| Package | Status | Keys | Last updated |
+|---|---|---|---|
+| `com.measure.stockcut` | ✅ **Registered** | 3 | 10 Aug 2026 |
+
+Registered automatically from the Play Console account when the app was created,
+because identity verification was already complete and Play App Signing was
+accepted. **The deadline is met and there is nothing to do.**
+
+🔴 Do NOT use "Register package name". That is for apps distributed outside Play
+or signed with additional keys, and StockCut is neither — it ships only through
+Play, signed by one upload key with Play App Signing on top. A stray entry would
+be noise at best.
+
+---
+
 ## Real-device verification of 1.0.2 — 31 Aug 2026
 
 Run on the **vivo V2307, Android 15, 3-button navigation, dark theme**, debug
