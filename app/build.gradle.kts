@@ -111,7 +111,7 @@ android {
         // it has EVER seen — including from a build you uploaded and discarded.
         // There is no way to reuse or lower a number. Bump it for every upload,
         // even a re-upload of the same code after a rejected review.
-        versionCode = 3
+        versionCode = 4
 
         // 1.0.0 was the first release, published to closed testing on
         // 2026-08-13. Before that it was 0.1.0, which is honest for a
@@ -124,7 +124,17 @@ android {
         // 1.0.2 (code 3): the first build with the edge-to-edge and keyboard
         // fixes, plus the "Save trim" data-loss fix. PATCH, not MINOR — every
         // change in it repairs behaviour rather than adding any.
-        versionName = "1.0.2"
+        //
+        // 1.0.3 (code 4): THE FIRST PRODUCTION BUILD. Identical source to
+        // 1.0.2 — the only difference is that it carries the real AdMob IDs
+        // instead of Google's test IDs, which is a build flag, not a code
+        // change.
+        //
+        // The version is bumped anyway rather than shipping a second artifact
+        // also called 1.0.2. Two builds sharing a user-facing version but
+        // behaving differently (test ads vs real ads) is exactly the ambiguity
+        // that makes a support conversation useless a year from now.
+        versionName = "1.0.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
