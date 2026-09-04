@@ -148,6 +148,72 @@ Nothing here needs code. It is all sitting in the repo.
 - [ ] Burn the captions into the 5 screenshots
 - [x] 512×512 store icon rendered — `store/play-store-icon-512.png`
 
+## Play's four "recommended actions" on 1.0.3 — all four resolved
+
+Investigated 4 Sept 2026. **Two were real and are fixed. Two are Google
+flagging something already done, or something that is not ours to fix.**
+Written down because these reappear on every release and re-deriving the
+answer each time is waste.
+
+### 1. "Outdated SDK version of androidx.fragment:fragment" — ✅ FIXED
+
+Google asked for 1.2.1+. Nothing here uses fragment; it arrives transitively
+from Google's own ads/billing/review SDKs, which still declare 1.0.0/1.1.0.
+Forced to **1.8.9** via a dependency constraint. R8 then strips the classes
+entirely — `androidx/fragment/app/Fragment` is absent from the built APK — so
+the version Play scans in the bundle metadata goes up while none of the code
+ships.
+
+### 2. "Edge-to-edge may not display for all users" — ✅ ALREADY SATISFIED
+
+Read Google's own text: *"Alternatively, **call enableEdgeToEdge()** for Kotlin
+… for backward compatibility."* `MainActivity.kt` has done exactly that since
+before launch. This is a generic advisory sent to every targetSdk 35+ app, not
+a detected defect. **No action, now or on future releases.**
+
+### 3. "Deprecated APIs or parameters for edge-to-edge" — ❌ NOT OURS
+
+Google names `Window.setStatusBarColor`, `Window.setNavigationBarColor` and
+`LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES`, starting in classes `c.s.b`,
+`c.u.b`, `c.w.b`, `a6.e.t`.
+
+**A grep of the whole source tree returns zero matches for all three.** Those
+obfuscated names are pre-obfuscated Google library classes, and those three
+calls are precisely what `androidx.activity` 1.13.0's `enableEdgeToEdge()` does
+on its backward-compatibility path for API < 35. minSdk is 26, so that path is
+REQUIRED for every Android 8–14 user.
+
+🔴 Note the contradiction: **#2 instructs us to call `enableEdgeToEdge()`, and
+#3 flags the deprecated APIs that `enableEdgeToEdge()` itself uses.** Google's
+lint reports call sites without accounting for API-gated paths inside
+libraries. Acting on #3 would break edge-to-edge on Android 8–14. **No action.**
+
+### 4. "Improve memory and performance with R8" — half done, half deferred
+
+Two separate asks:
+
+**"Optimised resource shrinking isn't enabled"** — real, and now enabled via
+`android.r8.optimizedResourceShrinking=true`. **2.32% smaller** (4,312,632 →
+4,212,502 bytes). AGP warns the flag is *experimental*, so it was verified on a
+device rather than assumed: installed on the Android 9 / 2 GB emulator, no
+`Resources$NotFoundException`, no `InflateException`, and — the thing actually
+at risk — **the AdMob banner renders with its image assets intact**. A stripped
+ad resource would have cost revenue silently, which is why this was tested
+rather than shipped on the size number alone.
+
+Low risk surface helped: no `getIdentifier` anywhere in the app, only 10
+resource files, and `isShrinkResources` was already on — so this changes the
+shrinking *algorithm*, not whether shrinking happens.
+
+**"Upgrade AGP to 9.0 or higher"** — 🔴 **deliberately deferred.** Currently
+8.13.0; 9.0 is a major version with breaking DSL and Gradle requirements. It
+needs its own pass across all tests plus a device run, and the app launched the
+day before. It is a recommendation, not a requirement, and nothing breaks by
+staying on 8.13. Do it as its own piece of work once real Vitals data exists on
+a build we understand.
+
+---
+
 ## Low-end device testing — DONE 4 Sept 2026, gap CLOSED
 
 The last outstanding real-device item, open since the beginning. Tested on an
