@@ -111,7 +111,7 @@ android {
         // it has EVER seen — including from a build you uploaded and discarded.
         // There is no way to reuse or lower a number. Bump it for every upload,
         // even a re-upload of the same code after a rejected review.
-        versionCode = 5
+        versionCode = 6
 
         // 1.0.0 was the first release, published to closed testing on
         // 2026-08-13. Before that it was 0.1.0, which is honest for a
@@ -139,7 +139,13 @@ android {
         // if they run dark mode — the launch window no longer flashes white.
         // The rest is build hygiene Play asked for: fragment forced off a 2019
         // release, and optimised resource shrinking.
-        versionName = "1.0.4"
+        // 1.0.5 (code 6): drops the com.android.vending.BILLING permission
+        // from the merged manifest, which is what made Play stamp "In-app
+        // purchases" on the listing of an app that sells nothing. The billing
+        // library and the whole dormant paywall stay in place — see the
+        // manifest for why removing the permission is safe while
+        // PAYWALL_ENABLED is false.
+        versionName = "1.0.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
