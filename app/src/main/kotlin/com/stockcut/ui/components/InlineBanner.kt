@@ -3,7 +3,8 @@ package com.stockcut.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -29,6 +30,7 @@ enum class BannerKind { INFO, WARNING, ERROR }
  * warning and carry on to a plan that silently dropped their parts, which is the
  * single thing S3 exists to prevent.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun InlineBanner(
     kind: BannerKind,
@@ -68,7 +70,24 @@ fun InlineBanner(
             )
         }
         if (primaryAction != null || secondaryAction != null) {
-            Row(horizontalArrangement = Arrangement.spacedBy(Space.sm)) {
+            // 🔴 FlowRow, not Row: two actions do not fit one line at large text.
+            //
+            // The infeasible-stock banner (ProjectEditorScreen) is the only call
+            // site passing BOTH actions, and its labels are "Add longer stock"
+            // and "Edit those parts" — 16 characters each. A plain Row does not
+            // wrap and has no weights: it measures children in order and hands
+            // the leftover width to the second one. On a 360dp phone the two
+            // buttons need close to the whole 296dp available, so one notch up
+            // on Android's text-size setting squeezes the second button and its
+            // label wraps mid-phrase inside the button.
+            //
+            // That button is the only offered route to fix the offending parts,
+            // on the app's one blocking error, for exactly the users who most
+            // need larger text. FlowRow lets it drop to a second line instead.
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(Space.sm),
+                verticalArrangement = Arrangement.spacedBy(Space.xs),
+            ) {
                 primaryAction?.let { (label, onClick) ->
                     TextButton(
                         onClick = onClick,

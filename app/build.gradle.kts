@@ -28,12 +28,51 @@ val useProductionAds = (project.findProperty("stockcut.productionAds") as? Strin
 
 // Google's documented public test IDs. Safe to commit — they are the same for
 // everyone and serve test ads only.
-val testAppId = "ca-app-pub-3940256099942544~3347511713"
-val testBannerId = "ca-app-pub-3940256099942544/6300978111"
-val testInterstitialId = "ca-app-pub-3940256099942544/1033173712"
+val testPublisher = "ca-app-pub-3940256099942544"
+val testAppId = "$testPublisher~3347511713"
+val testBannerId = "$testPublisher/6300978111"
+val testInterstitialId = "$testPublisher/1033173712"
 
-fun adId(key: String, fallback: String): String =
-    if (useProductionAds) localProps.getProperty(key) ?: fallback else fallback
+/**
+ * 🔴 Asking for production ads and not getting them must FAIL THE BUILD.
+ *
+ * This used to be `localProps.getProperty(key) ?: fallback`, which meant a
+ * missing entry in local.properties silently produced a build carrying Google's
+ * test IDs. That build compiles, signs, uploads and installs, and then earns
+ * nothing — forever, from every user, with no error in Gradle, in Play, in
+ * logcat or in AdMob. The only symptom is a revenue line that stays at zero,
+ * and by the time it is noticed the release is already public.
+ *
+ * local.properties is git-ignored, so it is exactly the file that goes missing
+ * on a new machine, a fresh clone, or a rebuild after a disk wipe — the moments
+ * when a release is most likely to be cut in a hurry.
+ *
+ * Throwing here makes the failure loud and immediate. The manual AAB check in
+ * docs/17 Step 7 is still worth running, but it is now a backstop rather than
+ * the only thing standing between a typo and a year of unpaid impressions.
+ */
+fun adId(key: String, fallback: String): String {
+    if (!useProductionAds) return fallback
+
+    val id = localProps.getProperty(key)?.trim()
+    if (id.isNullOrEmpty()) {
+        throw GradleException(
+            "Production ads were requested (-Pstockcut.productionAds=true) but " +
+                "'$key' is missing from local.properties.\n" +
+                "Refusing to fall back to the test ID: that build would look correct, " +
+                "upload correctly, and earn nothing with no error anywhere.\n" +
+                "Add the real ID from AdMob, or drop the flag to build with test ads.",
+        )
+    }
+    if (id.startsWith(testPublisher)) {
+        throw GradleException(
+            "'$key' in local.properties is Google's TEST publisher ($testPublisher).\n" +
+                "That serves test ads to real users and earns nothing. Copy the real " +
+                "ad unit ID from AdMob instead.",
+        )
+    }
+    return id
+}
 
 /**
  * Release signing.
@@ -72,17 +111,30 @@ android {
         // it has EVER seen — including from a build you uploaded and discarded.
         // There is no way to reuse or lower a number. Bump it for every upload,
         // even a re-upload of the same code after a rejected review.
-        versionCode = 1
+        versionCode = 4
 
-        // 1.0.0 for the first public release. It was 0.1.0 while the app was
-        // being built, which is honest for a pre-release but wrong on a store
-        // listing: users read a leading 0 as "unfinished", and a tradesman
-        // deciding whether to trust a measurement tool is the last person to
-        // give the benefit of the doubt.
+        // 1.0.0 was the first release, published to closed testing on
+        // 2026-08-13. Before that it was 0.1.0, which is honest for a
+        // pre-release but wrong on a store listing: users read a leading 0 as
+        // "unfinished", and a tradesman deciding whether to trust a measurement
+        // tool is the last person to give the benefit of the doubt.
         //
         // MAJOR.MINOR.PATCH from here: PATCH for fixes, MINOR for features,
         // MAJOR for a change that alters how a saved job behaves.
-        versionName = "1.0.0"
+        // 1.0.2 (code 3): the first build with the edge-to-edge and keyboard
+        // fixes, plus the "Save trim" data-loss fix. PATCH, not MINOR — every
+        // change in it repairs behaviour rather than adding any.
+        //
+        // 1.0.3 (code 4): THE FIRST PRODUCTION BUILD. Identical source to
+        // 1.0.2 — the only difference is that it carries the real AdMob IDs
+        // instead of Google's test IDs, which is a build flag, not a code
+        // change.
+        //
+        // The version is bumped anyway rather than shipping a second artifact
+        // also called 1.0.2. Two builds sharing a user-facing version but
+        // behaving differently (test ads vs real ads) is exactly the ambiguity
+        // that makes a support conversation useless a year from now.
+        versionName = "1.0.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
