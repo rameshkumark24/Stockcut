@@ -111,7 +111,7 @@ android {
         // it has EVER seen — including from a build you uploaded and discarded.
         // There is no way to reuse or lower a number. Bump it for every upload,
         // even a re-upload of the same code after a rejected review.
-        versionCode = 4
+        versionCode = 5
 
         // 1.0.0 was the first release, published to closed testing on
         // 2026-08-13. Before that it was 0.1.0, which is honest for a
@@ -134,7 +134,12 @@ android {
         // also called 1.0.2. Two builds sharing a user-facing version but
         // behaving differently (test ads vs real ads) is exactly the ambiguity
         // that makes a support conversation useless a year from now.
-        versionName = "1.0.3"
+        // 1.0.4 (code 5): first update after launch. No feature changes and
+        // no behaviour changes for the user beyond one they will only notice
+        // if they run dark mode — the launch window no longer flashes white.
+        // The rest is build hygiene Play asked for: fragment forced off a 2019
+        // release, and optimised resource shrinking.
+        versionName = "1.0.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
