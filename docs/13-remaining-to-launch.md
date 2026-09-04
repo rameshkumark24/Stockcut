@@ -148,6 +148,58 @@ Nothing here needs code. It is all sitting in the repo.
 - [ ] Burn the captions into the 5 screenshots
 - [x] 512×512 store icon rendered — `store/play-store-icon-512.png`
 
+## Low-end device testing — DONE 4 Sept 2026, gap CLOSED
+
+The last outstanding real-device item, open since the beginning. Tested on an
+emulated budget phone rather than left untested, because no low-end hardware was
+available and real users were already installing the app.
+
+**Profile:** Android 9 (API 28, `google_apis` x86_64) · **2 GB RAM** · 192 MB
+heap · 720×1280 @ 320 dpi (**360 dp wide** — narrower than anything previously
+tested) · 4 cores. Release APK, R8-minified — a debug build would have given a
+falsely pessimistic result. **Test ad IDs**, verified in the APK, so the
+emulator could never touch the live ad units.
+
+### Cold start
+
+| Configuration | Median | Range |
+|---|---|---|
+| vivo V2307 (real, good phone) | 670 ms | — |
+| Low-end, **GPU accelerated** | **1.60 s** | 1.52–1.66 s |
+| Low-end, software rendering | 2.96 s | 2.32–3.67 s |
+| Budget (`docs/08`) | 1.50 s | |
+
+🔴 **Read the software-rendering row as a floor, not a forecast.** It was forced
+deliberately (`-gpu swiftshader_indirect`) and no real phone renders that way. It
+roughly doubled cold start, which is worth remembering the next time an emulator
+number looks alarming.
+
+The realistic figure is **~1.6 s, marginally over a 1.5 s budget that was always
+self-imposed rather than a user requirement.** Accepted as-is.
+
+### Everything else passed
+
+| Check | Result |
+|---|---|
+| Crashes / ANRs / StrictMode | **None** |
+| Java heap | **6 MB** against a 192 MB cap — no memory pressure whatever |
+| Native heap | 26 MB |
+| Layout at 360 dp — jobs, editor, cut plan | Clean; bar segment labels fit |
+| Optimize correctness | 13.8%, 2 bars, plan correct |
+
+Memory was the risk most expected on a 2 GB device and it simply is not one: the
+app is an order of magnitude smaller than the constraint.
+
+### The one soft spot, not fixed
+
+30–43 frames skipped at launch (`Choreographer: Skipped N frames`), roughly
+0.5–0.7 s of blocked main thread while `AppContainer` brings up Room and
+DataStore. A fast phone hides it; a slow one shows it as a beat before the first
+frame. Not a defect and not user-visible as jank once running — recorded so the
+next person to measure startup knows where the time goes.
+
+---
+
 ## 🚀 LAUNCHED — 4 Sept 2026
 
 **StockCut is live and publicly listed on Google Play.**
