@@ -148,6 +148,50 @@ Nothing here needs code. It is all sitting in the repo.
 - [ ] Burn the captions into the 5 screenshots
 - [x] 512×512 store icon rendered — `store/play-store-icon-512.png`
 
+## AdMob was throttling us for the first day — fixed 4 Sept 2026
+
+Worth writing down, because "why did week one earn almost nothing" is exactly
+the question that gets asked later and misdiagnosed as a code problem.
+
+**The AdMob app had never been linked to a Play Store listing.** It could not
+be: the app was not publicly listed until 4 Sept. So App settings showed
+"Package name or store ID: **—**", and AdMob applied **"Limited ad serving —
+Add store to lift limit"**. Requests went out and real ads rendered on device,
+but serving was capped and the app also sat in AdMob's "Apps to confirm" list
+as an unrecognised package.
+
+The tell was in the numbers, not the code: **5 ad requests in seven days with
+0 impressions**. Requests proved the IDs were right; the gap proved the
+throttle.
+
+Fixed by linking `com.measure.stockcut` to the existing AdMob app.
+
+🔴 **The trap on that screen.** AdMob's "Finish setup" flow defaults to
+*"Set up com.measure.stockcut as a NEW AdMob app"*. Taking that default would
+have minted a second app with **new ad unit IDs** — which the shipped 1.0.3
+binary does not use — leaving the live app pointing at the original, still
+throttled, and the new app earning nothing. The correct choice is *"Add
+com.measure.stockcut to an EXISTING AdMob app"*, whose own description ("if you
+have a matching AdMob app without a package name or store ID") describes the
+situation exactly.
+
+Verified afterwards against the bundle, all three matching:
+
+| AdMob | Shipped in 1.0.3 |
+|---|---|
+| `ca-app-pub-7038016776482334~9124784733` | app id, manifest |
+| `ca-app-pub-7038016776482334/4169071601` | banner |
+| `ca-app-pub-7038016776482334/8254556191` | interstitial |
+
+App verification: **Verified**. Approval status moved to **"Getting ready"** —
+AdMob's review takes **2–3 days and ad serving stays limited throughout**.
+
+**So near-zero revenue before roughly 7 Sept 2026 is expected and is not a
+defect.** Judge the ad integration on *requests*, not earnings, until the
+review clears.
+
+---
+
 ## Play's four "recommended actions" on 1.0.3 — all four resolved
 
 Investigated 4 Sept 2026. **Two were real and are fixed. Two are Google
