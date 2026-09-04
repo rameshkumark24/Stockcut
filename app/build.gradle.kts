@@ -237,6 +237,25 @@ dependencies {
     implementation(libs.compose.ui.tooling.preview)
     debugImplementation(libs.compose.ui.tooling)
 
+    // 🔴 Force androidx.fragment forward. NOT a dependency this app wants.
+    //
+    // Nothing here asks for fragment — StockCut is single-Activity Compose and
+    // does not use one. It arrives transitively from Google's own SDKs (ads,
+    // billing, play-review), which still declare fragment 1.0.0/1.1.0, and
+    // Gradle was resolving it to 1.1.0 — a 2019 release. Play flags it on the
+    // production dashboard as "an outdated SDK version of
+    // androidx.fragment:fragment".
+    //
+    // A constraint rather than an `implementation` line, because the point is
+    // to raise the floor for a transitive nobody declared, not to take on a
+    // dependency this app has no use for. If a future SDK stops pulling
+    // fragment entirely, this quietly does nothing rather than adding it back.
+    constraints {
+        implementation(libs.androidx.fragment) {
+            because("Play flags fragment 1.1.0 (2019), pulled in by Google's own SDKs")
+        }
+    }
+
     // Phase 6. Every one of these is on the allowed list in docs/02 §9.
     implementation(libs.billing.ktx)
     implementation(libs.play.services.ads)

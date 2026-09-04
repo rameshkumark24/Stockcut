@@ -39,7 +39,13 @@ firebaseBom = "34.17.0"
 googleServices = "4.5.0"
 crashlyticsPlugin = "3.0.7"
 
+# Not a dependency this app uses. Pinned only as a CONSTRAINT so the
+# fragment that Google's ads/billing/review SDKs drag in stops resolving
+# to 1.1.0 (2019), which Play flags on the production dashboard.
+androidxFragment = "1.8.9"
+
 [libraries]
+androidx-fragment = { module = "androidx.fragment:fragment", version.ref = "androidxFragment" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junitPlatform" }
 
