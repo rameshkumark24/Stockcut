@@ -148,6 +148,42 @@ Nothing here needs code. It is all sitting in the repo.
 - [ ] Burn the captions into the 5 screenshots
 - [x] 512×512 store icon rendered — `store/play-store-icon-512.png`
 
+## 🚀 LAUNCHED — 4 Sept 2026
+
+**StockCut is live and publicly listed on Google Play.**
+`https://play.google.com/store/apps/details?id=com.measure.stockcut`
+Verified reachable: HTTP 200 (an unknown package name returns 404).
+
+Submission 6, 4 Sept 2026 00:33 — Production — **Published**. Full rollout;
+Play does not offer a staged percentage for a first production release, so this
+went straight to 100% with no staged safety net.
+
+Shipped artifact: **1.0.3 (versionCode 4)**, 3.77 MB per install, targetSdk 36,
+minSdk 26, 177 countries.
+
+### 🔴 The rule that changes today
+
+Every build before this one carried Google's TEST ad IDs, which made clicking an
+ad in your own app harmless. **That protection is gone.** 1.0.3 carries the real
+publisher (`pub-7038016776482334`), so a click by the owner or by a friendly
+tester is invalid traffic — and AdMob's answer to invalid traffic is permanent
+account termination with forfeiture of unpaid earnings (CLAUDE.md rule 8).
+
+The 15 closed testers are the highest-risk group precisely because they want to
+help. **They must be told.** If ad behaviour ever needs testing again, build a
+test-ID APK (`./gradlew :app:assembleDebug`, no flag) rather than tapping a live
+ad.
+
+### Watch list
+
+| When | Where | Act if |
+|---|---|---|
+| 24 h | AdMob → impressions | 🔴 **Zero on real installs** = test IDs shipped after all |
+| 48 h | Android vitals | Crash > 1.09% or ANR > 0.47% — either demotes the listing |
+| ~1 week | AdMob → app-ads.txt | Still "not found" → use the fallback in this doc |
+
+---
+
 ## Android developer verification — DONE, no action needed
 
 Google's 15 July 2026 rule: any Play app whose **package name and signing keys**
