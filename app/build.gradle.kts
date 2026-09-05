@@ -139,12 +139,18 @@ android {
         // if they run dark mode — the launch window no longer flashes white.
         // The rest is build hygiene Play asked for: fragment forced off a 2019
         // release, and optimised resource shrinking.
-        // 1.0.5 (code 6): drops the com.android.vending.BILLING permission
-        // from the merged manifest, which is what made Play stamp "In-app
-        // purchases" on the listing of an app that sells nothing. The billing
-        // library and the whole dormant paywall stay in place — see the
-        // manifest for why removing the permission is safe while
-        // PAYWALL_ENABLED is false.
+        // 1.0.5 (code 6): two things, both about what the user is told.
+        //
+        // Drops the com.android.vending.BILLING permission from the merged
+        // manifest, which is what made Play stamp "In-app purchases" on the
+        // listing of an app that sells nothing. The billing library and the
+        // dormant paywall stay in place — see the manifest for why removing
+        // the permission is safe while PAYWALL_ENABLED is false.
+        //
+        // And puts units on measurements that stand alone: a parts row now
+        // reads "1800 mm", not "1800". Imperial never had the problem because
+        // 1' 5 1/16" carries its own marks; metric read as a bare number, and
+        // in metre mode a part read just "3".
         versionName = "1.0.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

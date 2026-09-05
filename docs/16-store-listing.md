@@ -37,13 +37,13 @@ promotional text and ranking claims in the title, and it is a common rejection.
 
 ---
 
-## Short description — 76 / 80
+## Short description — 74 / 80
 
 The single highest-weight ASO field. It is also the only text shown before
 someone taps "Read more", so it must carry the whole proposition.
 
 ```
-Cut list optimizer for metal and timber. Kerf-accurate, offline, no sign-up.
+Cutting calculator and cut list optimizer for metal, timber, pipe and rod.
 ```
 
 **Why these words.** "Cut list optimizer" is the phrase tradesmen actually
@@ -53,7 +53,7 @@ sign-up" pre-empt the two objections that stop installs on utility apps.
 
 ---
 
-## Full description — 2,238 / 4,000
+## Full description — 2,315 / 4,000
 
 ```
 Stop working out cut lists on the back of a delivery note.
@@ -82,7 +82,7 @@ BUILT FOR THE SITE, NOT THE OFFICE
 
 WHO IT IS FOR
 
-Fabricators, welders, metalworkers, carpenters, timber framers, shopfitters, window and door installers, fencers, and anyone cutting from linear stock: steel tube, box section, angle, flat bar, rebar, aluminium extrusion, timber studs, skirting, trim, pipe, and conduit.
+Fabricators, welders, metalworkers, carpenters, timber framers, shopfitters, window and door installers, fencers, and anyone cutting from linear stock: steel tube, box section, angle, flat bar, rod, rebar, aluminium extrusion, timber studs, skirting, trim, pipe, and conduit. Use it as a cutting calculator for steel, wood, pipe, rod or aluminium.
 
 If you buy material in fixed lengths and cut pieces from it, this saves you material on every job.
 

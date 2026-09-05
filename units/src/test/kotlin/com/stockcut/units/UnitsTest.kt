@@ -139,4 +139,35 @@ class RejectionTest {
         assertTrue(r.message.isNotBlank())
         assertTrue(r.message.first().isUpperCase() || r.message.startsWith("Try"))
     }
+
+    // ── formatWithUnit — display only ────────────────────────────────────────
+
+    @Test
+    fun `formatWithUnit labels metric, which formats as a bare number`() {
+        assertEquals("3000 mm", formatWithUnit(3000 * U_PER_MM, UnitSystem.MM))
+        assertEquals("300 cm", formatWithUnit(3000 * U_PER_MM, UnitSystem.CM))
+        // The case that prompted this: in metre mode a 3 m part rendered as "3".
+        assertEquals("3 m", formatWithUnit(3 * U_PER_M, UnitSystem.M))
+    }
+
+    @Test
+    fun `formatWithUnit adds the inch mark only where format omits it`() {
+        // Decimal inches format bare, so they need the mark.
+        assertEquals("12.5\"", formatWithUnit(U_PER_INCH * 25 / 2, UnitSystem.INCH_DECIMAL))
+        // Fractional already carries ' and " — anything added would be noise.
+        val frac = formatWithUnit(U_PER_FOOT + U_PER_INCH, UnitSystem.INCH_FRACTIONAL, 16)
+        assertEquals(format(U_PER_FOOT + U_PER_INCH, UnitSystem.INCH_FRACTIONAL, 16), frac)
+    }
+
+    @Test
+    fun `🔴 formatWithUnit is display-only and must never fill a text field`() {
+        // format() carries the round-trip guarantee; formatWithUnit does not.
+        // If someone ever wires it into MeasurementFieldState, this is the test
+        // that should have stopped them: the two are deliberately different, and
+        // only one of them is safe to parse back.
+        val v = 1800 * U_PER_MM
+        assertEquals("1800", format(v, UnitSystem.MM))
+        assertEquals("1800 mm", formatWithUnit(v, UnitSystem.MM))
+        assertIs<ParseResult.Ok>(parse(format(v, UnitSystem.MM), UnitSystem.MM))
+    }
 }
