@@ -22,9 +22,9 @@
 > | Item | Trigger |
 > |---|---|
 > | Ratings from testers | Asked 7 Sept. **The single biggest ranking lever available** |
-> | `app-ads.txt` → Verified | AdMob → Apps → app-ads.txt tab. Affects demand quality, not payment |
+> | ~~`app-ads.txt`~~ | ✅ **Verified 7 Sept** — "file found and verified", 100% of queries authorised |
 > | Bank details | AdMob → Payments → Manage settings. Identity PIN at $10, payout at $100 |
-> | Android vitals | Weekly glance: crash < 1.09%, ANR < 0.47% |
+> | Android vitals | ✅ **0.00% crash, zero ANRs** across 15 installs (10 Aug – 7 Sept), 0.11 points better than peer median. Small sample — meaningful at a few hundred installs. Weekly glance |
 > | Oracle case `O-10` | Still open — needs one real tradesman's job |
 > | `MeasurementRow` right-alignment | Owner's design call, not a defect |
 > | AGP 9.0 | Deferred. Its own project, when something forces it |
