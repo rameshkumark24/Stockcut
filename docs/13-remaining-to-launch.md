@@ -1,5 +1,46 @@
 # Everything remaining until the app is live on Play
 
+> ## ✅ PROJECT CLOSED — 7 Sept 2026
+>
+> **StockCut is public on Google Play, free, serving real ads that are credited to
+> the owner's AdMob account.** Nothing in this document is outstanding engineering.
+>
+> | | |
+> |---|---|
+> | Live version | **1.0.5 (versionCode 6)** — submission 8, published 7 Sept |
+> | Store | `play.google.com/store/apps/details?id=com.measure.stockcut` |
+> | Ads | ✅ Approval **Ready**, 23 requests, **10 impressions**, $0.13 eCPM |
+> | Devices verified | vivo V2307 (Android 15, 3-button nav) · emulated Android 9 / 2 GB / 360 dp |
+> | Play recommendations | All five resolved or refuted **in writing** |
+> | Tests | Full JVM suite green; oracle set intact |
+>
+> **Elapsed: 22 days from paying the $25 to being public.** The code was ready six
+> days before the account existed.
+>
+> ### What is genuinely left, and none of it is code
+>
+> | Item | Trigger |
+> |---|---|
+> | Ratings from testers | Asked 7 Sept. **The single biggest ranking lever available** |
+> | `app-ads.txt` → Verified | AdMob → Apps → app-ads.txt tab. Affects demand quality, not payment |
+> | Bank details | AdMob → Payments → Manage settings. Identity PIN at $10, payout at $100 |
+> | Android vitals | Weekly glance: crash < 1.09%, ANR < 0.47% |
+> | Oracle case `O-10` | Still open — needs one real tradesman's job |
+> | `MeasurementRow` right-alignment | Owner's design call, not a defect |
+> | AGP 9.0 | Deferred. Its own project, when something forces it |
+>
+> ### 🔴 The one rule that outlives this project
+>
+> **Never tap an ad in your own app, and keep telling anyone who knows you the same.**
+> It is permanent, it forfeits the balance, and friends "helping" is the likeliest cause.
+>
+> ### For the next app
+>
+> Everything learned here is written up as a reusable template:
+> `C:\Placement-App-Developer-Zero-to-Published.md` and
+> `Reference/Play-Store-Templates.md`.
+
+---
 **Rewritten 2026-08-08.** Two settled decisions shape this list:
 
 1. **StockCut is completely free**, earning only from AdMob — see
