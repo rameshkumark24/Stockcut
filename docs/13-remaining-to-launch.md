@@ -148,6 +148,44 @@ Nothing here needs code. It is all sitting in the repo.
 - [ ] Burn the captions into the 5 screenshots
 - [x] 512×512 store icon rendered — `store/play-store-icon-512.png`
 
+## ✅ MONEY PATH PROVEN — 7 Sept 2026
+
+The last unverified claim in the project. Everything else could be checked from
+the repo; this one only existed in Google's console.
+
+**AdMob → StockCut, last 7 days:**
+
+| Metric | Value |
+|---|---|
+| Approval status | **Ready** (cleared the 2–3 day review) |
+| App store details | `com.measure.stockcut` — linked |
+| Requests | 23 |
+| **Impressions** | **10** |
+| Match rate | 47.83% |
+| eCPM | $0.13 |
+
+Real ads, served to real users, credited to the right account. The chain from
+`adId()` in build.gradle.kts → the IDs inside the bundle → the AdMob app → the
+store link is now verified end to end rather than reasoned about.
+
+**Banner only so far, and that is the app working as designed.** The interstitial
+needs a lifetime optimize count divisible by 5 AND ten minutes since the last one
+(`Entitlement.interstitialDue`). With ~15 users, almost nobody has reached their
+fifth optimize. Interstitials will appear as usage accumulates.
+
+### The arithmetic worth internalising
+
+`10 impressions × $0.13 eCPM / 1000 = $0.0013` — which is why earnings read
+$0.00 while everything works perfectly.
+
+🔴 **At this eCPM the $100 payout threshold is roughly 770,000 impressions.** eCPM
+improves as AdMob learns the audience and as `app-ads.txt` verifies, but the real
+lever is installs. **There is nothing left to fix on the ads side — the plumbing is
+correct and the volume is a distribution problem.** Judge future changes against
+installs and retention, not against the ad configuration, which is done.
+
+---
+
 ## AdMob was throttling us for the first day — fixed 4 Sept 2026
 
 Worth writing down, because "why did week one earn almost nothing" is exactly
