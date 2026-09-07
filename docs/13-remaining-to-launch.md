@@ -37,7 +37,7 @@
 > ### For the next app
 >
 > Everything learned here is written up as a reusable template:
-> `C:\Placement-App-Developer-Zero-to-Published.md` and
+> `C:/Placement/04-App-Developer/14-Zero-to-Published.md` and-Zero-to-Published.md` and
 > `Reference/Play-Store-Templates.md`.
 
 ---
