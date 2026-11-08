@@ -12,7 +12,7 @@ WHAT IT DOES
 
 METRIC AND IMPERIAL
 
-Millimetres, centimetres, metres, decimal inches, and fractional inches. Type 1 5/16" and it takes it — no converting to decimals in your head, no rounding errors creeping into a job.
+Millimetres, centimetres, metres, feet and inches, decimal inches, and fractional inches. Type 1 5/16" or 8' 3 1/2" and it takes it — no converting to decimals in your head, no rounding errors creeping into a job.
 
 BUILT FOR THE SITE, NOT THE OFFICE
 
@@ -24,9 +24,9 @@ BUILT FOR THE SITE, NOT THE OFFICE
 
 WHO IT IS FOR
 
-Fabricators, welders, metalworkers, carpenters, timber framers, shopfitters, window and door installers, fencers, and anyone cutting from linear stock: steel tube, box section, angle, flat bar, rod, rebar, aluminium extrusion, timber studs, skirting, trim, pipe, and conduit. Use it as a cutting calculator for steel, wood, pipe, rod or aluminium.
+Fabricators, welders, metalworkers, carpenters, timber framers, shopfitters, window and door installers, fencers, and anyone cutting from linear stock: steel tube, box section, angle, flat bar, rod, rebar, aluminium extrusion and profile, timber studs, skirting, architrave, trim, pipe, and conduit.
 
-If you buy material in fixed lengths and cut pieces from it, this saves you material on every job.
+If you buy material in fixed lengths and cut pieces from it, this saves you material on every job. Use it as a timber cut list calculator, a steel or pipe cutting calculator, or a rebar cutting list.
 
 HOW IT WORKS
 

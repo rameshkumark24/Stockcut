@@ -1,0 +1,1 @@
+Cutting calculator and cut list optimizer for metal, timber, pipe and rod.
