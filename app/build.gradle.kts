@@ -111,7 +111,7 @@ android {
         // it has EVER seen — including from a build you uploaded and discarded.
         // There is no way to reuse or lower a number. Bump it for every upload,
         // even a re-upload of the same code after a rejected review.
-        versionCode = 6
+        versionCode = 7
 
         // 1.0.0 was the first release, published to closed testing on
         // 2026-08-13. Before that it was 0.1.0, which is honest for a
@@ -151,7 +151,12 @@ android {
         // reads "1800 mm", not "1800". Imperial never had the problem because
         // 1' 5 1/16" carries its own marks; metric read as a bare number, and
         // in metre mode a part read just "3".
-        versionName = "1.0.5"
+        // 1.1.0 (code 7): MINOR, because it adds behaviour. A shared cut plan
+        // now credits the app: a grey "Made with StockCut" footer on the image
+        // and on every PDF page, and a Play link as the message text, tagged
+        // utm_source=share so Play Console shows installs that came from shares.
+        // The plan itself is drawn exactly as before.
+        versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
