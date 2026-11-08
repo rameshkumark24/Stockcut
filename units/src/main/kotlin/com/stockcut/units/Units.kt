@@ -203,6 +203,41 @@ fun format(valueU: Long, system: UnitSystem, denominator: Int = 16): String = wh
     UnitSystem.INCH_FRACTIONAL -> formatFractional(valueU, denominator)
 }
 
+/**
+ * Formats for DISPLAY ONLY, with the unit attached: `3000 mm`, `3 m`, `12.5"`.
+ *
+ * 🔴 Never use this to fill a text field. [format] is the one with the
+ * round-trip guarantee and the property test behind it, and it is what
+ * MeasurementFieldState writes back after a commit. This function exists
+ * alongside it rather than replacing it precisely so that guarantee is not
+ * quietly widened to a string carrying a suffix.
+ *
+ * Why it exists at all: every metric length rendered as a bare number. A parts
+ * row read `1800`, not `1800 mm`, and in metre mode a part read `3`. Someone who
+ * already knows the job infers the unit instantly; someone opening the app for
+ * the first time has to work it out, and the first thing a new user sees is the
+ * seeded example job. Imperial never had the problem, because `1' 5 1/16"`
+ * carries its own marks.
+ *
+ * WHERE IT IS USED, and the rule: a unit goes on a measurement that stands
+ * ALONE and could be read wrong — a parts row, a stock row, a quick-add chip,
+ * the offcut total, the infeasible warning. It is deliberately NOT used inside
+ * cut-plan bar segments or the `1800 · 1200 · 900` run beneath them, where the
+ * numbers are dense, the unit is already established by everything around them,
+ * and at 360 dp there is no room: repeating "mm" six times across one bar would
+ * cost legibility at the saw to solve a problem that is already solved.
+ */
+fun formatWithUnit(valueU: Long, system: UnitSystem, denominator: Int = 16): String =
+    when (system) {
+        UnitSystem.MM -> format(valueU, system, denominator) + " mm"
+        UnitSystem.CM -> format(valueU, system, denominator) + " cm"
+        UnitSystem.M -> format(valueU, system, denominator) + " m"
+        // Decimal inches format as a bare number, so they need the mark.
+        UnitSystem.INCH_DECIMAL -> format(valueU, system, denominator) + "\""
+        // Fractional already reads 1' 5 1/16". Adding anything would be noise.
+        UnitSystem.INCH_FRACTIONAL -> format(valueU, system, denominator)
+    }
+
 private fun formatDecimal(valueU: Long, perUnit: Long, maxDecimals: Int): String {
     val scale = pow10(maxDecimals)
     val scaled = (valueU * scale + perUnit / 2) / perUnit

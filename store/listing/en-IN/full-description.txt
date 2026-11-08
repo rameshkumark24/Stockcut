@@ -1,0 +1,46 @@
+Stop working out cutting lists on paper.
+
+Tell StockCut the lengths you can buy and the pieces you need. It works out which piece comes off which pipe or bar, in seconds, with as little waste as it can find — and it counts the width of your cutting blade, which is where hand-written cutting lists go wrong.
+
+WHAT IT DOES
+
+• Works out how to cut the job from fewer pipes and bars
+• Accounts for blade width (kerf) — every cut eats a few millimetres, and ten cuts at 3 mm is 30 mm
+• Shows each bar as a diagram, so you can read it at the cutting machine
+• Tells you the offcut left on every bar and the total waste percentage
+• Warns you when a piece is longer than anything you can buy, instead of quietly dropping it
+
+MM, FEET AND INCHES
+
+Millimetres, centimetres, metres, feet and inches, decimal inches, and fractional inches. Type 1 5/16" or 8' 3 1/2" and it takes it — no converting in your head, no rounding errors creeping into a job.
+
+BUILT FOR THE WORKSHOP AND THE SITE
+
+• Works with no internet. Everything runs on the phone
+• No account, no sign-up, no password
+• Your jobs are never uploaded — they stay on your device
+• Large type and big buttons, easy to read with safety glasses on
+• Share a cutting plan as an image or a PDF on WhatsApp — send it to your helper, or print it
+
+WHO IT IS FOR
+
+Fabricators, welders, steel and aluminium workshops, gate and grill makers, railing and shutter fabricators, window and door makers, carpenters, plumbers, electricians, bar benders, and anyone cutting from fixed lengths: MS pipe, GI pipe, square and rectangular tube, angle, channel, flat bar, round bar, TMT bar, aluminium section, PVC and CPVC pipe, conduit, and wooden battens.
+
+If you buy material in fixed lengths and cut pieces from it, this saves you material on every job. Use it as a pipe cutting calculator, a steel cutting calculator, or to plan cutting lengths for TMT bars.
+
+HOW IT WORKS
+
+1. Enter the lengths you can buy — 6 m pipes, 12 m TMT bars, 20 ft sections, whatever your supplier sells
+2. Enter the pieces you need and how many
+3. Set your blade width
+4. Tap Optimize
+
+You get a plan: bar by bar, cut by cut, with the offcut on each.
+
+FREE
+
+StockCut is free and supported by ads. There is no subscription, no trial, and nothing is locked. Ads are kept deliberately light — a banner, and an occasional full-screen ad after you tap Optimize, never while you are entering a job.
+
+WHAT IT IS NOT
+
+This is a 1D linear cutting optimizer. It plans straight cuts from pipes, bars and sections. It does not do 2D sheet nesting for plywood or sheet metal, and it does not draw bending shapes.

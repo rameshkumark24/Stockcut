@@ -1,5 +1,46 @@
 # Everything remaining until the app is live on Play
 
+> ## ✅ PROJECT CLOSED — 7 Sept 2026
+>
+> **StockCut is public on Google Play, free, serving real ads that are credited to
+> the owner's AdMob account.** Nothing in this document is outstanding engineering.
+>
+> | | |
+> |---|---|
+> | Live version | **1.0.5 (versionCode 6)** — submission 8, published 7 Sept |
+> | Store | `play.google.com/store/apps/details?id=com.measure.stockcut` |
+> | Ads | ✅ Approval **Ready**, 23 requests, **10 impressions**, $0.13 eCPM |
+> | Devices verified | vivo V2307 (Android 15, 3-button nav) · emulated Android 9 / 2 GB / 360 dp |
+> | Play recommendations | All five resolved or refuted **in writing** |
+> | Tests | Full JVM suite green; oracle set intact |
+>
+> **Elapsed: 22 days from paying the $25 to being public.** The code was ready six
+> days before the account existed.
+>
+> ### What is genuinely left, and none of it is code
+>
+> | Item | Trigger |
+> |---|---|
+> | Ratings from testers | Asked 7 Sept. **The single biggest ranking lever available** |
+> | ~~`app-ads.txt`~~ | ✅ **Verified 7 Sept** — "file found and verified", 100% of queries authorised |
+> | Bank details | AdMob → Payments → Manage settings. Identity PIN at $10, payout at $100 |
+> | Android vitals | ✅ **0.00% crash, zero ANRs** across 15 installs (10 Aug – 7 Sept), 0.11 points better than peer median. Small sample — meaningful at a few hundred installs. Weekly glance |
+> | Oracle case `O-10` | Still open — needs one real tradesman's job |
+> | `MeasurementRow` right-alignment | Owner's design call, not a defect |
+> | AGP 9.0 | Deferred. Its own project, when something forces it |
+>
+> ### 🔴 The one rule that outlives this project
+>
+> **Never tap an ad in your own app, and keep telling anyone who knows you the same.**
+> It is permanent, it forfeits the balance, and friends "helping" is the likeliest cause.
+>
+> ### For the next app
+>
+> Everything learned here is written up as a reusable template:
+> `C:/Placement/04-App-Developer/14-Zero-to-Published.md` and-Zero-to-Published.md` and
+> `Reference/Play-Store-Templates.md`.
+
+---
 **Rewritten 2026-08-08.** Two settled decisions shape this list:
 
 1. **StockCut is completely free**, earning only from AdMob — see
@@ -147,6 +188,242 @@ Nothing here needs code. It is all sitting in the repo.
       when asked. Invited-but-not-installed does not count toward the 12
 - [ ] Burn the captions into the 5 screenshots
 - [x] 512×512 store icon rendered — `store/play-store-icon-512.png`
+
+## ✅ MONEY PATH PROVEN — 7 Sept 2026
+
+The last unverified claim in the project. Everything else could be checked from
+the repo; this one only existed in Google's console.
+
+**AdMob → StockCut, last 7 days:**
+
+| Metric | Value |
+|---|---|
+| Approval status | **Ready** (cleared the 2–3 day review) |
+| App store details | `com.measure.stockcut` — linked |
+| Requests | 23 |
+| **Impressions** | **10** |
+| Match rate | 47.83% |
+| eCPM | $0.13 |
+
+Real ads, served to real users, credited to the right account. The chain from
+`adId()` in build.gradle.kts → the IDs inside the bundle → the AdMob app → the
+store link is now verified end to end rather than reasoned about.
+
+**Banner only so far, and that is the app working as designed.** The interstitial
+needs a lifetime optimize count divisible by 5 AND ten minutes since the last one
+(`Entitlement.interstitialDue`). With ~15 users, almost nobody has reached their
+fifth optimize. Interstitials will appear as usage accumulates.
+
+### The arithmetic worth internalising
+
+`10 impressions × $0.13 eCPM / 1000 = $0.0013` — which is why earnings read
+$0.00 while everything works perfectly.
+
+🔴 **At this eCPM the $100 payout threshold is roughly 770,000 impressions.** eCPM
+improves as AdMob learns the audience and as `app-ads.txt` verifies, but the real
+lever is installs. **There is nothing left to fix on the ads side — the plumbing is
+correct and the volume is a distribution problem.** Judge future changes against
+installs and retention, not against the ad configuration, which is done.
+
+---
+
+## AdMob was throttling us for the first day — fixed 4 Sept 2026
+
+Worth writing down, because "why did week one earn almost nothing" is exactly
+the question that gets asked later and misdiagnosed as a code problem.
+
+**The AdMob app had never been linked to a Play Store listing.** It could not
+be: the app was not publicly listed until 4 Sept. So App settings showed
+"Package name or store ID: **—**", and AdMob applied **"Limited ad serving —
+Add store to lift limit"**. Requests went out and real ads rendered on device,
+but serving was capped and the app also sat in AdMob's "Apps to confirm" list
+as an unrecognised package.
+
+The tell was in the numbers, not the code: **5 ad requests in seven days with
+0 impressions**. Requests proved the IDs were right; the gap proved the
+throttle.
+
+Fixed by linking `com.measure.stockcut` to the existing AdMob app.
+
+🔴 **The trap on that screen.** AdMob's "Finish setup" flow defaults to
+*"Set up com.measure.stockcut as a NEW AdMob app"*. Taking that default would
+have minted a second app with **new ad unit IDs** — which the shipped 1.0.3
+binary does not use — leaving the live app pointing at the original, still
+throttled, and the new app earning nothing. The correct choice is *"Add
+com.measure.stockcut to an EXISTING AdMob app"*, whose own description ("if you
+have a matching AdMob app without a package name or store ID") describes the
+situation exactly.
+
+Verified afterwards against the bundle, all three matching:
+
+| AdMob | Shipped in 1.0.3 |
+|---|---|
+| `ca-app-pub-7038016776482334~9124784733` | app id, manifest |
+| `ca-app-pub-7038016776482334/4169071601` | banner |
+| `ca-app-pub-7038016776482334/8254556191` | interstitial |
+
+App verification: **Verified**. Approval status moved to **"Getting ready"** —
+AdMob's review takes **2–3 days and ad serving stays limited throughout**.
+
+**So near-zero revenue before roughly 7 Sept 2026 is expected and is not a
+defect.** Judge the ad integration on *requests*, not earnings, until the
+review clears.
+
+---
+
+## Play's four "recommended actions" on 1.0.3 — all four resolved
+
+Investigated 4 Sept 2026. **Two were real and are fixed. Two are Google
+flagging something already done, or something that is not ours to fix.**
+Written down because these reappear on every release and re-deriving the
+answer each time is waste.
+
+### 1. "Outdated SDK version of androidx.fragment:fragment" — ✅ FIXED
+
+Google asked for 1.2.1+. Nothing here uses fragment; it arrives transitively
+from Google's own ads/billing/review SDKs, which still declare 1.0.0/1.1.0.
+Forced to **1.8.9** via a dependency constraint. R8 then strips the classes
+entirely — `androidx/fragment/app/Fragment` is absent from the built APK — so
+the version Play scans in the bundle metadata goes up while none of the code
+ships.
+
+### 2. "Edge-to-edge may not display for all users" — ✅ ALREADY SATISFIED
+
+Read Google's own text: *"Alternatively, **call enableEdgeToEdge()** for Kotlin
+… for backward compatibility."* `MainActivity.kt` has done exactly that since
+before launch. This is a generic advisory sent to every targetSdk 35+ app, not
+a detected defect. **No action, now or on future releases.**
+
+### 3. "Deprecated APIs or parameters for edge-to-edge" — ❌ NOT OURS
+
+Google names `Window.setStatusBarColor`, `Window.setNavigationBarColor` and
+`LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES`, starting in classes `c.s.b`,
+`c.u.b`, `c.w.b`, `a6.e.t`.
+
+**A grep of the whole source tree returns zero matches for all three.** Those
+obfuscated names are pre-obfuscated Google library classes, and those three
+calls are precisely what `androidx.activity` 1.13.0's `enableEdgeToEdge()` does
+on its backward-compatibility path for API < 35. minSdk is 26, so that path is
+REQUIRED for every Android 8–14 user.
+
+🔴 Note the contradiction: **#2 instructs us to call `enableEdgeToEdge()`, and
+#3 flags the deprecated APIs that `enableEdgeToEdge()` itself uses.** Google's
+lint reports call sites without accounting for API-gated paths inside
+libraries. Acting on #3 would break edge-to-edge on Android 8–14. **No action.**
+
+### 4. "Improve memory and performance with R8" — half done, half deferred
+
+Two separate asks:
+
+**"Optimised resource shrinking isn't enabled"** — real, and now enabled via
+`android.r8.optimizedResourceShrinking=true`. **2.32% smaller** (4,312,632 →
+4,212,502 bytes). AGP warns the flag is *experimental*, so it was verified on a
+device rather than assumed: installed on the Android 9 / 2 GB emulator, no
+`Resources$NotFoundException`, no `InflateException`, and — the thing actually
+at risk — **the AdMob banner renders with its image assets intact**. A stripped
+ad resource would have cost revenue silently, which is why this was tested
+rather than shipped on the size number alone.
+
+Low risk surface helped: no `getIdentifier` anywhere in the app, only 10
+resource files, and `isShrinkResources` was already on — so this changes the
+shrinking *algorithm*, not whether shrinking happens.
+
+**"Upgrade AGP to 9.0 or higher"** — 🔴 **deliberately deferred.** Currently
+8.13.0; 9.0 is a major version with breaking DSL and Gradle requirements. It
+needs its own pass across all tests plus a device run, and the app launched the
+day before. It is a recommendation, not a requirement, and nothing breaks by
+staying on 8.13. Do it as its own piece of work once real Vitals data exists on
+a build we understand.
+
+---
+
+## Low-end device testing — DONE 4 Sept 2026, gap CLOSED
+
+The last outstanding real-device item, open since the beginning. Tested on an
+emulated budget phone rather than left untested, because no low-end hardware was
+available and real users were already installing the app.
+
+**Profile:** Android 9 (API 28, `google_apis` x86_64) · **2 GB RAM** · 192 MB
+heap · 720×1280 @ 320 dpi (**360 dp wide** — narrower than anything previously
+tested) · 4 cores. Release APK, R8-minified — a debug build would have given a
+falsely pessimistic result. **Test ad IDs**, verified in the APK, so the
+emulator could never touch the live ad units.
+
+### Cold start
+
+| Configuration | Median | Range |
+|---|---|---|
+| vivo V2307 (real, good phone) | 670 ms | — |
+| Low-end, **GPU accelerated** | **1.60 s** | 1.52–1.66 s |
+| Low-end, software rendering | 2.96 s | 2.32–3.67 s |
+| Budget (`docs/08`) | 1.50 s | |
+
+🔴 **Read the software-rendering row as a floor, not a forecast.** It was forced
+deliberately (`-gpu swiftshader_indirect`) and no real phone renders that way. It
+roughly doubled cold start, which is worth remembering the next time an emulator
+number looks alarming.
+
+The realistic figure is **~1.6 s, marginally over a 1.5 s budget that was always
+self-imposed rather than a user requirement.** Accepted as-is.
+
+### Everything else passed
+
+| Check | Result |
+|---|---|
+| Crashes / ANRs / StrictMode | **None** |
+| Java heap | **6 MB** against a 192 MB cap — no memory pressure whatever |
+| Native heap | 26 MB |
+| Layout at 360 dp — jobs, editor, cut plan | Clean; bar segment labels fit |
+| Optimize correctness | 13.8%, 2 bars, plan correct |
+
+Memory was the risk most expected on a 2 GB device and it simply is not one: the
+app is an order of magnitude smaller than the constraint.
+
+### The one soft spot, not fixed
+
+30–43 frames skipped at launch (`Choreographer: Skipped N frames`), roughly
+0.5–0.7 s of blocked main thread while `AppContainer` brings up Room and
+DataStore. A fast phone hides it; a slow one shows it as a beat before the first
+frame. Not a defect and not user-visible as jank once running — recorded so the
+next person to measure startup knows where the time goes.
+
+---
+
+## 🚀 LAUNCHED — 4 Sept 2026
+
+**StockCut is live and publicly listed on Google Play.**
+`https://play.google.com/store/apps/details?id=com.measure.stockcut`
+Verified reachable: HTTP 200 (an unknown package name returns 404).
+
+Submission 6, 4 Sept 2026 00:33 — Production — **Published**. Full rollout;
+Play does not offer a staged percentage for a first production release, so this
+went straight to 100% with no staged safety net.
+
+Shipped artifact: **1.0.3 (versionCode 4)**, 3.77 MB per install, targetSdk 36,
+minSdk 26, 177 countries.
+
+### 🔴 The rule that changes today
+
+Every build before this one carried Google's TEST ad IDs, which made clicking an
+ad in your own app harmless. **That protection is gone.** 1.0.3 carries the real
+publisher (`pub-7038016776482334`), so a click by the owner or by a friendly
+tester is invalid traffic — and AdMob's answer to invalid traffic is permanent
+account termination with forfeiture of unpaid earnings (CLAUDE.md rule 8).
+
+The 15 closed testers are the highest-risk group precisely because they want to
+help. **They must be told.** If ad behaviour ever needs testing again, build a
+test-ID APK (`./gradlew :app:assembleDebug`, no flag) rather than tapping a live
+ad.
+
+### Watch list
+
+| When | Where | Act if |
+|---|---|---|
+| 24 h | AdMob → impressions | 🔴 **Zero on real installs** = test IDs shipped after all |
+| 48 h | Android vitals | Crash > 1.09% or ANR > 0.47% — either demotes the listing |
+| ~1 week | AdMob → app-ads.txt | Still "not found" → use the fallback in this doc |
+
+---
 
 ## Android developer verification — DONE, no action needed
 

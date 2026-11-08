@@ -42,7 +42,7 @@ import com.stockcut.ui.components.BannerKind
 import com.stockcut.ui.components.InlineBanner
 import com.stockcut.ui.theme.Space
 import com.stockcut.ui.theme.TouchTarget
-import com.stockcut.units.format
+import com.stockcut.units.formatWithUnit
 
 /** Which entry sheet, if any, is open. */
 private sealed interface SheetTarget {
@@ -248,7 +248,7 @@ fun ProjectEditorScreen(
                 val unit = state.unitSystem
                 val denominator = state.denominator
                 val lengths = infeasible.parts
-                    .map { format(it.lengthU, unit, denominator) }
+                    .map { formatWithUnit(it.lengthU, unit, denominator) }
                     .distinct()
                 val count = infeasible.parts.sumOf { it.quantity }
                 InlineBanner(
@@ -261,7 +261,7 @@ fun ProjectEditorScreen(
                     detail = lengths.joinToString(" and ") +
                         " " + (if (lengths.size == 1) "is" else "are") +
                         " longer than your longest stock (" +
-                        format(infeasible.longestUsableU, unit, denominator) + ").",
+                        formatWithUnit(infeasible.longestUsableU, unit, denominator) + ").",
                     primaryAction = "Add longer stock" to viewModel::onAddLongerStock,
                     secondaryAction = "Edit those parts" to viewModel::onFixInfeasibleParts,
                     modifier = Modifier.padding(

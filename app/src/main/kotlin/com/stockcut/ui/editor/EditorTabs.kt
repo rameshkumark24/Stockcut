@@ -45,6 +45,7 @@ import com.stockcut.units.UnitSystem
 import com.stockcut.units.U_PER_FOOT
 import com.stockcut.units.U_PER_M
 import com.stockcut.units.format
+import com.stockcut.units.formatWithUnit
 
 /** S2a — Parts. The default tab, because it is where the work is. */
 @Composable
@@ -81,7 +82,7 @@ fun PartsTab(
         }
         items(state.parts, key = { it.id }) { part ->
             MeasurementRow(
-                formattedLength = format(part.lengthU, state.unitSystem, state.denominator),
+                formattedLength = formatWithUnit(part.lengthU, state.unitSystem, state.denominator),
                 quantityLabel = "×${part.quantity}",
                 label = part.label,
                 onClick = { onEdit(part) },
@@ -142,7 +143,7 @@ fun StockTab(
     ) {
         items(state.stock, key = { it.id }) { entry ->
             MeasurementRow(
-                formattedLength = format(entry.lengthU, state.unitSystem, state.denominator),
+                formattedLength = formatWithUnit(entry.lengthU, state.unitSystem, state.denominator),
                 // Unlimited is the common case, so it reads as a word not a number.
                 quantityLabel = if (entry.isUnlimited) "unlimited" else "×${entry.quantity}",
                 label = entry.label,
@@ -225,7 +226,7 @@ private fun QuickAddChips(
         horizontalArrangement = Arrangement.spacedBy(Space.sm),
     ) {
         lengths.forEach { lengthU ->
-            val text = format(lengthU, unitSystem, denominator)
+            val text = formatWithUnit(lengthU, unitSystem, denominator)
             AssistChip(
                 onClick = { onQuickAdd(lengthU) },
                 label = { Text(text) },

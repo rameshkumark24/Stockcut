@@ -111,7 +111,7 @@ android {
         // it has EVER seen — including from a build you uploaded and discarded.
         // There is no way to reuse or lower a number. Bump it for every upload,
         // even a re-upload of the same code after a rejected review.
-        versionCode = 4
+        versionCode = 7
 
         // 1.0.0 was the first release, published to closed testing on
         // 2026-08-13. Before that it was 0.1.0, which is honest for a
@@ -134,7 +134,29 @@ android {
         // also called 1.0.2. Two builds sharing a user-facing version but
         // behaving differently (test ads vs real ads) is exactly the ambiguity
         // that makes a support conversation useless a year from now.
-        versionName = "1.0.3"
+        // 1.0.4 (code 5): first update after launch. No feature changes and
+        // no behaviour changes for the user beyond one they will only notice
+        // if they run dark mode — the launch window no longer flashes white.
+        // The rest is build hygiene Play asked for: fragment forced off a 2019
+        // release, and optimised resource shrinking.
+        // 1.0.5 (code 6): two things, both about what the user is told.
+        //
+        // Drops the com.android.vending.BILLING permission from the merged
+        // manifest, which is what made Play stamp "In-app purchases" on the
+        // listing of an app that sells nothing. The billing library and the
+        // dormant paywall stay in place — see the manifest for why removing
+        // the permission is safe while PAYWALL_ENABLED is false.
+        //
+        // And puts units on measurements that stand alone: a parts row now
+        // reads "1800 mm", not "1800". Imperial never had the problem because
+        // 1' 5 1/16" carries its own marks; metric read as a bare number, and
+        // in metre mode a part read just "3".
+        // 1.1.0 (code 7): MINOR, because it adds behaviour. A shared cut plan
+        // now credits the app: a grey "Made with StockCut" footer on the image
+        // and on every PDF page, and a Play link as the message text, tagged
+        // utm_source=share so Play Console shows installs that came from shares.
+        // The plan itself is drawn exactly as before.
+        versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -236,6 +258,25 @@ dependencies {
     implementation(libs.compose.material.icons.core)
     implementation(libs.compose.ui.tooling.preview)
     debugImplementation(libs.compose.ui.tooling)
+
+    // 🔴 Force androidx.fragment forward. NOT a dependency this app wants.
+    //
+    // Nothing here asks for fragment — StockCut is single-Activity Compose and
+    // does not use one. It arrives transitively from Google's own SDKs (ads,
+    // billing, play-review), which still declare fragment 1.0.0/1.1.0, and
+    // Gradle was resolving it to 1.1.0 — a 2019 release. Play flags it on the
+    // production dashboard as "an outdated SDK version of
+    // androidx.fragment:fragment".
+    //
+    // A constraint rather than an `implementation` line, because the point is
+    // to raise the floor for a transitive nobody declared, not to take on a
+    // dependency this app has no use for. If a future SDK stops pulling
+    // fragment entirely, this quietly does nothing rather than adding it back.
+    constraints {
+        implementation(libs.androidx.fragment) {
+            because("Play flags fragment 1.1.0 (2019), pulled in by Google's own SDKs")
+        }
+    }
 
     // Phase 6. Every one of these is on the allowed list in docs/02 §9.
     implementation(libs.billing.ktx)

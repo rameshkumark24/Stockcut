@@ -61,6 +61,14 @@ object PlanRenderer {
         color = Color.BLACK
     }
     private val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val footerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.GRAY
+        textSize = 24f
+    }
+    private val dividerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.LTGRAY
+        strokeWidth = 2f
+    }
 
     private val partFill = Color.rgb(0x2D, 0x7D, 0xD2)
     private val partFillAlt = Color.rgb(0x1E, 0x5B, 0x9A)
@@ -77,12 +85,21 @@ object PlanRenderer {
     const val HEADER_HEIGHT = MARGIN + 44f + 48f + GAP + 20f
     const val GROUP_HEIGHT = 16f + BAR_HEIGHT + 34f + GAP + 10f
 
+    /** The space [drawGroup] leaves after a group for the next one. */
+    private const val GROUP_TRAILING = GAP + 10f
+
+    /**
+     * From the last line of the plan to the footer's baseline. The footer sits
+     * below a divider so it can never be read as part of the plan.
+     */
+    const val FOOTER_HEIGHT = GAP + 40f
+
     /** Exact height needed for [plan] at the fixed render width. */
     fun measureHeight(plan: Plan): Int {
         val groups = plan.groupIdenticalBars().size
-        // The last group needs no trailing gap, only the bottom margin.
-        val trailing = GAP + 10f
-        return (HEADER_HEIGHT + groups * GROUP_HEIGHT - trailing + MARGIN).toInt()
+        // The last group needs no trailing gap: the footer follows it instead.
+        return (HEADER_HEIGHT + groups * GROUP_HEIGHT - GROUP_TRAILING + FOOTER_HEIGHT + MARGIN)
+            .toInt()
     }
 
     fun render(
@@ -103,7 +120,23 @@ object PlanRenderer {
         for (group in plan.groupIdenticalBars()) {
             y = drawGroup(canvas, group, y, kerfU, unitSystem, denominator)
         }
+        drawFooter(canvas, y - GROUP_TRAILING)
         return bitmap
+    }
+
+    /**
+     * The credit line: a divider, then [ShareLink.FOOTER] in grey.
+     *
+     * [top] is the baseline of the last line above it; the footer's own baseline
+     * lands [FOOTER_HEIGHT] below that. Public so every PDF page can carry it.
+     *
+     * It is small and grey on purpose. This is a tradesman's own document, sent
+     * on to someone else, so the credit must not compete with the plan.
+     */
+    fun drawFooter(canvas: Canvas, top: Float) {
+        val dividerY = top + 20f
+        canvas.drawLine(MARGIN, dividerY, WIDTH - MARGIN, dividerY, dividerPaint)
+        canvas.drawText(ShareLink.FOOTER, MARGIN, top + FOOTER_HEIGHT, footerPaint)
     }
 
     /**

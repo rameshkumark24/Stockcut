@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!--
         Exactly the three permissions CLAUDE.md rule 7 allows, and no others.
@@ -38,7 +39,33 @@
     -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="com.android.vending.BILLING" />
+    <!--
+        🔴 BILLING is REMOVED from the merged manifest, deliberately.
+
+        Play reads this permission and stamps "In-app purchases" on the store
+        listing. StockCut sells nothing — the paywall has been off since launch
+        (Monetization.PAYWALL_ENABLED = false) — so that label told every visitor
+        something untrue about a free tool, which for a tradesman deciding
+        whether to trust it is a reason not to install.
+
+        tools:node="remove" rather than deleting the line, because the Play
+        Billing library declares the permission in ITS manifest too. Deleting our
+        declaration alone would leave the merge result unchanged.
+
+        This is safe precisely because billing is inert: BillingManager.connect()
+        returns early while PAYWALL_ENABLED is false, so no billing IPC ever
+        happens and nothing needs the permission. Constructing a BillingClient
+        does not require it; only talking to Play does, and we never do.
+
+        The library and the whole paywall are left in place on purpose — see
+        docs/15-free-launch-and-paywall-plan.md. Nothing here is unpicked.
+
+        🔴 IF THE PAYWALL IS EVER RE-ENABLED, DELETE THIS BLOCK FIRST. Flipping
+        PAYWALL_ENABLED to true without restoring the permission gives a billing
+        connection that fails on a real device but works in every test that does
+        not talk to Play — the worst kind of failure to debug.
+    -->
+    <uses-permission android:name="com.android.vending.BILLING" tools:node="remove" />
 
     <application
         android:name=".StockCutApplication"

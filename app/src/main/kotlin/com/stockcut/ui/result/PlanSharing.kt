@@ -53,6 +53,9 @@ object PlanSharing {
             type = "image/png"
             putExtra(Intent.EXTRA_STREAM, uri)
             putExtra(Intent.EXTRA_SUBJECT, jobName)
+            // The caption under the image in WhatsApp. The person sharing sees
+            // it in the composer and can delete it before sending.
+            putExtra(Intent.EXTRA_TEXT, ShareLink.message(ShareLink.Medium.IMAGE))
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }.let { Intent.createChooser(it, "Share cut plan") }
     }

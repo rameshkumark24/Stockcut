@@ -68,6 +68,8 @@ object PlanPdf {
             type = "application/pdf"
             putExtra(Intent.EXTRA_STREAM, uri)
             putExtra(Intent.EXTRA_SUBJECT, jobName)
+            // Email apps use this as the body; the sender can edit it.
+            putExtra(Intent.EXTRA_TEXT, ShareLink.message(ShareLink.Medium.PDF))
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }.let { Intent.createChooser(it, "Export cut plan") }
     }
@@ -83,7 +85,9 @@ object PlanPdf {
         // The renderer draws at a fixed pixel width; scale that onto the page so
         // the drawing code never has to know what paper it is going onto.
         val scale = PAGE_WIDTH.toFloat() / PlanRenderer.WIDTH
-        val usableHeight = PAGE_HEIGHT / scale - PlanRenderer.MARGIN
+        // Every page ends with the footer, so bars stop above it. footerTop is
+        // the line the footer is measured down from (see drawFooter).
+        val footerTop = PAGE_HEIGHT / scale - PlanRenderer.MARGIN - PlanRenderer.FOOTER_HEIGHT
 
         val groups = plan.groupIdenticalBars()
         var index = 0
@@ -104,13 +108,16 @@ object PlanPdf {
                 PlanRenderer.MARGIN
             }
 
-            while (index < groups.size && y + PlanRenderer.GROUP_HEIGHT <= usableHeight) {
+            while (index < groups.size && y + PlanRenderer.GROUP_HEIGHT <= footerTop) {
                 y = PlanRenderer.drawGroup(
                     canvas, groups[index], y, kerfU, unitSystem, denominator,
                 )
                 index++
             }
 
+            // On every page, not just the last: a printed page pinned to the
+            // wall is often only one page of the job.
+            PlanRenderer.drawFooter(canvas, footerTop)
             document.finishPage(page)
             pageNumber++
 
@@ -127,6 +134,7 @@ object PlanPdf {
             )
             page.canvas.scale(scale, scale)
             PlanRenderer.drawHeader(page.canvas, plan, jobName, unitSystem, denominator)
+            PlanRenderer.drawFooter(page.canvas, footerTop)
             document.finishPage(page)
         }
     }

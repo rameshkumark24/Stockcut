@@ -40,6 +40,7 @@ import com.stockcut.ui.theme.Space
 import com.stockcut.ui.theme.TouchTarget
 import com.stockcut.units.UnitSystem
 import com.stockcut.units.format
+import com.stockcut.units.formatWithUnit
 
 /**
  * S4 — the cut plan. The payoff screen, and the app's first store screenshot.
@@ -239,7 +240,7 @@ private fun SummaryStrip(plan: Plan, unitSystem: UnitSystem, denominator: Int) {
                 text = buildString {
                     append(barLabel(plan.bars.size))
                     append(" · ")
-                    append(format(plan.totalOffcutU, unitSystem, denominator))
+                    append(formatWithUnit(plan.totalOffcutU, unitSystem, denominator))
                     append(" offcut total")
                 },
                 style = MaterialTheme.typography.bodyMedium,

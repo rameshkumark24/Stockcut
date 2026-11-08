@@ -46,10 +46,17 @@ $EMDASH  = [char]0x2014  # the dash used in the headings
 $MOJIBAKE = [string]([char]0x00E2) + [string]([char]0x20AC)  # UTF-8 read as ANSI
 $REPLACEMENT = [char]0xFFFD
 
+# One listing per English market (see the doc's "Three English listings"). Each
+# heading includes its language tag, so '## Short description (en-US' can never
+# match the en-GB block by prefix.
 $fields = @(
-    @{ Name = 'App name';          Heading = '## App name';          Limit = 30;   CheckWrap = $false }
-    @{ Name = 'Short description'; Heading = '## Short description'; Limit = 80;   CheckWrap = $false }
-    @{ Name = 'Full description';  Heading = '## Full description';  Limit = 4000; CheckWrap = $true }
+    @{ Name = 'App name';            Heading = '## App name';                     Limit = 30;   CheckWrap = $false }
+    @{ Name = 'Short desc en-US';    Heading = '## Short description (en-US';     Limit = 80;   CheckWrap = $false }
+    @{ Name = 'Full desc en-US';     Heading = '## Full description (en-US';      Limit = 4000; CheckWrap = $true }
+    @{ Name = 'Short desc en-GB';    Heading = '## Short description (en-GB';     Limit = 80;   CheckWrap = $false }
+    @{ Name = 'Full desc en-GB';     Heading = '## Full description (en-GB';      Limit = 4000; CheckWrap = $true }
+    @{ Name = 'Short desc en-IN';    Heading = '## Short description (en-IN';     Limit = 80;   CheckWrap = $false }
+    @{ Name = 'Full desc en-IN';     Heading = '## Full description (en-IN';      Limit = 4000; CheckWrap = $true }
 )
 
 # Anchored to its heading, NOT to ordinal position. Positional lookup

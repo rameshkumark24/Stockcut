@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 🔴 The dark counterpart of values/themes.xml, and the reason it exists.
+
+         values/themes.xml pins the launch window to
+         android:Theme.Material.Light.NoActionBar. That theme is used only for
+         the split second between the window appearing and Compose drawing its
+         first frame - but it was hardcoded LIGHT while StockCutTheme follows
+         the system. On a dark-mode phone that is a white flash on every cold
+         launch, and cold launch is ~1.6 s on a low-end device, so the flash is
+         not brief there.
+
+         Nothing else styles the app: all real theming lives in Theme.kt. This
+         file exists purely so the window that precedes Compose matches the one
+         that follows it. -->
+    <style name="Theme.StockCut" parent="android:Theme.Material.NoActionBar" />
+</resources>
